@@ -4,7 +4,11 @@ import { NewGameScreen } from './components/screens/NewGameScreen';
 import { LobbyScreen } from './components/screens/LobbyScreen';
 import { GameScreen } from './components/screens/GameScreen';
 import { RulesScreen } from './components/screens/RulesScreen';
+import { DeckBuilderScreen } from './components/screens/DeckBuilderScreen';
+import { CardCreatorScreen } from './components/screens/CardCreatorScreen';
 import { useGameEngine } from './hooks/useGameEngine';
+import { generateDefaultDeck, loadCustomCardsFromStorage } from './engine/utils';
+import { TITANS } from './data/titans';
 import { getSocket, disconnectSocket } from './multiplayer/socket';
 import type { GameState } from './types/game';
 import './styles/globals.css';
@@ -12,7 +16,7 @@ import './styles/board.css';
 import './styles/cards.css';
 import './styles/animations.css';
 
-type Screen = 'menu' | 'newgame' | 'lobby' | 'game' | 'rules';
+type Screen = 'menu' | 'newgame' | 'lobby' | 'game' | 'rules' | 'deckbuilder' | 'cardcreator';
 type GameMode = 'local' | 'host' | 'remote';
 type LobbyStatus = 'idle' | 'creating' | 'waiting' | 'joining' | 'connected';
 
@@ -20,6 +24,11 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('menu');
   const [gameMode, setGameMode] = useState<GameMode>('local');
   const engine = useGameEngine();
+
+  // Load custom cards on mount
+  useEffect(() => {
+    loadCustomCardsFromStorage();
+  }, []);
 
   // Multiplayer state
   const [lobbyStatus, setLobbyStatus] = useState<LobbyStatus>('idle');
@@ -165,7 +174,11 @@ export default function App() {
   }, []);
 
   const handleStartGame = useCallback((p1TitanId: string, p2TitanId: string, mapIdx: number) => {
-    engine.startGame(p1TitanId, p2TitanId, mapIdx, [], []);
+    const t1 = TITANS.find(t => t.id === p1TitanId);
+    const t2 = TITANS.find(t => t.id === p2TitanId);
+    const p1Deck = generateDefaultDeck(t1?.elem || 'fire');
+    const p2Deck = generateDefaultDeck(t2?.elem || 'earth');
+    engine.startGame(p1TitanId, p2TitanId, mapIdx, p1Deck, p2Deck);
     setScreen('game');
     if (gameMode === 'host') {
       getSocket().emit('game-start', { p1TitanId, p2TitanId, mapIdx });
@@ -219,6 +232,8 @@ export default function App() {
           onNewGame={handleStartLocal}
           onMultiplayer={handleStartMultiplayer}
           onRules={() => setScreen('rules')}
+          onDeckBuilder={() => setScreen('deckbuilder')}
+          onCardCreator={() => setScreen('cardcreator')}
         />
       )}
       {screen === 'lobby' && (
@@ -257,6 +272,12 @@ export default function App() {
       )}
       {screen === 'rules' && (
         <RulesScreen onBack={() => setScreen('menu')} />
+      )}
+      {screen === 'deckbuilder' && (
+        <DeckBuilderScreen onBack={() => setScreen('menu')} />
+      )}
+      {screen === 'cardcreator' && (
+        <CardCreatorScreen onBack={() => setScreen('menu')} />
       )}
     </>
   );

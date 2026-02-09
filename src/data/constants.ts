@@ -33,3 +33,7 @@ export const ALL_KEYWORDS: Keyword[] = [
   'elusive', 'ward', 'haste', 'freeze', 'deathrattle', 'battlecry',
   'enrage', 'inspire', 'ranged', 'regen', 'armor', 'bleed',
 ];
+
+// Simpler arrays for UI
+export const KEYWORDS = ALL_KEYWORDS;
+export const RARITIES = ['common', 'rare', 'epic', 'legendary'] as const;

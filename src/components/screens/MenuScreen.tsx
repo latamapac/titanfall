@@ -4,9 +4,11 @@ interface MenuScreenProps {
   onNewGame: () => void;
   onMultiplayer: () => void;
   onRules: () => void;
+  onDeckBuilder: () => void;
+  onCardCreator: () => void;
 }
 
-export function MenuScreen({ onNewGame, onMultiplayer, onRules }: MenuScreenProps) {
+export function MenuScreen({ onNewGame, onMultiplayer, onRules, onDeckBuilder, onCardCreator }: MenuScreenProps) {
   const handleSoundToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
     const on = sfx.toggle();
     (e.target as HTMLButtonElement).textContent = on ? 'Sound: ON' : 'Sound: OFF';
@@ -27,6 +29,8 @@ export function MenuScreen({ onNewGame, onMultiplayer, onRules }: MenuScreenProp
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '280px' }}>
         <button className="btn-primary" onClick={onNewGame} style={{ width: '100%' }}>Local Game</button>
         <button className="btn-primary" onClick={onMultiplayer} style={{ width: '100%' }}>Multiplayer</button>
+        <button className="btn-primary" onClick={onDeckBuilder} style={{ width: '100%' }}>Deck Builder</button>
+        <button className="btn-primary" onClick={onCardCreator} style={{ width: '100%' }}>Card Creator</button>
         <button className="btn-primary" onClick={onRules} style={{ width: '100%' }}>Rules &amp; Help</button>
         <button className="btn-secondary" onClick={handleSoundToggle} style={{ width: '100%' }}>Sound: ON</button>
       </div>

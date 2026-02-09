@@ -29,6 +29,80 @@ export function getCardPool(): CardDef[] {
   return [...BASE_CARDS, ...customCards];
 }
 
+// Generate a default 30-card deck based on titan element
+export function generateDefaultDeck(titanElem: string): string[] {
+  const pool = getCardPool();
+  const deck: string[] = [];
+  
+  // Add cards that match the titan's element (prioritize them)
+  const elemCards = pool.filter(c => c.elem === titanElem && c.type !== 'structure').slice(0, 10);
+  elemCards.forEach(c => deck.push(c.id));
+  
+  // Fill with random other cards to reach 30
+  const otherCards = pool.filter(c => c.elem !== titanElem && c.type !== 'structure');
+  while (deck.length < 30 && otherCards.length > 0) {
+    const idx = Math.floor(Math.random() * otherCards.length);
+    deck.push(otherCards[idx].id);
+    otherCards.splice(idx, 1);
+  }
+  
+  // If still not enough, add structures
+  const structures = pool.filter(c => c.type === 'structure');
+  while (deck.length < 30 && structures.length > 0) {
+    deck.push(structures[deck.length % structures.length].id);
+  }
+  
+  return deck;
+}
+
+// Local storage for decks
+export function saveDeckToStorage(name: string, cardIds: string[]) {
+  const decks = JSON.parse(localStorage.getItem('tc_decks') || '{}');
+  decks[name] = cardIds;
+  localStorage.setItem('tc_decks', JSON.stringify(decks));
+}
+
+export function loadDeckFromStorage(name: string): string[] | null {
+  const decks = JSON.parse(localStorage.getItem('tc_decks') || '{}');
+  return decks[name] || null;
+}
+
+export function getSavedDeckNames(): string[] {
+  const decks = JSON.parse(localStorage.getItem('tc_decks') || '{}');
+  return Object.keys(decks);
+}
+
+export function deleteDeckFromStorage(name: string) {
+  const decks = JSON.parse(localStorage.getItem('tc_decks') || '{}');
+  delete decks[name];
+  localStorage.setItem('tc_decks', JSON.stringify(decks));
+}
+
+// Local storage for custom cards
+export function saveCustomCard(card: CardDef) {
+  const cards = JSON.parse(localStorage.getItem('tc_custom_cards') || '[]');
+  const existingIdx = cards.findIndex((c: CardDef) => c.id === card.id);
+  if (existingIdx >= 0) {
+    cards[existingIdx] = card;
+  } else {
+    cards.push(card);
+  }
+  localStorage.setItem('tc_custom_cards', JSON.stringify(cards));
+  setCustomCards(cards);
+}
+
+export function loadCustomCardsFromStorage() {
+  const cards = JSON.parse(localStorage.getItem('tc_custom_cards') || '[]');
+  setCustomCards(cards);
+}
+
+export function deleteCustomCard(cardId: string) {
+  const cards = JSON.parse(localStorage.getItem('tc_custom_cards') || '[]');
+  const filtered = cards.filter((c: CardDef) => c.id !== cardId);
+  localStorage.setItem('tc_custom_cards', JSON.stringify(filtered));
+  setCustomCards(filtered);
+}
+
 export function getCardById(id: string): CardDef | null {
   return getCardPool().find(c => c.id === id) || TOKEN_CARDS[id] || null;
 }

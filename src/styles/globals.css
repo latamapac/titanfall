@@ -1,0 +1,88 @@
+:root {
+  --bg: #0a0a1a;
+  --bg2: #111128;
+  --bg3: #1a1a3e;
+  --panel: #16163a;
+  --gold: #d4a843;
+  --text: #e0ddd4;
+  --dim: #777;
+  --fire: #e84430;
+  --earth: #8b6914;
+  --wind: #30b8c8;
+  --shadow: #7030a0;
+  --light: #e8d44d;
+  --arcane: #a855f5;
+  --common: #aaa;
+  --rare: #4488ff;
+  --epic: #a855f5;
+  --legendary: #ff8800;
+  --mana-blue: #2980b9;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all .15s;
+}
+input, select, textarea {
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+select { appearance: auto; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+/* Shared button classes */
+.btn-primary {
+  background: linear-gradient(135deg, #2a5a8f, #1a3a6f);
+  color: #fff;
+  font-size: 16px;
+  padding: 12px 32px;
+  border: 1px solid #3a6aaf;
+  transition: transform .15s, box-shadow .15s;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #3a6aaf, #2a4a8f);
+  box-shadow: 0 0 15px rgba(60,120,200,.3);
+  transform: scale(1.04);
+}
+.btn-primary:active { transform: scale(.97); }
+.btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid #555; }
+.btn-secondary:hover { background: #252560; border-color: var(--gold); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-danger { background: #6a1a1a; color: #faa; border: 1px solid #a33; }
+.btn-danger:hover { background: #8a2a2a; }
+
+h1 {
+  font-size: 2.4em;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(212,168,67,.3), 0 0 60px rgba(212,168,67,.15);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+  animation: titleGlow 3s ease-in-out infinite;
+}
+@keyframes titleGlow {
+  0%, 100% { text-shadow: 0 0 20px rgba(212,168,67,.3), 0 0 40px rgba(212,168,67,.1); }
+  50% { text-shadow: 0 0 35px rgba(212,168,67,.5), 0 0 70px rgba(212,168,67,.25); }
+}
+h2 { color: var(--gold); margin-bottom: 12px; }
+h3 { color: var(--gold); margin-bottom: 8px; font-size: 1.1em; }
+.subtitle { color: var(--dim); font-style: italic; margin-bottom: 30px; }

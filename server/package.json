@@ -1,0 +1,13 @@
+{
+  "name": "titanfall-chronicles-server",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "socket.io": "^4.8.0"
+  }
+}

@@ -9,7 +9,7 @@ import { CardCreatorScreen } from './components/screens/CardCreatorScreen';
 import { useGameEngine } from './hooks/useGameEngine';
 import { generateDefaultDeck, loadCustomCardsFromStorage } from './engine/utils';
 import { TITANS } from './data/titans';
-import { getSocket, disconnectSocket } from './multiplayer/socket';
+import { getSocket, disconnectSocket, saveRoomSession, clearRoomSession, getSavedRoomSession } from './multiplayer/socket';
 import type { GameState } from './types/game';
 import './styles/globals.css';
 import './styles/board.css';
@@ -18,7 +18,7 @@ import './styles/animations.css';
 
 type Screen = 'menu' | 'newgame' | 'lobby' | 'game' | 'rules' | 'deckbuilder' | 'cardcreator';
 type GameMode = 'local' | 'host' | 'remote';
-type LobbyStatus = 'idle' | 'creating' | 'waiting' | 'joining' | 'connected';
+type LobbyStatus = 'idle' | 'creating' | 'waiting' | 'joining' | 'connected' | 'reconnecting';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('menu');
@@ -35,12 +35,31 @@ export default function App() {
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [mpRole, setMpRole] = useState<'host' | 'remote' | null>(null);
   const [mpError, setMpError] = useState<string | null>(null);
+  const [opponentDisconnected, setOpponentDisconnected] = useState(false);
 
   // Remote player: receives state from host
   const [remoteGameState, setRemoteGameState] = useState<GameState | null>(null);
   const [remoteLogs, setRemoteLogs] = useState<string[]>([]);
   const [remoteShowTurnOverlay, setRemoteShowTurnOverlay] = useState(false);
   const [remoteVictory, setRemoteVictory] = useState<{ winner: number } | null>(null);
+
+  // Check for saved session on mount (for page refresh recovery)
+  useEffect(() => {
+    const saved = getSavedRoomSession();
+    if (saved.code && saved.role) {
+      console.log(`Found saved session: room=${saved.code}, role=${saved.role}`);
+      // Attempt reconnection
+      setGameMode(saved.role);
+      setRoomCode(saved.code);
+      setLobbyStatus('reconnecting');
+      setMpRole(saved.role);
+      setScreen('lobby');
+      
+      // Socket will auto-reconnect and emit rejoin-room on connect
+      const socket = getSocket();
+      socket.connect();
+    }
+  }, []);
 
   // Socket event handlers
   useEffect(() => {
@@ -51,37 +70,76 @@ export default function App() {
       setRoomCode(code);
       setLobbyStatus('waiting');
       setMpRole('host');
+      saveRoomSession(code, 'host');
     };
-    const onRoomJoined = ({ code }: { code: string }) => {
+    
+    const onRoomJoined = ({ code, isReconnection }: { code: string; isReconnection?: boolean }) => {
       setRoomCode(code);
       setLobbyStatus('connected');
-      setMpRole('remote');
+      setMpRole(isReconnection ? mpRole : 'remote');
+      if (!isReconnection) {
+        saveRoomSession(code, 'remote');
+      }
+      setOpponentDisconnected(false);
     };
-    const onPlayerJoined = () => {
+    
+    const onPlayerJoined = ({ isReconnection }: { isReconnection?: boolean }) => {
       setLobbyStatus('connected');
+      setOpponentDisconnected(false);
+      if (isReconnection) {
+        setMpError('Opponent reconnected!');
+        setTimeout(() => setMpError(null), 3000);
+      }
     };
+    
+    const onPlayerRejoined = ({ role }: { role: string }) => {
+      setOpponentDisconnected(false);
+      setMpError(`${role === 'host' ? 'Host' : 'Opponent'} reconnected!`);
+      setTimeout(() => setMpError(null), 3000);
+    };
+    
     const onJoinError = ({ message }: { message: string }) => {
       setMpError(message);
       setLobbyStatus('idle');
+      clearRoomSession();
     };
-    const onPlayerDisconnected = () => {
-      setMpError('Opponent disconnected');
+    
+    const onRejoinError = ({ message }: { message: string }) => {
+      setMpError(`Reconnection failed: ${message}`);
+      setLobbyStatus('idle');
+      clearRoomSession();
+    };
+    
+    const onHostDisconnected = ({ message }: { message: string }) => {
+      setMpError(message);
+      setOpponentDisconnected(true);
+    };
+    
+    const onRemoteDisconnected = ({ message }: { message: string }) => {
+      setMpError(message);
+      setOpponentDisconnected(true);
     };
 
     socket.on('room-created', onRoomCreated);
     socket.on('room-joined', onRoomJoined);
     socket.on('player-joined', onPlayerJoined);
+    socket.on('player-rejoined', onPlayerRejoined);
     socket.on('join-error', onJoinError);
-    socket.on('player-disconnected', onPlayerDisconnected);
+    socket.on('rejoin-error', onRejoinError);
+    socket.on('host-disconnected', onHostDisconnected);
+    socket.on('remote-disconnected', onRemoteDisconnected);
 
     return () => {
       socket.off('room-created', onRoomCreated);
       socket.off('room-joined', onRoomJoined);
       socket.off('player-joined', onPlayerJoined);
+      socket.off('player-rejoined', onPlayerRejoined);
       socket.off('join-error', onJoinError);
-      socket.off('player-disconnected', onPlayerDisconnected);
+      socket.off('rejoin-error', onRejoinError);
+      socket.off('host-disconnected', onHostDisconnected);
+      socket.off('remote-disconnected', onRemoteDisconnected);
     };
-  }, [gameMode]);
+  }, [gameMode, mpRole]);
 
   // Host: broadcast state to remote whenever it changes
   useEffect(() => {
@@ -153,6 +211,8 @@ export default function App() {
     setRoomCode(null);
     setMpRole(null);
     setMpError(null);
+    setOpponentDisconnected(false);
+    clearRoomSession();
     setScreen('lobby');
   }, []);
 
@@ -197,6 +257,7 @@ export default function App() {
     setRoomCode(null);
     setMpRole(null);
     setMpError(null);
+    setOpponentDisconnected(false);
     setScreen('menu');
   }, [engine]);
 
@@ -242,6 +303,7 @@ export default function App() {
           roomCode={roomCode}
           role={mpRole}
           error={mpError}
+          opponentDisconnected={opponentDisconnected}
           onCreateRoom={handleCreateRoom}
           onJoinRoom={handleJoinRoom}
           onProceed={handleLobbyProceed}

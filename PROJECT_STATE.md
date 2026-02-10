@@ -1,6 +1,6 @@
 # Titanfall Chronicles - Project State
 
-> Last updated: 2026-02-09
+> Last updated: 2026-02-10
 
 ---
 
@@ -40,6 +40,9 @@
 - [x] Real-time state synchronization
 - [x] Host/Remote player roles
 - [x] Action relay system
+- [x] **Reconnection support** - 30s grace period for disconnects
+- [x] **Session persistence** - Room code stored in sessionStorage
+- [x] **Graceful disconnect handling** - Opponent disconnect notifications
 
 ### Audio
 - [x] Procedural SFX (sword hits, spells, UI clicks)
@@ -72,7 +75,7 @@
 
 ### Polish
 - [ ] Loading states
-- [ ] Better error handling for multiplayer disconnects
+- [x] Better error handling for multiplayer disconnects
 - [ ] Sound volume controls (not just on/off)
 - [ ] Card hover tooltips with full stats
 
@@ -159,14 +162,19 @@ docker build -t titanfall . && docker run -p 3001:3001 titanfall
 
 ---
 
-## 🔄 Recent Changes (2026-02-09)
+## 🔄 Recent Changes (2026-02-10)
 
-1. **Fixed critical bug:** Empty deck arrays → Now generates default 30-card decks
-2. **Added Deck Builder:** Full deck building with cost curve visualization
-3. **Added Card Creator:** Create custom cards with all stats/keywords
-4. **Added SFX:** Procedural audio system (swords, spells, ambient)
-5. **Expanded Rules:** Complete rules reference with 4 tabs
-6. **Deployed to Railway:** Live at https://intuitive-creativity-production-8688.up.railway.app
+1. **Fixed Multiplayer Reconnection:** Added 30-second grace period for disconnects
+   - Room persists when player disconnects (allows page refresh recovery)
+   - Session stored in sessionStorage for automatic reconnection
+   - Disconnect notifications shown to remaining player
+   - Game state preserved and sent to rejoining players
+2. **Fixed critical bug:** Empty deck arrays → Now generates default 30-card decks
+3. **Added Deck Builder:** Full deck building with cost curve visualization
+4. **Added Card Creator:** Create custom cards with all stats/keywords
+5. **Added SFX:** Procedural audio system (swords, spells, ambient)
+6. **Expanded Rules:** Complete rules reference with 4 tabs
+7. **Deployed to Railway:** Live at https://intuitive-creativity-production-8688.up.railway.app
 
 ---
 
@@ -184,3 +192,6 @@ docker build -t titanfall . && docker run -p 3001:3001 titanfall
 1. Test all card abilities work correctly
 2. Add AI opponent for single-player
 3. Mobile responsiveness improvements
+
+**Multiplayer Test Results:** All 11 core tests + 7 reconnection tests passing ✅
+- See `MULTIPLAYER_TEST_PLAN.md` for detailed test documentation

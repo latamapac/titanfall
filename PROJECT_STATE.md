@@ -44,6 +44,13 @@
 - [x] **Session persistence** - Room code stored in sessionStorage
 - [x] **Graceful disconnect handling** - Opponent disconnect notifications
 
+### Local 2-Player Mode
+- [x] Turn indicator banner (🔵 Player 1 / 🔴 Player 2)
+- [x] Turn overlay with Start Turn button
+- [x] Keyboard support (Space/Enter/Escape to dismiss)
+- [x] Pulsing END TURN button in End phase
+- [x] Correct hand display for active player
+
 ### Audio
 - [x] Procedural SFX (sword hits, spells, UI clicks)
 - [x] Ambient background music
@@ -65,6 +72,7 @@
 ### Bugs
 - [ ] Need to verify all card abilities work correctly
 - [ ] Some edge cases in combat might need testing
+- [x] **FIXED:** Local 2-player game flow was confusing (added turn indicators, fixed hand display)
 - [ ] Mobile responsiveness could be improved
 
 ### Features to Add (from original HTML)
@@ -164,17 +172,29 @@ docker build -t titanfall . && docker run -p 3001:3001 titanfall
 
 ## 🔄 Recent Changes (2026-02-10)
 
+### Multiplayer Fixes
 1. **Fixed Multiplayer Reconnection:** Added 30-second grace period for disconnects
    - Room persists when player disconnects (allows page refresh recovery)
    - Session stored in sessionStorage for automatic reconnection
    - Disconnect notifications shown to remaining player
    - Game state preserved and sent to rejoining players
-2. **Fixed critical bug:** Empty deck arrays → Now generates default 30-card decks
-3. **Added Deck Builder:** Full deck building with cost curve visualization
-4. **Added Card Creator:** Create custom cards with all stats/keywords
-5. **Added SFX:** Procedural audio system (swords, spells, ambient)
-6. **Expanded Rules:** Complete rules reference with 4 tabs
-7. **Deployed to Railway:** Live at https://intuitive-creativity-production-8688.up.railway.app
+   - Cancel reconnection button if stuck
+
+### Local 2-Player Game Fixes
+2. **Fixed Local Game Turn Flow:** 
+   - Added prominent turn indicator banner (🔵 Player 1 / 🔴 Player 2)
+   - Enhanced TurnOverlay with Start Turn button and keyboard support (Space/Enter/Escape)
+   - Added pulsing END TURN button during End phase
+   - Fixed hand display to correctly show active player's cards
+   - Fixed stuck on refresh issue when old session exists
+
+### Previous Features
+3. **Fixed critical bug:** Empty deck arrays → Now generates default 30-card decks
+4. **Added Deck Builder:** Full deck building with cost curve visualization
+5. **Added Card Creator:** Create custom cards with all stats/keywords
+6. **Added SFX:** Procedural audio system (swords, spells, ambient)
+7. **Expanded Rules:** Complete rules reference with 4 tabs
+8. **Deployed to Railway:** Live at https://intuitive-creativity-production-8688.up.railway.app
 
 ---
 

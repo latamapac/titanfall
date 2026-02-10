@@ -10,6 +10,7 @@ interface LobbyScreenProps {
   onJoinRoom: (code: string) => void;
   onProceed?: () => void;
   onBack: () => void;
+  onCancelReconnect?: () => void;
 }
 
 export function LobbyScreen({ 
@@ -21,7 +22,8 @@ export function LobbyScreen({
   onCreateRoom, 
   onJoinRoom, 
   onProceed, 
-  onBack 
+  onBack,
+  onCancelReconnect,
 }: LobbyScreenProps) {
   const [joinCode, setJoinCode] = useState('');
 
@@ -135,6 +137,15 @@ export function LobbyScreen({
           <div style={{ marginTop: '16px', color: 'var(--dim)', fontSize: '14px' }}>
             Attempting to restore your session
           </div>
+          {onCancelReconnect && (
+            <button 
+              className="btn-secondary" 
+              style={{ marginTop: '20px' }} 
+              onClick={onCancelReconnect}
+            >
+              Cancel Reconnection
+            </button>
+          )}
         </div>
       )}
 

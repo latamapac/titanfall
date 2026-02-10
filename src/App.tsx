@@ -48,16 +48,26 @@ export default function App() {
     const saved = getSavedRoomSession();
     if (saved.code && saved.role) {
       console.log(`Found saved session: room=${saved.code}, role=${saved.role}`);
-      // Attempt reconnection
-      setGameMode(saved.role);
-      setRoomCode(saved.code);
-      setLobbyStatus('reconnecting');
-      setMpRole(saved.role);
-      setScreen('lobby');
-      
-      // Socket will auto-reconnect and emit rejoin-room on connect
+      // Only auto-reconnect if we're in multiplayer mode (not local)
+      // and user explicitly clicks multiplayer
+      // For now, just clear old sessions to prevent stuck state
       const socket = getSocket();
-      socket.connect();
+      
+      // Try silent reconnection, but don't block the UI
+      socket.emit('rejoin-room', { code: saved.code, role: saved.role });
+      
+      // Set up one-time error handler - if reconnection fails, clear session
+      const handleRejoinError = () => {
+        console.log('Silent reconnection failed, clearing session');
+        clearRoomSession();
+      };
+      
+      socket.once('rejoin-error', handleRejoinError);
+      
+      // Clean up handler after 5 seconds
+      setTimeout(() => {
+        socket.off('rejoin-error', handleRejoinError);
+      }, 5000);
     }
   }, []);
 
@@ -201,7 +211,15 @@ export default function App() {
 
   // Actions
   const handleStartLocal = useCallback(() => {
+    // Clear any existing multiplayer session when starting local
+    clearRoomSession();
+    disconnectSocket();
     setGameMode('local');
+    setLobbyStatus('idle');
+    setRoomCode(null);
+    setMpRole(null);
+    setMpError(null);
+    setOpponentDisconnected(false);
     setScreen('newgame');
   }, []);
 
@@ -227,6 +245,16 @@ export default function App() {
     setGameMode('remote');
     setLobbyStatus('joining');
     getSocket().emit('join-room', { code });
+  }, []);
+
+  const handleCancelReconnect = useCallback(() => {
+    clearRoomSession();
+    disconnectSocket();
+    setLobbyStatus('idle');
+    setRoomCode(null);
+    setMpRole(null);
+    setMpError(null);
+    setOpponentDisconnected(false);
   }, []);
 
   const handleLobbyProceed = useCallback(() => {
@@ -308,6 +336,7 @@ export default function App() {
           onJoinRoom={handleJoinRoom}
           onProceed={handleLobbyProceed}
           onBack={handleBackToMenu}
+          onCancelReconnect={handleCancelReconnect}
         />
       )}
       {screen === 'newgame' && (

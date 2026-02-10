@@ -43,6 +43,11 @@ export function GameScreen({
   // In multiplayer: show own hand. In local: show active player's hand.
   const handPlayerIdx = isMultiplayer ? myPlayerIdx : ap;
   const handPlayer = G.p[handPlayerIdx];
+  
+  // Debug logging for local games
+  if (!isMultiplayer && import.meta.env.DEV) {
+    console.log('Local game - Active Player:', ap, 'Hand showing:', handPlayerIdx, 'Cards:', handPlayer.hand.length);
+  }
 
   return (
     <div className="game-screen">
@@ -88,6 +93,20 @@ export function GameScreen({
           winner={victory.winner}
           onBackToMenu={onBackToMenu}
         />
+      )}
+
+      {/* Turn indicator for local games - shows whose turn it is */}
+      {!isMultiplayer && !showTurnOverlay && !victory && (
+        <div style={{
+          position: 'fixed', top: '10px', left: '50%', transform: 'translateX(-50%)',
+          background: ap === 0 ? 'rgba(74,138,245,.8)' : 'rgba(245,74,74,.8)', 
+          padding: '10px 30px', borderRadius: '20px',
+          border: '2px solid var(--gold)', zIndex: 50, fontSize: '16px', fontWeight: 'bold',
+          color: '#fff',
+          textShadow: '0 1px 2px rgba(0,0,0,.5)',
+        }}>
+          {ap === 0 ? '🔵 Player 1 Turn' : '🔴 Player 2 Turn'}
+        </div>
       )}
 
       {isMultiplayer && !isMyTurn && !showTurnOverlay && !victory && (

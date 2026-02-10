@@ -16,6 +16,7 @@ export function Sidebar({ turn, phase, logs, onNextPhase }: SidebarProps) {
   }, [logs.length]);
 
   const canAdvance = phase === 2 || phase === 3 || phase === 4;
+  const isEnd = phase === 5;
 
   return (
     <div className="sidebar">
@@ -35,7 +36,24 @@ export function Sidebar({ turn, phase, logs, onNextPhase }: SidebarProps) {
         </div>
         {canAdvance && (
           <button className="btn-primary" style={{ width: '100%', fontSize: '12px', padding: '6px' }} onClick={onNextPhase}>
-            Next Phase
+            Next Phase →
+          </button>
+        )}
+        {isEnd && (
+          <button 
+            className="btn-primary" 
+            style={{ 
+              width: '100%', 
+              fontSize: '14px', 
+              padding: '10px',
+              background: 'linear-gradient(135deg, var(--gold), #d4af37)',
+              color: '#000',
+              fontWeight: 'bold',
+              animation: 'pulse 2s infinite',
+            }} 
+            onClick={onNextPhase}
+          >
+            🔄 END TURN
           </button>
         )}
       </div>

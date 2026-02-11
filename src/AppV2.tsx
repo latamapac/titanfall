@@ -11,7 +11,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { BattleScreen } from './components/v2/BattleScreen';
-import { CharacterSelect } from './components/v2/CharacterSelect';
+import { CharacterSelectV2 } from './components/v2/CharacterSelectV2';
 import { useGameEngine } from './hooks/useGameEngine';
 import { generateDefaultDeck, loadCustomCardsFromStorage } from './engine/utils';
 import { TITANS } from './data/titans';
@@ -41,7 +41,7 @@ export default function AppV2() {
   // Character Select Screen
   if (screen === 'menu') {
     return (
-      <CharacterSelect
+      <CharacterSelectV2
         onStart={handleStartGame}
         onBack={() => window.location.href = '/'}
       />

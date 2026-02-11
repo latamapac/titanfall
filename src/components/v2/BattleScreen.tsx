@@ -35,7 +35,7 @@ interface AnimatedUnit {
   animState: 'idle' | 'spawn' | 'attack' | 'damage' | 'death';
 }
 
-export function BattleScreen({
+export default function BattleScreen({
   gameState: G,
   logs,
   showTurnOverlay,

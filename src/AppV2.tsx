@@ -17,7 +17,6 @@ import { TITANS } from './data/titans';
 import './styles/v2/tokens.css';
 import './styles/v2/animations.css';
 import './styles/v2/touch.css';
-import './styles/v2/performance.css';
 
 // Lazy load heavy components for code splitting
 const CharacterSelectV2 = lazy(() => import('./components/v2/CharacterSelectV2'));

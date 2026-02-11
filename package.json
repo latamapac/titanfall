@@ -20,6 +20,7 @@
   "dependencies": {
     "@banana-dev/banana-dev": "^6.2.0",
     "@fal-ai/client": "^1.9.0",
+    "@google/generative-ai": "^0.24.1",
     "express": "^5.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

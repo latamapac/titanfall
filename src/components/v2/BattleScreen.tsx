@@ -254,33 +254,31 @@ export function BattleScreen({
             </div>
           </div>
 
-          {/* Action Button */}
-          {isMyTurn && (
-            <div style={{ padding: '12px 16px' }}>
-              <button
-                onClick={onNextPhase}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  background: G.phase === 5 
-                    ? 'linear-gradient(135deg, var(--color-gold), var(--color-gold-light))'
-                    : 'var(--color-blue)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: G.phase === 5 ? '#000' : '#fff',
-                  fontWeight: 'bold',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  boxShadow: G.phase === 5 
-                    ? '0 0 20px rgba(212,168,67,0.4)'
-                    : 'none',
-                  animation: G.phase === 5 ? 'pulse 1.5s infinite' : 'none',
-                }}
-              >
-                {G.phase === 5 ? '🔄 END TURN' : 'Next Phase →'}
-              </button>
-            </div>
-          )}
+          {/* Action Button - Always show in local games */}
+          <div style={{ padding: '12px 16px' }}>
+            <button
+              onClick={onNextPhase}
+              style={{
+                width: '100%',
+                padding: G.phase === 5 ? '16px' : '12px',
+                background: G.phase === 5 
+                  ? 'linear-gradient(135deg, var(--color-gold), var(--color-gold-light))'
+                  : 'var(--color-blue)',
+                border: 'none',
+                borderRadius: '8px',
+                color: G.phase === 5 ? '#000' : '#fff',
+                fontWeight: 'bold',
+                fontSize: G.phase === 5 ? '16px' : '14px',
+                cursor: 'pointer',
+                boxShadow: G.phase === 5 
+                  ? '0 0 20px rgba(212,168,67,0.4)'
+                  : '0 4px 10px rgba(0,0,0,0.3)',
+                animation: G.phase === 5 ? 'pulse 1.5s infinite' : 'none',
+              }}
+            >
+              {G.phase === 5 ? '🔄 END TURN' : `Next: ${PHASE_NAMES[G.phase + 1] || 'New Turn'} →`}
+            </button>
+          </div>
 
           {/* Log */}
           <div

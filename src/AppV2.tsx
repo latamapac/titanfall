@@ -11,6 +11,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { BattleScreen } from './components/v2/BattleScreen';
+import { CharacterSelect } from './components/v2/CharacterSelect';
 import { useGameEngine } from './hooks/useGameEngine';
 import { generateDefaultDeck, loadCustomCardsFromStorage } from './engine/utils';
 import { TITANS } from './data/titans';
@@ -36,63 +37,13 @@ export default function AppV2() {
     setScreen('game');
   }, [engine]);
 
-  // Simple menu for now
+  // Character Select Screen
   if (screen === 'menu') {
     return (
-      <div
-        style={{
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'var(--color-bg)',
-          gap: '20px',
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: 'var(--font-header)',
-            fontSize: '48px',
-            color: 'var(--color-gold)',
-            textAlign: 'center',
-          }}
-        >
-          Titanfall Chronicles
-        </h1>
-        <p style={{ color: '#888', marginBottom: '20px' }}>V2 - Visual Overhaul</p>
-        
-        <button
-          onClick={() => handleStartGame('kargath', 'thalor', 0)}
-          style={{
-            padding: '16px 48px',
-            background: 'var(--color-gold)',
-            border: 'none',
-            borderRadius: '8px',
-            color: '#000',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-          }}
-        >
-          Quick Start (V2)
-        </button>
-        
-        <button
-          onClick={() => window.location.href = '/'}
-          style={{
-            padding: '12px 32px',
-            background: 'transparent',
-            border: '1px solid var(--color-border)',
-            borderRadius: '8px',
-            color: '#888',
-            fontSize: '14px',
-            cursor: 'pointer',
-          }}
-        >
-          Back to V1
-        </button>
-      </div>
+      <CharacterSelect
+        onStart={handleStartGame}
+        onBack={() => window.location.href = '/'}
+      />
     );
   }
 

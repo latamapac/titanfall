@@ -191,7 +191,7 @@ interface CardArtProps {
 
 export function CardArt({
   cardId,
-  element,
+  element: _element,
   rarity = 'common',
   isPlayable,
   isSelected,

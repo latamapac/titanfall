@@ -12,9 +12,13 @@
     "generate:titans": "npx tsx scripts/generate-titans.ts",
     "generate:terrain": "npx tsx scripts/generate-terrain.ts",
     "generate:all": "npx tsx scripts/generate-all.ts",
-    "generate:quick": "npx tsx scripts/generate-all.ts --quick"
+    "generate:quick": "npx tsx scripts/generate-all.ts --quick",
+    "generate:banana": "npx tsx scripts/generate-unified.ts --backend=banana",
+    "check:fal": "npx tsx scripts/check-models.ts",
+    "test:banana": "npx tsx scripts/banana-client.ts"
   },
   "dependencies": {
+    "@banana-dev/banana-dev": "^6.2.0",
     "@fal-ai/client": "^1.9.0",
     "express": "^5.1.0",
     "react": "^19.2.0",

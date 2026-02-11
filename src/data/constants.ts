@@ -9,6 +9,7 @@ export const ELEMENTS: Record<Element, ElementInfo> = {
   shadow: { name: 'Shadow', color: '#7030a0', icon: '\u{1F311}' },
   light: { name: 'Light', color: '#e8d44d', icon: '\u{2728}' },
   arcane: { name: 'Arcane', color: '#a855f5', icon: '\u{1F52E}' },
+  nature: { name: 'Nature', color: '#228B22', icon: '\u{1F33F}' },
 };
 
 export const TERRAIN_INFO: Record<TerrainType, TerrainInfo> = {

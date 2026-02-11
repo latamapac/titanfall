@@ -1,0 +1,280 @@
+{
+  "project": "Dragonamachia",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-11",
+  "status": "planning",
+  
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Foundation",
+      "status": "in-progress",
+      "priority": "critical",
+      "deadline": "2026-02-18",
+      "tasks": [
+        {
+          "id": "T001",
+          "name": "World Bible Completion",
+          "description": "Finalize all faction details, lore, visual codes",
+          "status": "complete",
+          "assignee": "AI",
+          "deliverable": "lore/world-bible.json",
+          "dependencies": [],
+          "estHours": 2
+        },
+        {
+          "id": "T002", 
+          "name": "Visual Style Guide Document",
+          "description": "Create comprehensive visual style guide from PDF input",
+          "status": "pending",
+          "assignee": "Design Architect",
+          "deliverable": "docs/visual-style-guide.md",
+          "dependencies": ["T001"],
+          "estHours": 8
+        },
+        {
+          "id": "T003",
+          "name": "Character Template Standardization",
+          "description": "Create reusable character template based on .rtfd file",
+          "status": "pending", 
+          "assignee": "Design Architect",
+          "deliverable": "templates/character-template.json",
+          "dependencies": ["T002"],
+          "estHours": 4
+        }
+      ]
+    },
+    {
+      "id": "phase-2", 
+      "name": "Hero Assets",
+      "status": "pending",
+      "priority": "critical",
+      "deadline": "2026-03-04",
+      "tasks": [
+        {
+          "id": "T101",
+          "name": "Hero: Iron Warden",
+          "description": "Tank hero for Iron Church faction",
+          "status": "pending",
+          "assignee": "AI Generation",
+          "deliverable": "assets/heroes/iron-warden.png",
+          "specs": {
+            "dimensions": "1024x1024",
+            "format": "PNG",
+            "style": "Vertical shields, rune-guarded plate, signal color on weapon glow",
+            "faction": "iron-church"
+          },
+          "dependencies": ["T002"],
+          "estHours": 2
+        },
+        {
+          "id": "T102",
+          "name": "Hero: Verdant Thornbinder", 
+          "description": "DPS hero for Verdant Covenant faction",
+          "status": "pending",
+          "assignee": "AI Generation",
+          "deliverable": "assets/heroes/verdant-thornbinder.png",
+          "specs": {
+            "dimensions": "1024x1024",
+            "format": "PNG", 
+            "style": "Vined whip, organic armor, signal color on spell effects",
+            "faction": "verdant-covenant"
+          },
+          "dependencies": ["T002"],
+          "estHours": 2
+        },
+        {
+          "id": "T103",
+          "name": "Hero: Storm Sky-Seeker",
+          "description": "Ranged hero for Stormbound faction",
+          "status": "pending",
+          "assignee": "AI Generation",
+          "deliverable": "assets/heroes/storm-skyseeker.png",
+          "specs": {
+            "dimensions": "1024x1024",
+            "format": "PNG",
+            "style": "Cerulean bow, wind glyphs, signal color on arrow tips",
+            "faction": "stormbound"
+          },
+          "dependencies": ["T002"],
+          "estHours": 2
+        },
+        {
+          "id": "T104",
+          "name": "Hero: Scholarium Arcanist",
+          "description": "Caster hero for Esoteric Scholarium faction",
+          "status": "pending",
+          "assignee": "AI Generation",
+          "deliverable": "assets/heroes/scholarium-arcanist.png",
+          "specs": {
+            "dimensions": "1024x1024",
+            "format": "PNG",
+            "style": "Floating sigils, glowing eyes, signal color on sigils",
+            "faction": "esoteric-scholarium"
+          },
+          "dependencies": ["T002"],
+          "estHours": 2
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Creature Assets",
+      "status": "pending", 
+      "priority": "high",
+      "deadline": "2026-03-11",
+      "tasks": [
+        {
+          "id": "T201",
+          "name": "Creature: Forest Behemoth",
+          "description": "Threat creature for Verdant",
+          "status": "pending",
+          "assignee": "AI Generation",
+          "deliverable": "assets/creatures/forest-behemoth.png",
+          "specs": {
+            "dimensions": "1024x1024",
+            "format": "PNG",
+            "style": "Moss bone blades, ancient growth, grounded anatomy"
+          },
+          "dependencies": ["T002"],
+          "estHours": 2
+        },
+        {
+          "id": "T202",
+          "name": "Creature: Iron Juggernaut",
+          "description": "Siege unit for Iron Church",
+          "status": "pending",
+          "assignee": "AI Generation",
+          "deliverable": "assets/creatures/iron-juggernaut.png",
+          "specs": {
+            "dimensions": "1024x1024",
+            "format": "PNG",
+            "style": "Welded iron plates, steam vents, crushing bulk"
+          },
+          "dependencies": ["T002"],
+          "estHours": 2
+        },
+        {
+          "id": "T203",
+          "name": "Creature: Storm Wyrm",
+          "description": "Rare elite for Stormbound",
+          "status": "pending",
+          "assignee": "AI Generation",
+          "deliverable": "assets/creatures/storm-wyrm.png",
+          "specs": {
+            "dimensions": "1024x1024",
+            "format": "PNG",
+            "style": "Crackling sky scales, wing lightning, cloud breath"
+          },
+          "dependencies": ["T002"],
+          "estHours": 2
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "UI System",
+      "status": "pending",
+      "priority": "high",
+      "deadline": "2026-03-18",
+      "tasks": [
+        {
+          "id": "T301",
+          "name": "UI: Card Frame Templates",
+          "description": "4 rarity card frames with faction variants",
+          "status": "pending",
+          "assignee": "Design Architect",
+          "deliverable": "assets/ui/card-frames/",
+          "specs": {
+            "dimensions": "512x768",
+            "variants": ["common", "rare", "epic", "legendary"],
+            "factions": ["iron-church", "verdant-covenant", "stormbound", "esoteric-scholarium"]
+          },
+          "dependencies": ["T002"],
+          "estHours": 16
+        },
+        {
+          "id": "T302",
+          "name": "UI: Button System",
+          "description": "Faction-coded buttons with 4 states each",
+          "status": "pending",
+          "assignee": "Design Architect",
+          "deliverable": "assets/ui/buttons/",
+          "specs": {
+            "states": ["normal", "hover", "active", "disabled"],
+            "variants": ["primary", "secondary", "danger"]
+          },
+          "dependencies": ["T301"],
+          "estHours": 8
+        },
+        {
+          "id": "T303",
+          "name": "UI: Icon Set",
+          "description": "20+ game icons (elements, stats, actions)",
+          "status": "pending",
+          "assignee": "Design Architect",
+          "deliverable": "assets/ui/icons/",
+          "specs": {
+            "sizes": ["64x64", "128x128", "256x256"],
+            "categories": ["elements", "stats", "actions", "status"]
+          },
+          "dependencies": ["T301"],
+          "estHours": 12
+        }
+      ]
+    },
+    {
+      "id": "phase-5",
+      "name": "Effects & Animation",
+      "status": "pending",
+      "priority": "medium",
+      "deadline": "2026-04-01",
+      "tasks": [
+        {
+          "id": "T401",
+          "name": "Spell Effects: Iron Church",
+          "description": "Geometric glyph locks, ash embers, metal shards",
+          "status": "pending",
+          "assignee": "VFX Artist",
+          "deliverable": "assets/effects/spells/iron-church/",
+          "estHours": 8
+        },
+        {
+          "id": "T402",
+          "name": "Spell Effects: Verdant",
+          "description": "Twisting vines, pollen motes, green aura flux",
+          "status": "pending",
+          "assignee": "VFX Artist",
+          "deliverable": "assets/effects/spells/verdant/",
+          "estHours": 8
+        },
+        {
+          "id": "T403",
+          "name": "Spell Effects: Stormbound",
+          "description": "Electric arcs, wind gust ribbons, blue spark clusters",
+          "status": "pending",
+          "assignee": "VFX Artist",
+          "deliverable": "assets/effects/spells/stormbound/",
+          "estHours": 8
+        },
+        {
+          "id": "T404",
+          "name": "Spell Effects: Scholarium",
+          "description": "Floating sigils, reality distortions, eye glyphs",
+          "status": "pending",
+          "assignee": "VFX Artist",
+          "deliverable": "assets/effects/spells/scholarium/",
+          "estHours": 8
+        }
+      ]
+    }
+  ],
+  
+  "summary": {
+    "totalTasks": 18,
+    "completed": 1,
+    "inProgress": 0,
+    "pending": 17,
+    "totalEstHours": 96
+  }
+}

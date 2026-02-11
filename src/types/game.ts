@@ -1,6 +1,6 @@
 // ====================== Core Game Types ======================
 
-export type Element = 'fire' | 'earth' | 'wind' | 'shadow' | 'light' | 'arcane';
+export type Element = 'fire' | 'earth' | 'wind' | 'shadow' | 'light' | 'arcane' | 'nature';
 export type TerrainType = 'plain' | 'forest' | 'mountain' | 'water' | 'swamp' | 'hill' | 'volcano' | 'ruins';
 export type CardType = 'unit' | 'spell' | 'structure';
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
@@ -66,6 +66,10 @@ export interface TitanDef {
   kills: number;
   icon: string;
   color: string;
+  // Dragonamachia extensions
+  faction?: string;
+  role?: string;
+  visualSignature?: string[];
 }
 
 export interface Effect {

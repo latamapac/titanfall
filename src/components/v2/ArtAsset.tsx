@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback, memo, useMemo } from 'react';
+
+// ============================================================================
+// ART ASSET - Base image component with loading states
+// ============================================================================
 
 interface ArtAssetProps {
   src: string;
@@ -8,9 +12,12 @@ interface ArtAssetProps {
   fallback?: React.ReactNode;
 }
 
-export function ArtAsset({ src, alt, className, style, fallback }: ArtAssetProps) {
+export const ArtAsset = memo(function ArtAsset({ src, alt, className, style, fallback }: ArtAssetProps) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
+
+  const handleLoad = useCallback(() => setLoaded(true), []);
+  const handleError = useCallback(() => setError(true), []);
 
   if (error && fallback) {
     return <>{fallback}</>;
@@ -20,12 +27,10 @@ export function ArtAsset({ src, alt, className, style, fallback }: ArtAssetProps
     <div style={{ position: 'relative', ...style }} className={className}>
       {!loaded && !error && (
         <div
+          className="art-shimmer"
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(90deg, #1a1b2e 25%, #2a2d4a 50%, #1a1b2e 75%)',
-            backgroundSize: '200% 100%',
-            animation: 'shimmer 1.5s infinite',
             borderRadius: style?.borderRadius,
           }}
         />
@@ -33,20 +38,25 @@ export function ArtAsset({ src, alt, className, style, fallback }: ArtAssetProps
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         style={{
           ...style,
           opacity: loaded ? 1 : 0,
           transition: 'opacity 0.3s ease',
           display: error ? 'none' : 'block',
         }}
-        onLoad={() => setLoaded(true)}
-        onError={() => setError(true)}
+        onLoad={handleLoad}
+        onError={handleError}
       />
     </div>
   );
-}
+});
 
-// Titan Portrait with Art
+// ============================================================================
+// TITAN ART - Character portrait with element theming
+// ============================================================================
+
 interface TitanArtProps {
   titanId: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -58,26 +68,43 @@ const sizeMap = {
   md: { width: 120, height: 120 },
   lg: { width: 200, height: 200 },
   xl: { width: 300, height: 400 },
-};
+} as const;
 
-export function TitanArt({ titanId, size = 'md', isActive }: TitanArtProps) {
+export const TitanArt = memo(function TitanArt({ titanId, size = 'md', isActive }: TitanArtProps) {
   const dims = sizeMap[size];
-  const artPath = `/art/titans/${titanId.toLowerCase()}.png`;
+  const artPath = useMemo(() => `/art/titans/${titanId.toLowerCase()}.png`, [titanId]);
+  const borderRadius = size === 'xl' ? 16 : '50%';
 
-  return (
+  const containerStyle = useMemo(() => ({
+    width: dims.width,
+    height: dims.height,
+    borderRadius,
+    overflow: 'hidden' as const,
+    position: 'relative' as const,
+    border: isActive ? '4px solid var(--color-gold)' : '2px solid var(--color-border)',
+    boxShadow: isActive
+      ? '0 0 30px rgba(212, 168, 67, 0.6)'
+      : '0 4px 20px rgba(0, 0, 0, 0.5)',
+  }), [dims.width, dims.height, borderRadius, isActive]);
+
+  const fallback = useMemo(() => (
     <div
       style={{
-        width: dims.width,
-        height: dims.height,
-        borderRadius: size === 'xl' ? 16 : '50%',
-        overflow: 'hidden',
-        position: 'relative',
-        border: isActive ? '4px solid var(--color-gold)' : '2px solid var(--color-border)',
-        boxShadow: isActive
-          ? '0 0 30px rgba(212, 168, 67, 0.6)'
-          : '0 4px 20px rgba(0, 0, 0, 0.5)',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: dims.width * 0.4,
+        background: 'var(--color-surface)',
       }}
     >
+      🛡️
+    </div>
+  ), [dims.width]);
+
+  return (
+    <div style={containerStyle}>
       <ArtAsset
         src={artPath}
         alt={`Titan ${titanId}`}
@@ -86,67 +113,62 @@ export function TitanArt({ titanId, size = 'md', isActive }: TitanArtProps) {
           height: '100%',
           objectFit: 'cover',
         }}
-        fallback={
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: dims.width * 0.4,
-              background: 'var(--color-surface)',
-            }}
-          >
-            🛡️
-          </div>
-        }
+        fallback={fallback}
       />
       {isActive && (
         <div
+          className="pulse-glow"
           style={{
             position: 'absolute',
             inset: 0,
-            borderRadius: size === 'xl' ? 16 : '50%',
+            borderRadius,
             boxShadow: 'inset 0 0 40px rgba(212, 168, 67, 0.3)',
-            animation: 'pulse-glow 2s ease-in-out infinite',
           }}
         />
       )}
     </div>
   );
-}
+});
 
-// Terrain Tile with Art
+// ============================================================================
+// TERRAIN ART - Grid cell background
+// ============================================================================
+
 interface TerrainArtProps {
   terrain: string;
   highlight?: 'deploy' | 'move' | 'attack' | 'selected' | null;
   onClick?: () => void;
 }
 
-export function TerrainArt({ terrain, highlight, onClick }: TerrainArtProps) {
-  const artPath = `/art/terrain/${terrain.toLowerCase()}.jpg`;
+const highlightStyles = {
+  deploy: { boxShadow: 'inset 0 0 0 3px #4ade80, 0 0 20px rgba(74, 222, 128, 0.4)' },
+  move: { boxShadow: 'inset 0 0 0 3px #4a9eff, 0 0 20px rgba(74, 158, 255, 0.4)' },
+  attack: { boxShadow: 'inset 0 0 0 3px #f87171, 0 0 20px rgba(248, 113, 113, 0.4)' },
+  selected: { boxShadow: 'inset 0 0 0 3px #d4a843, 0 0 20px rgba(212, 168, 67, 0.4)' },
+} as const;
 
-  const highlightStyles = {
-    deploy: { boxShadow: 'inset 0 0 0 3px #4ade80, 0 0 20px rgba(74, 222, 128, 0.4)' },
-    move: { boxShadow: 'inset 0 0 0 3px #4a9eff, 0 0 20px rgba(74, 158, 255, 0.4)' },
-    attack: { boxShadow: 'inset 0 0 0 3px #f87171, 0 0 20px rgba(248, 113, 113, 0.4)' },
-    selected: { boxShadow: 'inset 0 0 0 3px #d4a843, 0 0 20px rgba(212, 168, 67, 0.4)' },
-  };
+export const TerrainArt = memo(function TerrainArt({ terrain, highlight, onClick }: TerrainArtProps) {
+  const artPath = useMemo(() => `/art/terrain/${terrain.toLowerCase()}.jpg`, [terrain]);
+
+  const containerStyle = useMemo(() => ({
+    aspectRatio: '1' as const,
+    borderRadius: 8,
+    overflow: 'hidden' as const,
+    position: 'relative' as const,
+    cursor: onClick ? 'pointer' as const : 'default' as const,
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    ...(highlight ? highlightStyles[highlight] : {}),
+  }), [highlight, onClick]);
+
+  const fallbackColor = useMemo(() => {
+    const t = terrain.toLowerCase();
+    if (t === 'forest') return 'var(--color-success)';
+    if (t === 'volcano') return 'var(--color-danger)';
+    return 'var(--color-surface)';
+  }, [terrain]);
 
   return (
-    <div
-      onClick={onClick}
-      style={{
-        aspectRatio: '1',
-        borderRadius: 8,
-        overflow: 'hidden',
-        position: 'relative',
-        cursor: onClick ? 'pointer' : 'default',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        ...(highlight ? highlightStyles[highlight] : {}),
-      }}
-    >
+    <div onClick={onClick} style={containerStyle}>
       <ArtAsset
         src={artPath}
         alt={`${terrain} terrain`}
@@ -160,13 +182,12 @@ export function TerrainArt({ terrain, highlight, onClick }: TerrainArtProps) {
             style={{
               width: '100%',
               height: '100%',
-              background: `var(--color-${terrain.toLowerCase() === 'forest' ? 'success' : terrain.toLowerCase() === 'volcano' ? 'danger' : 'surface'})`,
+              background: fallbackColor,
               opacity: 0.5,
             }}
           />
         }
       />
-      {/* Overlay for depth */}
       <div
         style={{
           position: 'absolute',
@@ -177,9 +198,12 @@ export function TerrainArt({ terrain, highlight, onClick }: TerrainArtProps) {
       />
     </div>
   );
-}
+});
 
-// Card with Art
+// ============================================================================
+// CARD ART - Unit card illustration
+// ============================================================================
+
 interface CardArtProps {
   cardId: string;
   element: string;
@@ -189,7 +213,14 @@ interface CardArtProps {
   onClick?: () => void;
 }
 
-export function CardArt({
+const rarityBorders = {
+  common: '#6b7280',
+  rare: '#4a9eff',
+  epic: '#a855f7',
+  legendary: '#d4a843',
+} as const;
+
+export const CardArt = memo(function CardArt({
   cardId,
   element: _element,
   rarity = 'common',
@@ -197,36 +228,33 @@ export function CardArt({
   isSelected,
   onClick,
 }: CardArtProps) {
-  const artPath = `/art/cards/${cardId}.jpg`;
+  const artPath = useMemo(() => `/art/cards/${cardId}.jpg`, [cardId]);
 
-  const rarityBorders = {
-    common: '#6b7280',
-    rare: '#4a9eff',
-    epic: '#a855f7',
-    legendary: '#d4a843',
-  };
+  const containerStyle = useMemo(() => ({
+    width: 140,
+    height: 200,
+    borderRadius: 12,
+    overflow: 'hidden' as const,
+    position: 'relative' as const,
+    cursor: onClick ? 'pointer' as const : 'default' as const,
+    border: `3px solid ${isSelected ? '#d4a843' : rarityBorders[rarity]}`,
+    boxShadow: isSelected
+      ? '0 0 30px rgba(212, 168, 67, 0.6)'
+      : isPlayable
+      ? `0 0 20px ${rarityBorders[rarity]}40`
+      : '0 4px 15px rgba(0, 0, 0, 0.3)',
+    opacity: isPlayable || !onClick ? 1 : 0.6,
+    transform: isSelected ? 'translateY(-10px) scale(1.05)' : 'none',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  }), [isSelected, isPlayable, onClick, rarity]);
+
+  const cardName = useMemo(() => 
+    cardId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+    [cardId]
+  );
 
   return (
-    <div
-      onClick={onClick}
-      style={{
-        width: 140,
-        height: 200,
-        borderRadius: 12,
-        overflow: 'hidden',
-        position: 'relative',
-        cursor: onClick ? 'pointer' : 'default',
-        border: `3px solid ${isSelected ? '#d4a843' : rarityBorders[rarity]}`,
-        boxShadow: isSelected
-          ? '0 0 30px rgba(212, 168, 67, 0.6)'
-          : isPlayable
-          ? `0 0 20px ${rarityBorders[rarity]}40`
-          : '0 4px 15px rgba(0, 0, 0, 0.3)',
-        opacity: isPlayable || !onClick ? 1 : 0.6,
-        transform: isSelected ? 'translateY(-10px) scale(1.05)' : 'none',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      }}
-    >
+    <div onClick={onClick} style={containerStyle}>
       <ArtAsset
         src={artPath}
         alt={`Card ${cardId}`}
@@ -251,7 +279,6 @@ export function CardArt({
           </div>
         }
       />
-      {/* Card info section */}
       <div
         style={{
           height: '30%',
@@ -263,7 +290,7 @@ export function CardArt({
         }}
       >
         <div style={{ fontSize: 12, fontWeight: 'bold', color: 'var(--color-gold)' }}>
-          {cardId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+          {cardName}
         </div>
         <div
           style={{
@@ -278,16 +305,19 @@ export function CardArt({
       </div>
     </div>
   );
-}
+});
 
-// Background with Art
+// ============================================================================
+// BACKGROUND ART - Full-screen background with fallback
+// ============================================================================
+
 interface BackgroundArtProps {
   type: 'menu' | 'character-select' | 'battle' | 'victory';
   children: React.ReactNode;
 }
 
-export function BackgroundArt({ type, children }: BackgroundArtProps) {
-  const artPath = `/art/bg/${type}.jpg`;
+export const BackgroundArt = memo(function BackgroundArt({ type, children }: BackgroundArtProps) {
+  const artPath = useMemo(() => `/art/bg/${type}.jpg`, [type]);
 
   return (
     <div
@@ -317,7 +347,6 @@ export function BackgroundArt({ type, children }: BackgroundArtProps) {
           />
         }
       />
-      {/* Darken overlay for UI readability */}
       <div
         style={{
           position: 'absolute',
@@ -326,10 +355,9 @@ export function BackgroundArt({ type, children }: BackgroundArtProps) {
           backdropFilter: 'blur(2px)',
         }}
       />
-      {/* Content */}
       <div style={{ position: 'relative', zIndex: 1, height: '100%' }}>
         {children}
       </div>
     </div>
   );
-}
+});

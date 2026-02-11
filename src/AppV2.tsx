@@ -1,17 +1,14 @@
 /**
  * Titanfall Chronicles V2 - Main Entry Point
  * 
- * This is the new version with:
+ * Features:
  * - FLUX-generated art assets
- * - Improved UI/UX
- * - Smooth animations
- * - Fixed viewport (no scrolling)
- * - Industry-standard battle layout
+ * - Code splitting with React.lazy
+ * - Optimized rendering with memoization
+ * - Smooth 60fps animations
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { BattleScreen } from './components/v2/BattleScreen';
-import { CharacterSelectV2 } from './components/v2/CharacterSelectV2';
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { useGameEngine } from './hooks/useGameEngine';
 import { generateDefaultDeck, loadCustomCardsFromStorage } from './engine/utils';
 import { TITANS } from './data/titans';
@@ -20,10 +17,25 @@ import { TITANS } from './data/titans';
 import './styles/v2/tokens.css';
 import './styles/v2/animations.css';
 import './styles/v2/touch.css';
+import './styles/v2/performance.css';
+
+// Lazy load heavy components for code splitting
+const CharacterSelectV2 = lazy(() => import('./components/v2/CharacterSelectV2'));
+const BattleScreen = lazy(() => import('./components/v2/BattleScreen'));
+
+// Loading fallback
+function ScreenLoader() {
+  return (
+    <div className="screen-loader">
+      <div className="loader-spinner" />
+      <div className="loader-text">Loading...</div>
+    </div>
+  );
+}
 
 export default function AppV2() {
   const engine = useGameEngine();
-  const [screen, setScreen] = useState<'menu' | 'setup' | 'game'>('menu');
+  const [screen, setScreen] = useState<'menu' | 'game'>('menu');
 
   useEffect(() => {
     loadCustomCardsFromStorage();
@@ -38,37 +50,46 @@ export default function AppV2() {
     setScreen('game');
   }, [engine]);
 
+  const handleBackToMenu = useCallback(() => {
+    engine.resetGame();
+    setScreen('menu');
+  }, [engine]);
+
+  const handleBack = useCallback(() => {
+    window.location.href = '/';
+  }, []);
+
   // Character Select Screen
   if (screen === 'menu') {
     return (
-      <CharacterSelectV2
-        onStart={handleStartGame}
-        onBack={() => window.location.href = '/'}
-      />
+      <Suspense fallback={<ScreenLoader />}>
+        <CharacterSelectV2
+          onStart={handleStartGame}
+          onBack={handleBack}
+        />
+      </Suspense>
     );
   }
 
   if (screen === 'game' && engine.gameState) {
     return (
-      <BattleScreen
-        gameState={engine.gameState}
-        logs={engine.logs}
-        showTurnOverlay={engine.showTurnOverlay}
-        victory={engine.victory}
-        onNextPhase={engine.nextPhase}
-        onCellClick={engine.cellClick}
-        onCardClick={engine.cardClick}
-        onActivateTitan={engine.activateTitan}
-        onDismissTurnOverlay={engine.dismissTurnOverlay}
-        onBackToMenu={() => {
-          engine.resetGame();
-          setScreen('menu');
-        }}
-        isMultiplayer={false}
-      />
+      <Suspense fallback={<ScreenLoader />}>
+        <BattleScreen
+          gameState={engine.gameState}
+          logs={engine.logs}
+          showTurnOverlay={engine.showTurnOverlay}
+          victory={engine.victory}
+          onNextPhase={engine.nextPhase}
+          onCellClick={engine.cellClick}
+          onCardClick={engine.cardClick}
+          onActivateTitan={engine.activateTitan}
+          onDismissTurnOverlay={engine.dismissTurnOverlay}
+          onBackToMenu={handleBackToMenu}
+          isMultiplayer={false}
+        />
+      </Suspense>
     );
   }
 
   return null;
 }
-// Railway deploy check Tue Feb 10 23:49:48 -03 2026

@@ -62,7 +62,7 @@ const sizeMap = {
 
 export function TitanArt({ titanId, size = 'md', isActive }: TitanArtProps) {
   const dims = sizeMap[size];
-  const artPath = `/art/titans/${titanId}.jpg`;
+  const artPath = `/art/titans/${titanId.toLowerCase()}.png`;
 
   return (
     <div

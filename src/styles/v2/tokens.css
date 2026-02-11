@@ -1,0 +1,154 @@
+/* Titanfall Chronicles V2 - Design Tokens */
+
+:root {
+  /* Primary Colors */
+  --color-gold: #D4A843;
+  --color-gold-light: #E8C97A;
+  --color-gold-dark: #A6822A;
+  
+  /* Secondary Colors */
+  --color-blue: #4A4F8C;
+  --color-blue-light: #6A70B8;
+  --color-blue-dark: #2A2D5C;
+  
+  /* Tertiary Colors */
+  --color-navy: #2A2D4A;
+  --color-navy-light: #3A3D6A;
+  --color-navy-dark: #1A1B2E;
+  
+  /* Accent Colors */
+  --color-mana: #4A9EFF;
+  --color-success: #4ADE80;
+  --color-danger: #F87171;
+  --color-warning: #FBBF24;
+  
+  /* Background Colors */
+  --color-bg: #0A0B14;
+  --color-surface: #1A1B2E;
+  --color-surface-light: #2A2D4A;
+  --color-border: #3A3D5C;
+  
+  /* Player Colors */
+  --color-p1: #4A9EFF;  /* Blue */
+  --color-p2: #F87171;  /* Red */
+  
+  /* Element Colors */
+  --color-fire: #F87171;
+  --color-water: #4A9EFF;
+  --color-earth: #A3A35A;
+  --color-air: #A78BFA;
+  --color-shadow: #9CA3AF;
+  --color-nature: #4ADE80;
+  --color-arcane: #F472B6;
+  
+  /* Typography */
+  --font-header: 'Cinzel', 'Georgia', serif;
+  --font-body: 'Inter', 'Roboto', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+  
+  /* Font Sizes */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  
+  /* Spacing */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 0 20px rgba(212, 168, 67, 0.4);
+  --shadow-mana: 0 0 20px rgba(74, 158, 255, 0.4);
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms ease;
+  --transition-slow: 500ms ease;
+  
+  /* Z-Index Scale */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-overlay: 400;
+  --z-tooltip: 500;
+}
+
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: #fff;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+/* Utility Classes */
+.text-gold { color: var(--color-gold); }
+.text-mana { color: var(--color-mana); }
+.text-success { color: var(--color-success); }
+.text-danger { color: var(--color-danger); }
+.text-p1 { color: var(--color-p1); }
+.text-p2 { color: var(--color-p2); }
+
+.bg-surface { background: var(--color-surface); }
+.bg-surface-light { background: var(--color-surface-light); }
+
+/* Hide scrollbar but allow scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Animation utilities */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}

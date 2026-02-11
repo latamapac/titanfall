@@ -1,0 +1,297 @@
+/* Titanfall Chronicles V2 - Animations */
+
+/* Card Draw Animation */
+@keyframes cardDraw {
+  from {
+    transform: translateY(-100px) scale(0.5) rotate(-10deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+/* Card Play Animation */
+@keyframes cardPlay {
+  0% {
+    transform: scale(1) rotate(0);
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: scale(0) translateY(-200px) rotate(10deg);
+    opacity: 0;
+  }
+}
+
+/* Unit Spawn Animation */
+@keyframes unitSpawn {
+  0% {
+    transform: scale(0) translateY(-50px);
+    filter: brightness(2) blur(10px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) translateY(0);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    filter: brightness(1) blur(0);
+    opacity: 1;
+  }
+}
+
+/* Unit Attack Animation */
+@keyframes unitAttack {
+  0% {
+    transform: translateX(0) scale(1);
+  }
+  25% {
+    transform: translateX(-10px) scale(0.9);
+  }
+  50% {
+    transform: translateX(30px) scale(1.1);
+    filter: brightness(1.3);
+  }
+  75% {
+    transform: translateX(-5px) scale(1.05);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Unit Take Damage */
+@keyframes unitDamage {
+  0%, 100% {
+    transform: translateX(0);
+    filter: grayscale(0);
+  }
+  20% {
+    transform: translateX(-15px);
+    filter: grayscale(0.5) brightness(1.5) sepia(1) hue-rotate(-50deg) saturate(2);
+  }
+  40% {
+    transform: translateX(15px);
+    filter: grayscale(0.5);
+  }
+  60% {
+    transform: translateX(-10px);
+  }
+  80% {
+    transform: translateX(10px);
+  }
+}
+
+/* Unit Death */
+@keyframes unitDeath {
+  0% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(0.8) rotate(10deg);
+    filter: brightness(0.5) grayscale(1);
+  }
+  100% {
+    transform: scale(0) rotate(45deg);
+    opacity: 0;
+    filter: brightness(0);
+  }
+}
+
+/* HP Bar Change */
+@keyframes hpChange {
+  0% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(2);
+    box-shadow: 0 0 20px currentColor;
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+/* Phase Transition */
+@keyframes phaseSlide {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Turn Indicator Pulse */
+@keyframes turnPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(212, 168, 67, 0);
+  }
+}
+
+/* Victory Animation */
+@keyframes victoryZoom {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+/* Shine Effect for Legendary Cards */
+@keyframes cardShine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Shake Animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Glow Pulse */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 5px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+  }
+}
+
+/* Pulse Glow (for active elements) */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(212, 168, 67, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(212, 168, 67, 0.6);
+  }
+}
+
+/* Particle Float */
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) translateX(var(--drift, 20px));
+    opacity: 0;
+  }
+}
+
+/* Utility Classes */
+.animate-card-draw {
+  animation: cardDraw 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-card-play {
+  animation: cardPlay 0.6s ease-out forwards;
+}
+
+.animate-unit-spawn {
+  animation: unitSpawn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-unit-attack {
+  animation: unitAttack 0.4s ease-out;
+}
+
+.animate-unit-damage {
+  animation: unitDamage 0.5s ease-out;
+}
+
+.animate-unit-death {
+  animation: unitDeath 0.8s ease-out forwards;
+}
+
+.animate-hp-change {
+  animation: hpChange 0.5s ease-out;
+}
+
+.animate-phase-slide {
+  animation: phaseSlide 0.3s ease-out;
+}
+
+.animate-turn-pulse {
+  animation: turnPulse 2s ease-in-out infinite;
+}
+
+.animate-victory {
+  animation: victoryZoom 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-glow {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* Hover Transitions */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Focus States */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.5);
+}
+
+/* Loading Spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}

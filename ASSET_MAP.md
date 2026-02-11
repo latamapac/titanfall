@@ -12,7 +12,7 @@
 
 ---
 
-## 👤 TITAN PORTRAITS (5)
+## 👤 TITAN PORTRAITS (5) ✅ COMPLETE
 
 ### Style Specs
 - Full upper body, dramatic pose
@@ -20,13 +20,15 @@
 - Cinematic rim lighting
 - Rich color grading per element
 
-| Asset | File | Size | Description |
-|-------|------|------|-------------|
-| Kargath | `titans/kargath.jpg` | 1024x1024 | Orc warlord, volcanic bg, red/orange |
-| Thalor | `titans/thalor.jpg` | 1024x1024 | Archmage, arcane ruins, blue/purple |
-| Sylara | `titans/sylara.jpg` | 1024x1024 | Elf druid, enchanted forest, green/gold |
-| Nyx | `titans/nyx.jpg` | 1024x1024 | Shadow assassin, void realm, purple/black |
-| Elandor | `titans/elandor.jpg` | 1024x1024 | Dragon knight, sky fortress, gold/white |
+| Asset | File | Size | Status | Description |
+|-------|------|------|--------|-------------|
+| Arcanum | `titans/arcanum.png` | 1024x1024 | ✅ | Elder archmage with crystal staff, arcane tower bg, blue/gold |
+| Maulk | `titans/maulk.png` | 1024x1024 | ✅ | Demon berserker with blood sword, lava bg, red/orange |
+| Nyx | `titans/nyx.png` | 1024x1024 | ✅ | Shadow assassin with twin blades, void bg, purple/black |
+| Sylvana | `titans/sylvana.png` | 1024x1024 | ✅ | Forest elf druid with nature staff, woodland bg, green/gold |
+| Solara | `titans/solara.png` | 1024x1024 | ✅ | Dragon knight in silver armor, castle bg, gold/red |
+
+**All portraits generated with FLUX.1** - High quality MK-style character art
 
 ---
 
@@ -173,7 +175,7 @@
 
 | Category | Count | Priority |
 |----------|-------|----------|
-| Titans | 5 | 🔴 Critical |
+| Titans | 5 | ✅ **COMPLETE** |
 | Terrain | 8 | 🔴 Critical |
 | Cards | 20 | 🟠 High |
 | Backgrounds | 5 | 🟠 High |

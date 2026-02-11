@@ -1,0 +1,436 @@
+/* Titanfall Chronicles V2 - Touch & Mobile Optimizations */
+
+/* ============================================
+   RIPPLE EFFECT ANIMATIONS
+   ============================================ */
+
+@keyframes ripple-effect {
+  to {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes ripple-fade {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   TOUCH GESTURE INDICATORS
+   ============================================ */
+
+@keyframes swipe-indicator {
+  0%, 100% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(var(--swipe-direction, 10px));
+  }
+}
+
+@keyframes pinch-zoom-indicator {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes fade-in-out {
+  0% { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(0.8); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(0.8); 
+  }
+}
+
+@keyframes victory-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* ============================================
+   TOUCH-FRIENDLY BASE STYLES
+   ============================================ */
+
+/* Prevent text selection during touch interactions */
+.touch-no-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Remove tap highlight on mobile browsers */
+.touch-no-highlight {
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+}
+
+/* Enable momentum scrolling on iOS */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+}
+
+/* ============================================
+   MINIMUM TOUCH TARGET SIZES
+   ============================================ */
+
+/* Minimum 44px touch target (Apple HIG) */
+.touch-target-min {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Larger 48px touch target (Material Design) */
+.touch-target-large {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+/* ============================================
+   BUTTON STYLES
+   ============================================ */
+
+/* Touch-optimized button */
+.btn-touch {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-touch:active {
+  transform: scale(0.96);
+}
+
+.btn-touch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Button with ripple effect */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn-ripple:active::after {
+  animation: ripple-fade 0.4s ease-out;
+}
+
+/* ============================================
+   CARD TOUCH STYLES
+   ============================================ */
+
+/* Card drag ghost */
+.card-drag-ghost {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.9;
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Card drop zone highlight */
+.card-drop-zone {
+  background: rgba(74, 222, 128, 0.2);
+  border: 2px dashed var(--color-success);
+  animation: pulse-border 1s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: var(--color-success);
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+  }
+  50% {
+    border-color: rgba(74, 222, 128, 0.5);
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+  }
+}
+
+/* ============================================
+   GRID CELL TOUCH STYLES
+   ============================================ */
+
+.grid-cell-touch {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.grid-cell-touch:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
+}
+
+/* Deploy zone indicator */
+.grid-cell-deployable {
+  position: relative;
+}
+
+.grid-cell-deployable::after {
+  content: '+';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: var(--color-success);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ============================================
+   SWIPE GESTURE HINTS
+   ============================================ */
+
+.swipe-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #666;
+  padding: 4px 0;
+}
+
+.swipe-hint-arrow {
+  animation: swipe-hint-bounce 1s ease-in-out infinite;
+}
+
+@keyframes swipe-hint-bounce {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
+/* ============================================
+   MOBILE-SPECIFIC LAYOUTS
+   ============================================ */
+
+/* Hide elements on mobile */
+@media (max-width: 767px) {
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  .stack-mobile {
+    flex-direction: column !important;
+  }
+  
+  .full-width-mobile {
+    width: 100% !important;
+  }
+}
+
+/* Hide elements on desktop */
+@media (min-width: 768px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY - REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .ripple-effect,
+  .ripple-fade {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   PREVENT ACCIDENTAL TOUCHES
+   ============================================ */
+
+/* Touch guard overlay */
+.touch-guard {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: transparent;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+/* Delayed pointer events for drag operations */
+.touch-delay-pointer {
+  pointer-events: none;
+}
+
+.touch-delay-pointer.active {
+  pointer-events: auto;
+}
+
+/* ============================================
+   HAPTIC FEEDBACK VISUAL INDICATORS
+   ============================================ */
+
+/* Visual feedback when haptic would trigger */
+.haptic-visual-feedback {
+  position: relative;
+}
+
+.haptic-visual-feedback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  pointer-events: none;
+}
+
+.haptic-visual-feedback.trigger::after {
+  opacity: 1;
+}
+
+/* ============================================
+   PINCH ZOOM INDICATORS
+   ============================================ */
+
+.pinch-zoom-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 20px;
+  color: #fff;
+  font-size: 14px;
+  pointer-events: none;
+  animation: fade-in-out 2s ease forwards;
+}
+
+/* ============================================
+   SCROLLBAR HIDING (touch-friendly)
+   ============================================ */
+
+.scrollbar-hide-touch {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scrollbar-hide-touch::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   DRAG PREVIEW
+   ============================================ */
+
+.drag-preview {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  opacity: 0.9;
+  transform: scale(1.1);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   ORIENTATION LOCK HINT
+   ============================================ */
+
+@media screen and (max-width: 767px) and (orientation: portrait) {
+  .landscape-recommended::before {
+    content: '📱 Rotate device for better experience';
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    font-size: 12px;
+    color: #fff;
+    z-index: 1000;
+    animation: fade-in-out 3s ease forwards;
+    animation-delay: 1s;
+  }
+}
+
+/* ============================================
+   SAFE AREA INSETS (notch devices)
+   ============================================ */
+
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}

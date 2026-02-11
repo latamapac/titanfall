@@ -1,163 +1,634 @@
-/* Titanfall Chronicles V2 - Animations */
+/* Titanfall Chronicles V2 - Enhanced Animation System */
+/* 60fps optimized animations using GPU acceleration */
 
-/* Card Draw Animation */
-@keyframes cardDraw {
-  from {
-    transform: translateY(-100px) scale(0.5) rotate(-10deg);
+/* ============================================
+   1. CARD DRAW ANIMATION - Flip from deck
+   ============================================ */
+
+@keyframes cardDrawFlip {
+  0% {
+    transform: perspective(1000px) rotateY(-90deg) translateX(-200px) scale(0.5);
     opacity: 0;
+    filter: brightness(0.5);
   }
-  to {
-    transform: translateY(0) scale(1) rotate(0);
+  30% {
+    transform: perspective(1000px) rotateY(-45deg) translateX(-100px) scale(0.7);
+    opacity: 0.6;
+    filter: brightness(0.8);
+  }
+  60% {
+    transform: perspective(1000px) rotateY(10deg) translateX(20px) scale(1.05);
+    opacity: 0.9;
+    filter: brightness(1.1);
+  }
+  80% {
+    transform: perspective(1000px) rotateY(-5deg) translateX(-10px) scale(1.02);
     opacity: 1;
   }
-}
-
-/* Card Play Animation */
-@keyframes cardPlay {
-  0% {
-    transform: scale(1) rotate(0);
-  }
-  50% {
-    transform: scale(1.1) rotate(5deg);
-    filter: brightness(1.5);
-  }
   100% {
-    transform: scale(0) translateY(-200px) rotate(10deg);
-    opacity: 0;
-  }
-}
-
-/* Unit Spawn Animation */
-@keyframes unitSpawn {
-  0% {
-    transform: scale(0) translateY(-50px);
-    filter: brightness(2) blur(10px);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.2) translateY(0);
-    filter: brightness(1.5);
-  }
-  100% {
-    transform: scale(1) translateY(0);
-    filter: brightness(1) blur(0);
+    transform: perspective(1000px) rotateY(0) translateX(0) scale(1);
     opacity: 1;
+    filter: brightness(1);
   }
 }
 
-/* Unit Attack Animation */
-@keyframes unitAttack {
+@keyframes cardDrawShadow {
+  0% {
+    box-shadow: -20px 20px 40px rgba(0,0,0,0.5);
+  }
+  50% {
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+  }
+  100% {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+}
+
+.animate-card-draw-v2 {
+  animation: cardDrawFlip 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             cardDrawShadow 0.6s ease-out forwards;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, opacity, filter;
+}
+
+/* Card deck glow effect during draw */
+@keyframes deckGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(212, 168, 67, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(212, 168, 67, 0.6), 0 0 60px rgba(212, 168, 67, 0.3);
+  }
+}
+
+.deck-drawing {
+  animation: deckGlow 0.6s ease-in-out;
+}
+
+/* ============================================
+   2. CARD PLAY ANIMATION - Fly to board
+   ============================================ */
+
+@keyframes cardPlayFly {
+  0% {
+    transform: scale(1) rotateZ(0) translateY(0);
+    opacity: 1;
+    filter: brightness(1);
+  }
+  20% {
+    transform: scale(1.15) rotateZ(-5deg) translateY(-30px);
+    filter: brightness(1.3) drop-shadow(0 20px 40px rgba(212, 168, 67, 0.5));
+  }
+  50% {
+    transform: scale(0.9) rotateZ(3deg) translateY(-100px);
+    opacity: 0.8;
+    filter: brightness(1.5);
+  }
+  80% {
+    transform: scale(0.3) rotateZ(10deg) translateY(-200px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0) rotateZ(15deg) translateY(-250px);
+    opacity: 0;
+  }
+}
+
+@keyframes cardPlayTrail {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) translateY(-100px);
+  }
+}
+
+.animate-card-play-v2 {
+  animation: cardPlayFly 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: center bottom;
+  will-change: transform, opacity, filter;
+}
+
+.card-play-trail {
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: cardPlayTrail 0.4s ease-out forwards;
+}
+
+/* ============================================
+   3. UNIT ATTACK ANIMATION - Lunge forward
+   ============================================ */
+
+@keyframes unitAttackLunge {
   0% {
     transform: translateX(0) scale(1);
+    filter: brightness(1);
   }
-  25% {
-    transform: translateX(-10px) scale(0.9);
+  15% {
+    transform: translateX(-8px) scale(0.95) rotateZ(-2deg);
+    filter: brightness(1.1);
   }
-  50% {
-    transform: translateX(30px) scale(1.1);
+  35% {
+    transform: translateX(40px) scale(1.15) rotateZ(5deg);
+    filter: brightness(1.4) drop-shadow(0 0 20px rgba(255, 200, 100, 0.8));
+  }
+  55% {
+    transform: translateX(50px) scale(1.1) rotateZ(3deg);
     filter: brightness(1.3);
   }
   75% {
-    transform: translateX(-5px) scale(1.05);
+    transform: translateX(-5px) scale(1.05) rotateZ(-1deg);
+    filter: brightness(1.1);
   }
   100% {
-    transform: translateX(0) scale(1);
+    transform: translateX(0) scale(1) rotateZ(0);
+    filter: brightness(1);
   }
 }
 
-/* Unit Take Damage */
-@keyframes unitDamage {
-  0%, 100% {
-    transform: translateX(0);
-    filter: grayscale(0);
+@keyframes attackImpact {
+  0% {
+    transform: scale(0);
+    opacity: 1;
   }
-  20% {
-    transform: translateX(-15px);
-    filter: grayscale(0.5) brightness(1.5) sepia(1) hue-rotate(-50deg) saturate(2);
+  50% {
+    transform: scale(1.5);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-unit-attack-v2 {
+  animation: unitAttackLunge 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center center;
+  will-change: transform, filter;
+  z-index: 100;
+}
+
+.attack-impact-effect {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,200,100,0.8) 0%, transparent 70%);
+  pointer-events: none;
+  animation: attackImpact 0.4s ease-out forwards;
+}
+
+/* Direction-specific attacks */
+.animate-unit-attack-right {
+  --attack-direction: 1;
+}
+
+.animate-unit-attack-left {
+  --attack-direction: -1;
+}
+
+/* ============================================
+   4. UNIT TAKE DAMAGE - Flash red + shake
+   ============================================ */
+
+@keyframes unitDamageFlash {
+  0% {
+    filter: grayscale(0) brightness(1);
+    transform: translateX(0);
+  }
+  10% {
+    filter: grayscale(0.3) brightness(2) sepia(1) hue-rotate(-50deg) saturate(3);
+    transform: translateX(-12px) rotateZ(-3deg);
+  }
+  25% {
+    filter: grayscale(0.5) brightness(1.8) sepia(1) hue-rotate(-50deg) saturate(2.5);
+    transform: translateX(12px) rotateZ(3deg);
   }
   40% {
-    transform: translateX(15px);
-    filter: grayscale(0.5);
+    filter: grayscale(0.3) brightness(1.5) sepia(0.8) hue-rotate(-40deg) saturate(2);
+    transform: translateX(-8px) rotateZ(-2deg);
+  }
+  55% {
+    filter: grayscale(0.2) brightness(1.3) sepia(0.5) hue-rotate(-30deg) saturate(1.5);
+    transform: translateX(8px) rotateZ(2deg);
+  }
+  70% {
+    filter: grayscale(0.1) brightness(1.1) sepia(0.3) hue-rotate(-20deg) saturate(1.2);
+    transform: translateX(-4px) rotateZ(-1deg);
+  }
+  85% {
+    filter: grayscale(0.05) brightness(1.05);
+    transform: translateX(4px) rotateZ(1deg);
+  }
+  100% {
+    filter: grayscale(0) brightness(1);
+    transform: translateX(0) rotateZ(0);
+  }
+}
+
+@keyframes damageNumberPopup {
+  0% {
+    transform: translateY(0) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-30px) scale(1.2);
+    opacity: 1;
   }
   60% {
-    transform: translateX(-10px);
-  }
-  80% {
-    transform: translateX(10px);
-  }
-}
-
-/* Unit Death */
-@keyframes unitDeath {
-  0% {
-    transform: scale(1) rotate(0);
-    opacity: 1;
-    filter: brightness(1);
-  }
-  50% {
-    transform: scale(0.8) rotate(10deg);
-    filter: brightness(0.5) grayscale(1);
+    transform: translateY(-50px) scale(1);
+    opacity: 0.8;
   }
   100% {
-    transform: scale(0) rotate(45deg);
+    transform: translateY(-70px) scale(0.8);
     opacity: 0;
-    filter: brightness(0);
   }
 }
 
-/* HP Bar Change */
-@keyframes hpChange {
+.animate-unit-damage-v2 {
+  animation: unitDamageFlash 0.6s ease-out;
+  will-change: transform, filter;
+}
+
+.damage-number {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-header);
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff4444;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 2px 2px 4px rgba(0,0,0,0.8);
+  pointer-events: none;
+  animation: damageNumberPopup 1s ease-out forwards;
+  z-index: 200;
+}
+
+.damage-shield-effect {
+  position: absolute;
+  inset: -10px;
+  border: 3px solid rgba(100, 200, 255, 0.8);
+  border-radius: 12px;
+  animation: shieldBreak 0.5s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes shieldBreak {
   0% {
-    filter: brightness(1);
+    transform: scale(1);
+    opacity: 1;
+    border-width: 3px;
   }
   50% {
-    filter: brightness(2);
-    box-shadow: 0 0 20px currentColor;
+    transform: scale(1.2);
+    opacity: 0.6;
+    border-width: 1px;
   }
   100% {
-    filter: brightness(1);
+    transform: scale(1.5);
+    opacity: 0;
+    border-width: 0;
   }
 }
 
-/* Phase Transition */
-@keyframes phaseSlide {
-  from {
-    transform: translateX(-100%);
-    opacity: 0;
+/* ============================================
+   5. UNIT DEATH - Fade out + particles
+   ============================================ */
+
+@keyframes unitDeathFade {
+  0% {
+    transform: scale(1) rotateZ(0);
+    opacity: 1;
+    filter: brightness(1) grayscale(0);
   }
-  to {
-    transform: translateX(0);
+  25% {
+    transform: scale(0.95) rotateZ(-5deg);
+    filter: brightness(0.7) grayscale(0.3);
+  }
+  50% {
+    transform: scale(0.85) rotateZ(5deg);
+    opacity: 0.7;
+    filter: brightness(0.5) grayscale(0.6);
+  }
+  75% {
+    transform: scale(0.6) rotateZ(15deg);
+    opacity: 0.3;
+    filter: brightness(0.3) grayscale(0.8);
+  }
+  100% {
+    transform: scale(0) rotateZ(45deg);
+    opacity: 0;
+    filter: brightness(0) grayscale(1);
+  }
+}
+
+@keyframes deathParticle {
+  0% {
+    transform: translate(0, 0) scale(1) rotateZ(0);
     opacity: 1;
   }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0) rotateZ(var(--rot));
+    opacity: 0;
+  }
 }
 
-/* Turn Indicator Pulse */
-@keyframes turnPulse {
+@keyframes deathSoulRise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+    filter: blur(0);
+  }
+  100% {
+    transform: translateY(-100px) scale(0.3);
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+
+.animate-unit-death-v2 {
+  animation: unitDeathFade 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity, filter;
+  pointer-events: none;
+}
+
+.death-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: deathParticle 0.8s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.death-soul {
+  position: absolute;
+  width: 40px;
+  height: 60px;
+  background: radial-gradient(ellipse at center, rgba(200, 200, 255, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: deathSoulRise 1.2s ease-out forwards;
+  will-change: transform, opacity, filter;
+}
+
+/* ============================================
+   6. HP BAR - Smooth transitions
+   ============================================ */
+
+@keyframes hpBarPulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.4);
+    filter: brightness(1);
   }
   50% {
-    box-shadow: 0 0 0 20px rgba(212, 168, 67, 0);
+    filter: brightness(1.3);
   }
 }
 
-/* Victory Animation */
-@keyframes victoryZoom {
+@keyframes hpBarDamage {
   0% {
-    transform: scale(0) rotate(-180deg);
+    width: var(--hp-prev);
+    background: linear-gradient(90deg, #ff4444, #ff6666);
+  }
+  30% {
+    filter: brightness(1.5);
+    box-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+  }
+  100% {
+    width: var(--hp-current);
+    background: var(--hp-color);
+  }
+}
+
+@keyframes hpBarHeal {
+  0% {
+    width: var(--hp-prev);
+    background: linear-gradient(90deg, #44ff44, #66ff66);
+  }
+  50% {
+    filter: brightness(1.5);
+    box-shadow: 0 0 20px rgba(68, 255, 68, 0.8);
+  }
+  100% {
+    width: var(--hp-current);
+    background: var(--hp-color);
+  }
+}
+
+.hp-bar-container {
+  position: relative;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 6px;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.hp-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width;
+  position: relative;
+  overflow: hidden;
+}
+
+.hp-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.3), transparent);
+  border-radius: 6px 6px 0 0;
+}
+
+.hp-bar-damage {
+  animation: hpBarDamage 0.5s ease-out;
+}
+
+.hp-bar-heal {
+  animation: hpBarHeal 0.5s ease-out;
+}
+
+.hp-bar-low {
+  animation: hpBarPulse 1s ease-in-out infinite;
+}
+
+/* HP change indicator */
+.hp-change-indicator {
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: bold;
+  animation: hpChangeFloat 1s ease-out forwards;
+  pointer-events: none;
+}
+
+.hp-change-indicator.damage {
+  color: #ff4444;
+}
+
+.hp-change-indicator.heal {
+  color: #44ff44;
+}
+
+@keyframes hpChangeFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+  }
+}
+
+/* ============================================
+   7. ENERGY CRYSTAL - Pulse animation
+   ============================================ */
+
+@keyframes energyCrystalPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px rgba(74, 158, 255, 0.5));
+  }
+  25% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px rgba(74, 158, 255, 0.7));
+  }
+  50% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 30px rgba(74, 158, 255, 0.9)) brightness(1.2);
+  }
+  75% {
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 15px rgba(74, 158, 255, 0.6));
+  }
+}
+
+@keyframes energyCrystalGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(74, 158, 255, 0.4),
+      inset 0 0 20px rgba(74, 158, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px rgba(74, 158, 255, 0.7),
+      0 0 60px rgba(74, 158, 255, 0.4),
+      inset 0 0 30px rgba(74, 158, 255, 0.4);
+  }
+}
+
+@keyframes energyCrystalSpin {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+@keyframes energyGainBurst {
+  0% {
+    transform: scale(0.8);
     opacity: 0;
   }
   50% {
-    transform: scale(1.2) rotate(10deg);
+    transform: scale(1.3);
+    opacity: 1;
+    filter: brightness(1.5) drop-shadow(0 0 30px rgba(74, 158, 255, 1));
   }
   100% {
-    transform: scale(1) rotate(0);
+    transform: scale(1);
     opacity: 1;
   }
 }
 
-/* Shine Effect for Legendary Cards */
-@keyframes cardShine {
+.animate-energy-crystal {
+  animation: energyCrystalPulse 2s ease-in-out infinite;
+  will-change: transform, filter;
+  transform-style: preserve-3d;
+}
+
+.animate-energy-crystal-active {
+  animation: energyCrystalPulse 1s ease-in-out infinite, energyCrystalGlow 1s ease-in-out infinite;
+}
+
+.animate-energy-gain {
+  animation: energyGainBurst 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.energy-crystal-inner {
+  animation: energyCrystalSpin 4s linear infinite;
+  transform-style: preserve-3d;
+}
+
+/* Energy number change animation */
+@keyframes energyNumberChange {
+  0% {
+    transform: scale(1);
+    color: var(--color-mana);
+  }
+  50% {
+    transform: scale(1.3);
+    color: #fff;
+    text-shadow: 0 0 20px rgba(74, 158, 255, 1);
+  }
+  100% {
+    transform: scale(1);
+    color: var(--color-mana);
+  }
+}
+
+.animate-energy-change {
+  animation: energyNumberChange 0.4s ease-out;
+  display: inline-block;
+}
+
+/* ============================================
+   8. PHASE TRANSITION - Slide effect
+   ============================================ */
+
+@keyframes phaseSlideIn {
+  0% {
+    transform: translateX(-100%) skewX(-10deg);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(10%) skewX(-5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) skewX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes phaseSlideOut {
+  0% {
+    transform: translateX(0) skewX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) skewX(10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes phaseGlowBar {
   0% {
     background-position: -200% 0;
   }
@@ -166,35 +637,1614 @@
   }
 }
 
-/* Floating Animation */
-@keyframes float {
+@keyframes phaseNamePop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-phase-slide-in {
+  animation: phaseSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-phase-slide-out {
+  animation: phaseSlideOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-phase-name {
+  animation: phaseNamePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.phase-transition-bar {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-gold) 20%,
+    var(--color-gold-light) 50%,
+    var(--color-gold) 80%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: phaseGlowBar 1.5s linear infinite;
+  height: 3px;
+  width: 100%;
+}
+
+/* Phase indicator dots animation */
+@keyframes phaseDotActive {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px var(--color-gold);
+  }
+  50% {
+    transform: scale(1.2);
+    box-shadow: 0 0 20px var(--color-gold), 0 0 40px var(--color-gold);
+  }
+}
+
+.phase-dot-active {
+  animation: phaseDotActive 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   UTILITY ANIMATIONS
+   ============================================ */
+
+/* Unit spawn (complement to play animation) */
+@keyframes unitSpawnV2 {
+  0% {
+    transform: scale(0) translateY(-50px);
+    filter: brightness(3) blur(10px);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.3) translateY(10px);
+    filter: brightness(2) blur(5px);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(0.95) translateY(-5px);
+    filter: brightness(1.2) blur(2px);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    filter: brightness(1) blur(0);
+    opacity: 1;
+  }
+}
+
+.animate-unit-spawn-v2 {
+  animation: unitSpawnV2 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, filter, opacity;
+}
+
+/* Turn indicator pulse */
+@keyframes turnIndicatorPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 25px rgba(212, 168, 67, 0);
+    transform: scale(1.02);
+  }
+}
+
+.animate-turn-indicator {
+  animation: turnIndicatorPulse 2s ease-in-out infinite;
+}
+
+/* Victory animation */
+@keyframes victoryZoomV2 {
+  0% {
+    transform: scale(0) rotateZ(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3) rotateZ(10deg);
+  }
+  70% {
+    transform: scale(0.9) rotateZ(-5deg);
+  }
+  100% {
+    transform: scale(1) rotateZ(0);
+    opacity: 1;
+  }
+}
+
+.animate-victory-v2 {
+  animation: victoryZoomV2 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Float animation for idle units */
+@keyframes gentleFloat {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
   }
 }
 
-/* Shake Animation */
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
+.animate-float-gentle {
+  animation: gentleFloat 3s ease-in-out infinite;
 }
 
-/* Glow Pulse */
-@keyframes glowPulse {
+/* Shake for invalid actions */
+@keyframes shakeV2 {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-6px) rotateZ(-1deg); }
+  20%, 40%, 60%, 80% { transform: translateX(6px) rotateZ(1deg); }
+}
+
+.animate-shake-v2 {
+  animation: shakeV2 0.4s ease-in-out;
+}
+
+/* Hover lift effect */
+.hover-lift-v2 {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s ease,
+              filter 0.3s ease;
+  will-change: transform, box-shadow;
+}
+
+.hover-lift-v2:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  filter: brightness(1.1);
+}
+
+/* Focus ring */
+.focus-ring-v2:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.5);
+  animation: focusPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes focusPulse {
   0%, 100% {
-    box-shadow: 0 0 5px currentColor;
+    box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.5);
   }
   50% {
-    box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+    box-shadow: 0 0 0 5px rgba(212, 168, 67, 0.3);
   }
 }
 
-/* Pulse Glow (for active elements) */
-@keyframes pulse-glow {
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-v2 {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-draw-v2,
+  .animate-card-play-v2,
+  .animate-unit-attack-v2,
+  .animate-unit-damage-v2,
+  .animate-unit-death-v2,
+  .animate-unit-spawn-v2,
+  .animate-energy-crystal,
+  .animate-energy-crystal-active,
+  .animate-phase-slide-in,
+  .animate-phase-slide-out,
+  .animate-phase-name,
+  .animate-turn-indicator,
+  .animate-victory-v2,
+  .animate-float-gentle,
+  .animate-shake-v2,
+  .hp-bar-fill {
+    animation: none !important;
+    transition: opacity 0.2s ease !important;
+  }
+  
+  .hp-bar-fill {
+    transition: width 0.2s ease, opacity 0.2s ease !important;
+  }
+}
+
+/* ============================================
+   ANIMATION PERFORMANCE UTILITIES
+   ============================================ */
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.will-animate {
+  will-change: transform, opacity, filter;
+  contain: layout style;
+}
+
+.animation-paused {
+  animation-play-state: paused !important;
+}
+/* Titanfall Chronicles V2 - Enhanced Animation System */
+/* 60fps optimized animations using GPU acceleration */
+
+/* ============================================
+   1. CARD DRAW ANIMATION - Flip from deck
+   ============================================ */
+
+@keyframes cardDrawFlip {
+  0% {
+    transform: perspective(1000px) rotateY(-90deg) translateX(-200px) scale(0.5);
+    opacity: 0;
+    filter: brightness(0.5);
+  }
+  30% {
+    transform: perspective(1000px) rotateY(-45deg) translateX(-100px) scale(0.7);
+    opacity: 0.6;
+    filter: brightness(0.8);
+  }
+  60% {
+    transform: perspective(1000px) rotateY(10deg) translateX(20px) scale(1.05);
+    opacity: 0.9;
+    filter: brightness(1.1);
+  }
+  80% {
+    transform: perspective(1000px) rotateY(-5deg) translateX(-10px) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(1000px) rotateY(0) translateX(0) scale(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+@keyframes cardDrawShadow {
+  0% {
+    box-shadow: -20px 20px 40px rgba(0,0,0,0.5);
+  }
+  50% {
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+  }
+  100% {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+}
+
+.animate-card-draw-v2 {
+  animation: cardDrawFlip 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             cardDrawShadow 0.6s ease-out forwards;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, opacity, filter;
+}
+
+/* Card deck glow effect during draw */
+@keyframes deckGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(212, 168, 67, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(212, 168, 67, 0.6), 0 0 60px rgba(212, 168, 67, 0.3);
+  }
+}
+
+.deck-drawing {
+  animation: deckGlow 0.6s ease-in-out;
+}
+
+/* ============================================
+   2. CARD PLAY ANIMATION - Fly to board
+   ============================================ */
+
+@keyframes cardPlayFly {
+  0% {
+    transform: scale(1) rotateZ(0) translateY(0);
+    opacity: 1;
+    filter: brightness(1);
+  }
+  20% {
+    transform: scale(1.15) rotateZ(-5deg) translateY(-30px);
+    filter: brightness(1.3) drop-shadow(0 20px 40px rgba(212, 168, 67, 0.5));
+  }
+  50% {
+    transform: scale(0.9) rotateZ(3deg) translateY(-100px);
+    opacity: 0.8;
+    filter: brightness(1.5);
+  }
+  80% {
+    transform: scale(0.3) rotateZ(10deg) translateY(-200px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0) rotateZ(15deg) translateY(-250px);
+    opacity: 0;
+  }
+}
+
+@keyframes cardPlayTrail {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) translateY(-100px);
+  }
+}
+
+.animate-card-play-v2 {
+  animation: cardPlayFly 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: center bottom;
+  will-change: transform, opacity, filter;
+}
+
+.card-play-trail {
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: cardPlayTrail 0.4s ease-out forwards;
+}
+
+/* ============================================
+   3. UNIT ATTACK ANIMATION - Lunge forward
+   ============================================ */
+
+@keyframes unitAttackLunge {
+  0% {
+    transform: translateX(0) scale(1);
+    filter: brightness(1);
+  }
+  15% {
+    transform: translateX(-8px) scale(0.95) rotateZ(-2deg);
+    filter: brightness(1.1);
+  }
+  35% {
+    transform: translateX(40px) scale(1.15) rotateZ(5deg);
+    filter: brightness(1.4) drop-shadow(0 0 20px rgba(255, 200, 100, 0.8));
+  }
+  55% {
+    transform: translateX(50px) scale(1.1) rotateZ(3deg);
+    filter: brightness(1.3);
+  }
+  75% {
+    transform: translateX(-5px) scale(1.05) rotateZ(-1deg);
+    filter: brightness(1.1);
+  }
+  100% {
+    transform: translateX(0) scale(1) rotateZ(0);
+    filter: brightness(1);
+  }
+}
+
+@keyframes attackImpact {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-unit-attack-v2 {
+  animation: unitAttackLunge 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center center;
+  will-change: transform, filter;
+  z-index: 100;
+}
+
+.attack-impact-effect {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,200,100,0.8) 0%, transparent 70%);
+  pointer-events: none;
+  animation: attackImpact 0.4s ease-out forwards;
+}
+
+/* Direction-specific attacks */
+.animate-unit-attack-right {
+  --attack-direction: 1;
+}
+
+.animate-unit-attack-left {
+  --attack-direction: -1;
+}
+
+/* ============================================
+   4. UNIT TAKE DAMAGE - Flash red + shake
+   ============================================ */
+
+@keyframes unitDamageFlash {
+  0% {
+    filter: grayscale(0) brightness(1);
+    transform: translateX(0);
+  }
+  10% {
+    filter: grayscale(0.3) brightness(2) sepia(1) hue-rotate(-50deg) saturate(3);
+    transform: translateX(-12px) rotateZ(-3deg);
+  }
+  25% {
+    filter: grayscale(0.5) brightness(1.8) sepia(1) hue-rotate(-50deg) saturate(2.5);
+    transform: translateX(12px) rotateZ(3deg);
+  }
+  40% {
+    filter: grayscale(0.3) brightness(1.5) sepia(0.8) hue-rotate(-40deg) saturate(2);
+    transform: translateX(-8px) rotateZ(-2deg);
+  }
+  55% {
+    filter: grayscale(0.2) brightness(1.3) sepia(0.5) hue-rotate(-30deg) saturate(1.5);
+    transform: translateX(8px) rotateZ(2deg);
+  }
+  70% {
+    filter: grayscale(0.1) brightness(1.1) sepia(0.3) hue-rotate(-20deg) saturate(1.2);
+    transform: translateX(-4px) rotateZ(-1deg);
+  }
+  85% {
+    filter: grayscale(0.05) brightness(1.05);
+    transform: translateX(4px) rotateZ(1deg);
+  }
+  100% {
+    filter: grayscale(0) brightness(1);
+    transform: translateX(0) rotateZ(0);
+  }
+}
+
+@keyframes damageNumberPopup {
+  0% {
+    transform: translateY(0) scale(0.5);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-30px) scale(1.2);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(-50px) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-70px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.animate-unit-damage-v2 {
+  animation: unitDamageFlash 0.6s ease-out;
+  will-change: transform, filter;
+}
+
+.damage-number {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-header);
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff4444;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 2px 2px 4px rgba(0,0,0,0.8);
+  pointer-events: none;
+  animation: damageNumberPopup 1s ease-out forwards;
+  z-index: 200;
+}
+
+.damage-shield-effect {
+  position: absolute;
+  inset: -10px;
+  border: 3px solid rgba(100, 200, 255, 0.8);
+  border-radius: 12px;
+  animation: shieldBreak 0.5s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes shieldBreak {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    border-width: 3px;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.6;
+    border-width: 1px;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+    border-width: 0;
+  }
+}
+
+/* ============================================
+   5. UNIT DEATH - Fade out + particles
+   ============================================ */
+
+@keyframes unitDeathFade {
+  0% {
+    transform: scale(1) rotateZ(0);
+    opacity: 1;
+    filter: brightness(1) grayscale(0);
+  }
+  25% {
+    transform: scale(0.95) rotateZ(-5deg);
+    filter: brightness(0.7) grayscale(0.3);
+  }
+  50% {
+    transform: scale(0.85) rotateZ(5deg);
+    opacity: 0.7;
+    filter: brightness(0.5) grayscale(0.6);
+  }
+  75% {
+    transform: scale(0.6) rotateZ(15deg);
+    opacity: 0.3;
+    filter: brightness(0.3) grayscale(0.8);
+  }
+  100% {
+    transform: scale(0) rotateZ(45deg);
+    opacity: 0;
+    filter: brightness(0) grayscale(1);
+  }
+}
+
+@keyframes deathParticle {
+  0% {
+    transform: translate(0, 0) scale(1) rotateZ(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0) rotateZ(var(--rot));
+    opacity: 0;
+  }
+}
+
+@keyframes deathSoulRise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+    filter: blur(0);
+  }
+  100% {
+    transform: translateY(-100px) scale(0.3);
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+
+.animate-unit-death-v2 {
+  animation: unitDeathFade 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity, filter;
+  pointer-events: none;
+}
+
+.death-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: deathParticle 0.8s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.death-soul {
+  position: absolute;
+  width: 40px;
+  height: 60px;
+  background: radial-gradient(ellipse at center, rgba(200, 200, 255, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: deathSoulRise 1.2s ease-out forwards;
+  will-change: transform, opacity, filter;
+}
+
+/* ============================================
+   6. HP BAR - Smooth transitions
+   ============================================ */
+
+@keyframes hpBarPulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes hpBarDamage {
+  0% {
+    width: var(--hp-prev);
+    background: linear-gradient(90deg, #ff4444, #ff6666);
+  }
+  30% {
+    filter: brightness(1.5);
+    box-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+  }
+  100% {
+    width: var(--hp-current);
+    background: var(--hp-color);
+  }
+}
+
+@keyframes hpBarHeal {
+  0% {
+    width: var(--hp-prev);
+    background: linear-gradient(90deg, #44ff44, #66ff66);
+  }
+  50% {
+    filter: brightness(1.5);
+    box-shadow: 0 0 20px rgba(68, 255, 68, 0.8);
+  }
+  100% {
+    width: var(--hp-current);
+    background: var(--hp-color);
+  }
+}
+
+.hp-bar-container {
+  position: relative;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 6px;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.hp-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width;
+  position: relative;
+  overflow: hidden;
+}
+
+.hp-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.3), transparent);
+  border-radius: 6px 6px 0 0;
+}
+
+.hp-bar-damage {
+  animation: hpBarDamage 0.5s ease-out;
+}
+
+.hp-bar-heal {
+  animation: hpBarHeal 0.5s ease-out;
+}
+
+.hp-bar-low {
+  animation: hpBarPulse 1s ease-in-out infinite;
+}
+
+/* HP change indicator */
+.hp-change-indicator {
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: bold;
+  animation: hpChangeFloat 1s ease-out forwards;
+  pointer-events: none;
+}
+
+.hp-change-indicator.damage {
+  color: #ff4444;
+}
+
+.hp-change-indicator.heal {
+  color: #44ff44;
+}
+
+@keyframes hpChangeFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+  }
+}
+
+/* ============================================
+   7. ENERGY CRYSTAL - Pulse animation
+   ============================================ */
+
+@keyframes energyCrystalPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px rgba(74, 158, 255, 0.5));
+  }
+  25% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px rgba(74, 158, 255, 0.7));
+  }
+  50% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 30px rgba(74, 158, 255, 0.9)) brightness(1.2);
+  }
+  75% {
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 15px rgba(74, 158, 255, 0.6));
+  }
+}
+
+@keyframes energyCrystalGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(74, 158, 255, 0.4),
+      inset 0 0 20px rgba(74, 158, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px rgba(74, 158, 255, 0.7),
+      0 0 60px rgba(74, 158, 255, 0.4),
+      inset 0 0 30px rgba(74, 158, 255, 0.4);
+  }
+}
+
+@keyframes energyCrystalSpin {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+@keyframes energyGainBurst {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+    filter: brightness(1.5) drop-shadow(0 0 30px rgba(74, 158, 255, 1));
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-energy-crystal {
+  animation: energyCrystalPulse 2s ease-in-out infinite;
+  will-change: transform, filter;
+  transform-style: preserve-3d;
+}
+
+.animate-energy-crystal-active {
+  animation: energyCrystalPulse 1s ease-in-out infinite, energyCrystalGlow 1s ease-in-out infinite;
+}
+
+.animate-energy-gain {
+  animation: energyGainBurst 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.energy-crystal-inner {
+  animation: energyCrystalSpin 4s linear infinite;
+  transform-style: preserve-3d;
+}
+
+/* Energy number change animation */
+@keyframes energyNumberChange {
+  0% {
+    transform: scale(1);
+    color: var(--color-mana);
+  }
+  50% {
+    transform: scale(1.3);
+    color: #fff;
+    text-shadow: 0 0 20px rgba(74, 158, 255, 1);
+  }
+  100% {
+    transform: scale(1);
+    color: var(--color-mana);
+  }
+}
+
+.animate-energy-change {
+  animation: energyNumberChange 0.4s ease-out;
+  display: inline-block;
+}
+
+/* ============================================
+   8. PHASE TRANSITION - Slide effect
+   ============================================ */
+
+@keyframes phaseSlideIn {
+  0% {
+    transform: translateX(-100%) skewX(-10deg);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(10%) skewX(-5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) skewX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes phaseSlideOut {
+  0% {
+    transform: translateX(0) skewX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) skewX(10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes phaseGlowBar {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes phaseNamePop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-phase-slide-in {
+  animation: phaseSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-phase-slide-out {
+  animation: phaseSlideOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-phase-name {
+  animation: phaseNamePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.phase-transition-bar {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-gold) 20%,
+    var(--color-gold-light) 50%,
+    var(--color-gold) 80%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: phaseGlowBar 1.5s linear infinite;
+  height: 3px;
+  width: 100%;
+}
+
+/* Phase indicator dots animation */
+@keyframes phaseDotActive {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px var(--color-gold);
+  }
+  50% {
+    transform: scale(1.2);
+    box-shadow: 0 0 20px var(--color-gold), 0 0 40px var(--color-gold);
+  }
+}
+
+.phase-dot-active {
+  animation: phaseDotActive 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   UTILITY ANIMATIONS
+   ============================================ */
+
+/* Unit spawn (complement to play animation) */
+@keyframes unitSpawnV2 {
+  0% {
+    transform: scale(0) translateY(-50px);
+    filter: brightness(3) blur(10px);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.3) translateY(10px);
+    filter: brightness(2) blur(5px);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(0.95) translateY(-5px);
+    filter: brightness(1.2) blur(2px);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    filter: brightness(1) blur(0);
+    opacity: 1;
+  }
+}
+
+.animate-unit-spawn-v2 {
+  animation: unitSpawnV2 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, filter, opacity;
+}
+
+/* Turn indicator pulse */
+@keyframes turnIndicatorPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 25px rgba(212, 168, 67, 0);
+    transform: scale(1.02);
+  }
+}
+
+.animate-turn-indicator {
+  animation: turnIndicatorPulse 2s ease-in-out infinite;
+}
+
+/* Victory animation */
+@keyframes victoryZoomV2 {
+  0% {
+    transform: scale(0) rotateZ(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3) rotateZ(10deg);
+  }
+  70% {
+    transform: scale(0.9) rotateZ(-5deg);
+  }
+  100% {
+    transform: scale(1) rotateZ(0);
+    opacity: 1;
+  }
+}
+
+.animate-victory-v2 {
+  animation: victoryZoomV2 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Float animation for idle units */
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-float-gentle {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+/* Shake for invalid actions */
+@keyframes shakeV2 {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-6px) rotateZ(-1deg); }
+  20%, 40%, 60%, 80% { transform: translateX(6px) rotateZ(1deg); }
+}
+
+.animate-shake-v2 {
+  animation: shakeV2 0.4s ease-in-out;
+}
+
+/* Hover lift effect */
+.hover-lift-v2 {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s ease,
+              filter 0.3s ease;
+  will-change: transform, box-shadow;
+}
+
+.hover-lift-v2:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  filter: brightness(1.1);
+}
+
+/* Focus ring */
+.focus-ring-v2:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.5);
+  animation: focusPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes focusPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(212, 168, 67, 0.3);
+  }
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-v2 {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================
+   NEW VISUAL EFFECTS (Added Feb 2026)
+   ============================================ */
+
+/* ============================================
+   PARTICLE EFFECTS
+   ============================================ */
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--float-y, -100px)) translateX(var(--float-x, 20px)) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes sparkleTwinkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.7) rotate(180deg);
+  }
+}
+
+@keyframes emberRise {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-150px) translateX(var(--drift, 30px)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-20px) rotate(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.animate-particle {
+  animation: particleFloat var(--duration, 1s) ease-out forwards;
+  will-change: transform, opacity;
+}
+
+.animate-sparkle {
+  animation: sparkleTwinkle var(--duration, 1s) ease-in-out infinite;
+}
+
+.animate-ember {
+  animation: emberRise var(--duration, 2s) ease-out forwards;
+}
+
+.animate-confetti {
+  animation: confettiFall var(--duration, 3s) ease-out forwards;
+}
+
+/* ============================================
+   FLOATING DAMAGE NUMBERS
+   ============================================ */
+
+@keyframes damageFloatUp {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, -80%) scale(1.3);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(-50%, -120%) scale(1.1);
+  }
+  100% {
+    transform: translate(-50%, -200%) scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes criticalBounce {
+  0% {
+    transform: translate(-50%, -50%) scale(0) rotate(-10deg);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -100%) scale(1.6) rotate(5deg);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(-50%, -150%) scale(1.4) rotate(-3deg);
+  }
+  60% {
+    transform: translate(-50%, -180%) scale(1.5) rotate(2deg);
+  }
+  80% {
+    transform: translate(-50%, -200%) scale(1.2) rotate(-1deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -250%) scale(0.6) rotate(0);
+    opacity: 0;
+  }
+}
+
+@keyframes healFloatUp {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  25% {
+    transform: translate(-50%, -90%) scale(1.4);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -180%) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes missTextFloat {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+  }
+  30% {
+    transform: translate(-50%, -90%) scale(1.2);
+    opacity: 1;
+  }
+  60% {
+    transform: translate(-50%, -110%) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -130%) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.damage-number {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  font-family: var(--font-header), Cinzel, Georgia, serif;
+  font-weight: bold;
+  text-shadow: 0 0 20px currentColor;
+}
+
+.damage-number-damage {
+  animation: damageFloatUp 1.2s ease-out forwards;
+  color: #F87171;
+}
+
+.damage-number-critical {
+  animation: criticalBounce 1.5s ease-out forwards;
+  color: #FFD700;
+  font-size: 48px;
+}
+
+.damage-number-heal {
+  animation: healFloatUp 1.3s ease-out forwards;
+  color: #4ADE80;
+}
+
+.damage-number-miss {
+  animation: missTextFloat 1.2s ease-out forwards;
+  color: #9CA3AF;
+}
+
+/* ============================================
+   SCREEN SHAKE ANIMATIONS
+   ============================================ */
+
+@keyframes screenShakeLight {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2px, 1px); }
+  20% { transform: translate(3px, -2px); }
+  30% { transform: translate(-3px, 2px); }
+  40% { transform: translate(2px, -1px); }
+  50% { transform: translate(-2px, -2px); }
+  60% { transform: translate(1px, 2px); }
+  70% { transform: translate(-1px, -1px); }
+  80% { transform: translate(2px, 1px); }
+  90% { transform: translate(-2px, 2px); }
+}
+
+@keyframes screenShakeMedium {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5px, 3px); }
+  20% { transform: translate(7px, -5px); }
+  30% { transform: translate(-8px, 5px); }
+  40% { transform: translate(6px, -3px); }
+  50% { transform: translate(-5px, -5px); }
+  60% { transform: translate(4px, 5px); }
+  70% { transform: translate(-3px, -3px); }
+  80% { transform: translate(5px, 3px); }
+  90% { transform: translate(-5px, 5px); }
+}
+
+@keyframes screenShakeHeavy {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  10% { transform: translate(-10px, 5px) rotate(-1deg); }
+  20% { transform: translate(15px, -8px) rotate(2deg); }
+  30% { transform: translate(-15px, 8px) rotate(-2deg); }
+  40% { transform: translate(12px, -5px) rotate(1deg); }
+  50% { transform: translate(-10px, -10px) rotate(-1deg); }
+  60% { transform: translate(8px, 10px) rotate(2deg); }
+  70% { transform: translate(-6px, -6px) rotate(-1deg); }
+  80% { transform: translate(10px, 5px) rotate(1deg); }
+  90% { transform: translate(-10px, 10px) rotate(-2deg); }
+}
+
+.screen-shake-light {
+  animation: screenShakeLight 0.5s ease-in-out;
+}
+
+.screen-shake-medium {
+  animation: screenShakeMedium 0.6s ease-in-out;
+}
+
+.screen-shake-heavy {
+  animation: screenShakeHeavy 0.8s ease-in-out;
+}
+
+/* ============================================
+   TURN TRANSITION ANIMATIONS
+   ============================================ */
+
+@keyframes turnFlash {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes turnTextReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.8);
+    filter: blur(20px);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+    filter: blur(0);
+  }
+  50% {
+    transform: translateY(0) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+    filter: blur(10px);
+  }
+}
+
+@keyframes turnLineExpand {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  30% {
+    width: 300px;
+    opacity: 1;
+  }
+  70% {
+    width: 300px;
+    opacity: 1;
+  }
+  100% {
+    width: 400px;
+    opacity: 0;
+  }
+}
+
+.turn-transition-overlay .turn-transition-flash {
+  animation: turnFlash 2s ease-out forwards;
+}
+
+.turn-transition-overlay .turn-transition-text {
+  animation: turnTextReveal 2s ease-out forwards;
+}
+
+.turn-transition-overlay .turn-transition-lines div {
+  animation: turnLineExpand 2s ease-out forwards;
+}
+
+/* ============================================
+   VICTORY CONFETTI EFFECTS
+   ============================================ */
+
+@keyframes victoryConfettiBurst {
+  0% {
+    transform: translate(0, 0) rotate(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--end-x, 200px), var(--end-y, 300px)) rotate(var(--rotation, 720deg)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes trophyShine {
+  0% {
+    filter: brightness(1) drop-shadow(0 0 20px rgba(212, 168, 67, 0.5));
+  }
+  50% {
+    filter: brightness(1.3) drop-shadow(0 0 40px rgba(212, 168, 67, 0.8));
+  }
+  100% {
+    filter: brightness(1) drop-shadow(0 0 20px rgba(212, 168, 67, 0.5));
+  }
+}
+
+@keyframes victoryGlowPulse {
+  0%, 100% {
+    text-shadow: 0 0 20px rgba(212, 168, 67, 0.5),
+                 0 0 40px rgba(212, 168, 67, 0.3),
+                 0 0 60px rgba(212, 168, 67, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 40px rgba(212, 168, 67, 0.8),
+                 0 0 80px rgba(212, 168, 67, 0.5),
+                 0 0 120px rgba(212, 168, 67, 0.3);
+  }
+}
+
+.animate-victory-confetti {
+  animation: victoryConfettiBurst 2s ease-out forwards;
+}
+
+.animate-trophy-shine {
+  animation: trophyShine 2s ease-in-out infinite;
+}
+
+.animate-victory-glow {
+  animation: victoryGlowPulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   UNIT SELECTION HIGHLIGHTS
+   ============================================ */
+
+@keyframes unitSelectedPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.6),
+                inset 0 0 20px rgba(212, 168, 67, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px 5px rgba(212, 168, 67, 0.4),
+                inset 0 0 30px rgba(212, 168, 67, 0.5);
+  }
+}
+
+@keyframes validTargetEnemy {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.6),
+                inset 0 0 15px rgba(248, 113, 113, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px 3px rgba(248, 113, 113, 0.5),
+                inset 0 0 25px rgba(248, 113, 113, 0.4);
+  }
+}
+
+@keyframes validTargetFriendly {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6),
+                inset 0 0 15px rgba(74, 222, 128, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px 3px rgba(74, 222, 128, 0.5),
+                inset 0 0 25px rgba(74, 222, 128, 0.4);
+  }
+}
+
+.animate-unit-selected {
+  animation: unitSelectedPulse 1.5s ease-in-out infinite;
+}
+
+.animate-valid-target-enemy {
+  animation: validTargetEnemy 1.2s ease-in-out infinite;
+}
+
+.animate-valid-target-friendly {
+  animation: validTargetFriendly 1.2s ease-in-out infinite;
+}
+
+/* Selection ring animation */
+@keyframes selectionRotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.selection-ring {
+  background: linear-gradient(90deg, #D4A843, #E8C97A, #FFD700, #E8C97A, #D4A843);
+  background-size: 200% 100%;
+  animation: selectionRotate 2s linear infinite;
+}
+
+/* ============================================
+   CARD HOVER EFFECTS
+   ============================================ */
+
+@keyframes cardGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--glow-color, rgba(212, 168, 67, 0.4)),
+                0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px var(--glow-color, rgba(212, 168, 67, 0.6)),
+                0 0 60px var(--glow-color, rgba(212, 168, 67, 0.3)),
+                0 15px 40px rgba(0, 0, 0, 0.6);
+  }
+}
+
+@keyframes cardShineSweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.card-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: skewX(-25deg);
+  animation: cardShineSweep 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.animate-card-glow {
+  animation: cardGlowPulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   GRID CELL HIGHLIGHTS
+   ============================================ */
+
+.grid-cell.selected::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 10px;
+  border: 3px solid #D4A843;
+  box-shadow: 0 0 20px rgba(212, 168, 67, 0.6),
+              inset 0 0 20px rgba(212, 168, 67, 0.3);
+  animation: unitSelectedPulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.grid-cell.valid-target-enemy::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  border: 2px solid #F87171;
+  box-shadow: 0 0 15px rgba(248, 113, 113, 0.5),
+              inset 0 0 15px rgba(248, 113, 113, 0.3);
+  animation: validTargetEnemy 1.2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.grid-cell.valid-target-friendly::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  border: 2px solid #4ADE80;
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.5),
+              inset 0 0 15px rgba(74, 222, 128, 0.3);
+  animation: validTargetFriendly 1.2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ============================================
+   PULSE GLOW ANIMATION
+   ============================================ */
+
+@keyframes pulseGlow {
   0%, 100% {
     box-shadow: 0 0 20px rgba(212, 168, 67, 0.3);
   }
@@ -203,95 +2253,91 @@
   }
 }
 
-/* Particle Float */
-@keyframes particleFloat {
-  0% {
-    transform: translateY(0) translateX(0);
-    opacity: 1;
+.animate-pulse-glow {
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-draw-v2,
+  .animate-card-play-v2,
+  .animate-unit-attack-v2,
+  .animate-unit-damage-v2,
+  .animate-unit-death-v2,
+  .animate-unit-spawn-v2,
+  .animate-energy-crystal,
+  .animate-energy-crystal-active,
+  .animate-phase-slide-in,
+  .animate-phase-slide-out,
+  .animate-phase-name,
+  .animate-turn-indicator,
+  .animate-victory-v2,
+  .animate-float-gentle,
+  .animate-shake-v2,
+  .hp-bar-fill,
+  .animate-particle,
+  .animate-sparkle,
+  .animate-ember,
+  .animate-confetti,
+  .damage-number,
+  .screen-shake-light,
+  .screen-shake-medium,
+  .screen-shake-heavy,
+  .turn-transition-overlay .turn-transition-flash,
+  .turn-transition-overlay .turn-transition-text,
+  .turn-transition-overlay .turn-transition-lines div,
+  .animate-victory-confetti,
+  .animate-trophy-shine,
+  .animate-victory-glow,
+  .animate-unit-selected,
+  .animate-valid-target-enemy,
+  .animate-valid-target-friendly,
+  .selection-ring,
+  .card-shine::before,
+  .animate-card-glow,
+  .grid-cell.selected::after,
+  .grid-cell.valid-target-enemy::after,
+  .grid-cell.valid-target-friendly::after,
+  .animate-pulse-glow {
+    animation: none !important;
+    transition: opacity 0.2s ease !important;
   }
-  100% {
-    transform: translateY(-100px) translateX(var(--drift, 20px));
-    opacity: 0;
-  }
-}
-
-/* Utility Classes */
-.animate-card-draw {
-  animation: cardDraw 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.animate-card-play {
-  animation: cardPlay 0.6s ease-out forwards;
-}
-
-.animate-unit-spawn {
-  animation: unitSpawn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.animate-unit-attack {
-  animation: unitAttack 0.4s ease-out;
-}
-
-.animate-unit-damage {
-  animation: unitDamage 0.5s ease-out;
-}
-
-.animate-unit-death {
-  animation: unitDeath 0.8s ease-out forwards;
-}
-
-.animate-hp-change {
-  animation: hpChange 0.5s ease-out;
-}
-
-.animate-phase-slide {
-  animation: phaseSlide 0.3s ease-out;
-}
-
-.animate-turn-pulse {
-  animation: turnPulse 2s ease-in-out infinite;
-}
-
-.animate-victory {
-  animation: victoryZoom 1s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-shake {
-  animation: shake 0.5s ease-in-out;
-}
-
-.animate-glow {
-  animation: glowPulse 2s ease-in-out infinite;
-}
-
-/* Hover Transitions */
-.hover-lift {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-}
-
-/* Focus States */
-.focus-ring:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.5);
-}
-
-/* Loading Spinner */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+  
+  .hp-bar-fill {
+    transition: width 0.2s ease, opacity 0.2s ease !important;
   }
 }
 
-.spinner {
-  animation: spin 1s linear infinite;
+/* ============================================
+   ANIMATION PERFORMANCE UTILITIES
+   ============================================ */
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.will-animate {
+  will-change: transform, opacity, filter;
+  contain: layout style;
+}
+
+.animation-paused {
+  animation-play-state: paused !important;
+}
+
+/* ============================================
+   PARTICLE CONTAINER
+   ============================================ */
+
+.particle-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
 }

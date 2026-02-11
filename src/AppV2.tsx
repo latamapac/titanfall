@@ -19,6 +19,7 @@ import { TITANS } from './data/titans';
 // Import V2 styles
 import './styles/v2/tokens.css';
 import './styles/v2/animations.css';
+import './styles/v2/touch.css';
 
 export default function AppV2() {
   const engine = useGameEngine();

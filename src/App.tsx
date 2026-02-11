@@ -15,6 +15,9 @@ import './styles/globals.css';
 import './styles/board.css';
 import './styles/cards.css';
 import './styles/animations.css';
+import './styles/v2/tokens.css';
+import './styles/v2/animations.css';
+import './styles/v2/touch.css';
 
 type Screen = 'menu' | 'newgame' | 'lobby' | 'game' | 'rules' | 'deckbuilder' | 'cardcreator';
 type GameMode = 'local' | 'host' | 'remote';

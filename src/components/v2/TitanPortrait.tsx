@@ -3,17 +3,18 @@ import { ELEMENTS } from '../../data/constants';
 
 interface TitanPortraitProps {
   titanId: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   isActive?: boolean;
   showInfo?: boolean;
   onClick?: () => void;
 }
 
 const sizes = {
-  sm: { container: 60, font: 24 },
-  md: { container: 80, font: 32 },
-  lg: { container: 120, font: 48 },
-  xl: { container: 160, font: 64 },
+  xs: { container: 44, font: 18, border: 2 },
+  sm: { container: 60, font: 24, border: 3 },
+  md: { container: 80, font: 32, border: 3 },
+  lg: { container: 120, font: 48, border: 4 },
+  xl: { container: 160, font: 64, border: 4 },
 };
 
 export function TitanPortrait({ 
@@ -52,8 +53,13 @@ export function TitanPortrait({
           height: dim.container,
           borderRadius: '50%',
           border: isActive 
-            ? `4px solid var(--color-gold)` 
-            : `3px solid ${elem?.color || '#888'}`,
+            ? `${dim.border + 1}px solid var(--color-gold)` 
+            : `${dim.border}px solid ${elem?.color || '#888'}`,
+          // Touch-friendly minimum size
+          minWidth: '44px',
+          minHeight: '44px',
+          touchAction: 'manipulation',
+          WebkitTapHighlightColor: 'transparent',
           boxShadow: isActive 
             ? '0 0 30px rgba(212, 168, 67, 0.6), inset 0 0 20px rgba(0,0,0,0.5)'
             : `0 0 15px ${elem?.color}40, inset 0 0 20px rgba(0,0,0,0.5)`,

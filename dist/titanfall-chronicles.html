@@ -1,0 +1,3242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Titanfall Chronicles</title>
+<style>
+:root{--bg:#0a0a1a;--bg2:#111128;--bg3:#1a1a3e;--panel:#16163a;--gold:#d4a843;--text:#e0ddd4;--dim:#777;--fire:#e84430;--earth:#8b6914;--wind:#30b8c8;--shadow:#7030a0;--light:#e8d44d;--arcane:#a855f5;--common:#aaa;--rare:#4488ff;--epic:#a855f5;--legendary:#ff8800}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer;border:none;padding:8px 18px;border-radius:4px;font-size:14px;transition:all .15s}
+input,select,textarea{font-family:inherit;background:var(--bg);color:var(--text);border:1px solid #444;border-radius:4px;padding:6px 10px;font-size:13px}
+select{appearance:auto}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#444;border-radius:3px}
+.screen{display:none;flex-direction:column;align-items:center;min-height:100vh;padding:20px}
+#menu-screen{background:radial-gradient(ellipse at 50% 30%,rgba(40,40,80,.6) 0%,transparent 60%),radial-gradient(circle at 20% 80%,rgba(80,40,30,.3) 0%,transparent 40%),radial-gradient(circle at 80% 70%,rgba(30,60,80,.3) 0%,transparent 40%);padding-top:80px}
+.screen.active{display:flex}
+h1{font-size:2.4em;color:var(--gold);text-shadow:0 0 30px rgba(212,168,67,.3),0 0 60px rgba(212,168,67,.15);margin-bottom:8px;letter-spacing:2px;animation:titleGlow 3s ease-in-out infinite}
+@keyframes titleGlow{0%,100%{text-shadow:0 0 20px rgba(212,168,67,.3),0 0 40px rgba(212,168,67,.1)}50%{text-shadow:0 0 35px rgba(212,168,67,.5),0 0 70px rgba(212,168,67,.25)}}
+h2{color:var(--gold);margin-bottom:12px}
+h3{color:var(--gold);margin-bottom:8px;font-size:1.1em}
+.subtitle{color:var(--dim);font-style:italic;margin-bottom:30px}
+.btn-primary{background:linear-gradient(135deg,#2a5a8f,#1a3a6f);color:#fff;font-size:16px;padding:12px 32px;border:1px solid #3a6aaf;transition:transform .15s,box-shadow .15s}
+.btn-primary:hover{background:linear-gradient(135deg,#3a6aaf,#2a4a8f);box-shadow:0 0 15px rgba(60,120,200,.3);transform:scale(1.04)}
+.btn-primary:active{transform:scale(.97)}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid #555}
+.btn-secondary:hover{background:#252560;border-color:var(--gold)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-danger{background:#6a1a1a;color:#faa;border:1px solid #a33}
+.btn-danger:hover{background:#8a2a2a}
+.menu-buttons{display:flex;flex-direction:column;gap:12px;width:280px}
+.menu-buttons button{width:100%}
+
+/* New Game Screen */
+#newgame-screen .ng-container{display:flex;gap:30px;flex-wrap:wrap;justify-content:center;max-width:1200px}
+.titan-select{flex:1;min-width:300px;max-width:450px}
+.titan-grid{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.titan-option{background:var(--bg2);border:2px solid #333;border-radius:8px;padding:12px;cursor:pointer;transition:all .15s}
+.titan-option:hover{border-color:var(--gold);background:var(--bg3)}
+.titan-option.selected{border-color:var(--gold);box-shadow:0 0 12px rgba(212,168,67,.3)}
+.titan-option .t-name{font-weight:bold;font-size:1.05em}
+.titan-option .t-elem{font-size:.85em;margin-left:8px;padding:2px 8px;border-radius:10px;font-weight:bold}
+.titan-option .t-desc{font-size:.85em;color:var(--dim);margin-top:4px}
+.map-select{width:100%;max-width:500px;margin-top:20px}
+.map-grid{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.map-option{background:var(--bg2);border:2px solid #333;border-radius:8px;padding:10px 18px;cursor:pointer;transition:all .15s}
+.map-option:hover{border-color:var(--gold)}
+.map-option.selected{border-color:var(--gold);box-shadow:0 0 10px rgba(212,168,67,.2)}
+.ng-start{margin-top:20px}
+
+/* Game Screen */
+#game-screen{padding:0;height:100vh;overflow:hidden}
+#game-screen.active{display:flex;flex-direction:column;align-items:stretch}
+.player-bar{display:flex;align-items:center;gap:15px;padding:8px 15px;background:var(--bg2);border-bottom:1px solid #333;min-height:60px;flex-wrap:wrap}
+.player-bar.p2{border-bottom:2px solid #444}
+.player-bar.p1{border-top:2px solid #444;border-bottom:none}
+.titan-portrait{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;border:2px solid var(--gold)}
+.hp-bar-outer{width:140px;height:18px;background:#222;border-radius:9px;overflow:hidden;border:1px solid #444}
+.hp-bar-inner{height:100%;background:linear-gradient(90deg,#c0392b,#e74c3c);transition:width .3s;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;min-width:20px}
+.energy-display{font-size:1.1em;font-weight:bold;color:var(--mana-blue,#4a9eff)}
+.deploy-display{font-size:.9em;color:var(--gold)}
+.titan-ability-btn{padding:4px 10px;font-size:12px;background:#2a2a5a;color:var(--arcane);border:1px solid var(--arcane);border-radius:4px}
+.titan-ability-btn:hover{background:#3a3a7a}
+.titan-ability-btn:disabled{opacity:.4;cursor:not-allowed}
+.game-middle{display:flex;flex:1;overflow:hidden}
+#board-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;overflow:auto;position:relative;min-width:0}
+#board{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(5,1fr);gap:3px;width:100%;max-width:980px;height:100%;max-height:700px;background:#222;border:2px solid #444;border-radius:6px;padding:3px}
+.cell{position:relative;background:var(--bg3);border-radius:3px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;transition:all .12s;overflow:hidden;min-height:40px}
+.cell:hover{filter:brightness(1.2);z-index:1}
+.cell .terrain-label{display:none}
+.cell .height-label{display:none}
+.terrain-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.55;transition:opacity .2s}
+.terrain-icon svg{width:65%;height:65%}
+.cell:hover .terrain-icon{opacity:.35}
+.cell.drag-valid{animation:dragPulse 1s ease-in-out infinite;z-index:2}
+.cell.drag-valid::after{content:'';position:absolute;inset:0;border:2px solid rgba(60,220,60,.6);border-radius:3px;pointer-events:none}
+@keyframes dragPulse{0%,100%{box-shadow:inset 0 0 8px rgba(60,220,60,.2)}50%{box-shadow:inset 0 0 18px rgba(60,220,60,.45)}}
+.cell.drag-hover{transform:scale(1.08);box-shadow:inset 0 0 20px rgba(60,255,60,.5),0 0 12px rgba(60,220,60,.4)!important;z-index:3}
+.cell.drag-invalid{opacity:.4;filter:saturate(.3)}
+.cell.t-plain{background:linear-gradient(170deg,#4a7a4a 0%,#3a6a3a 40%,#4a7a4a 100%);background-image:repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(0,0,0,.08) 4px,rgba(0,0,0,.08) 5px),linear-gradient(170deg,#4a7a4a,#3a6a3a,#4a7a4a)}
+.cell.t-forest{background:linear-gradient(180deg,#0e3a0e 0%,#1a5a1a 50%,#0e3a0e 100%);background-image:radial-gradient(ellipse at 25% 30%,#104010 0%,transparent 45%),radial-gradient(ellipse at 65% 25%,#104010 0%,transparent 40%),radial-gradient(ellipse at 45% 50%,#0c4a0c 0%,transparent 35%),linear-gradient(180deg,#0e3a0e,#1a5a1a);box-shadow:inset 0 0 16px rgba(0,100,0,.6)}
+.cell.t-mountain{background:linear-gradient(180deg,#7a7a8a 0%,#5a5a6a 30%,#3a3a4a 100%);background-image:linear-gradient(135deg,rgba(255,255,255,.12) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.08) 75%,transparent 75%),linear-gradient(180deg,#7a7a8a,#3a3a4a);box-shadow:inset 0 -8px 16px rgba(0,0,0,.6),inset 0 3px 6px rgba(255,255,255,.12)}
+.cell.t-water{background:linear-gradient(90deg,#1a4090,#2a5aaa,#1a4090);background-size:200% 100%;animation:waterRipple 4s ease-in-out infinite;box-shadow:inset 0 0 22px rgba(30,120,220,.45)}
+@keyframes waterRipple{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.cell.t-swamp{background:linear-gradient(180deg,#2e4220 0%,#1e3015 60%,#2e4220 100%);background-image:radial-gradient(circle at 30% 70%,rgba(90,120,0,.35) 0%,transparent 40%),radial-gradient(circle at 70% 40%,rgba(70,90,0,.3) 0%,transparent 35%),linear-gradient(180deg,#2e4220,#1e3015,#2e4220);box-shadow:inset 0 0 16px rgba(80,90,0,.5)}
+.cell.t-hill{background:linear-gradient(180deg,#7a7a44 0%,#6a6a34 50%,#5a5a28 100%);box-shadow:inset 0 -5px 12px rgba(0,0,0,.35),inset 0 3px 5px rgba(255,255,200,.1)}
+.cell.t-volcano{background:radial-gradient(ellipse at 50% 60%,#8a3010 0%,#5a2018 50%,#30100a 100%);box-shadow:inset 0 0 24px rgba(255,80,0,.4);animation:volcanoGlow 2.5s ease-in-out infinite}
+@keyframes volcanoGlow{0%,100%{box-shadow:inset 0 0 18px rgba(255,80,0,.3)}50%{box-shadow:inset 0 0 32px rgba(255,130,30,.55)}}
+.cell.t-ruins{background:linear-gradient(135deg,#3e2e55 0%,#524068 50%,#3e2e55 100%);background-image:repeating-linear-gradient(0deg,transparent,transparent 6px,rgba(168,85,245,.06) 6px,rgba(168,85,245,.06) 7px),linear-gradient(135deg,#3e2e55,#524068,#3e2e55);animation:ruinsShimmer 4s ease-in-out infinite}
+@keyframes ruinsShimmer{0%,100%{box-shadow:inset 0 0 12px rgba(168,85,245,.25)}50%{box-shadow:inset 0 0 26px rgba(168,85,245,.5)}}
+.cell.h-1::before,.cell.h-2::before,.cell.h-3::before{content:'';position:absolute;inset:0;pointer-events:none;border-radius:3px;z-index:1}
+.cell.h-1::before{box-shadow:inset 0 -3px 6px rgba(0,0,0,.3),inset 0 1px 2px rgba(255,255,255,.06);border-bottom:1px solid rgba(0,0,0,.2)}
+.cell.h-2::before{box-shadow:inset 0 -5px 10px rgba(0,0,0,.4),inset 0 2px 4px rgba(255,255,255,.1);border-bottom:2px solid rgba(0,0,0,.25)}
+.cell.h-3::before{box-shadow:inset 0 -7px 14px rgba(0,0,0,.5),inset 0 3px 6px rgba(255,255,255,.14);border-bottom:3px solid rgba(0,0,0,.3)}
+.cell.hl-deploy{box-shadow:inset 0 0 0 2px #4a4,0 0 8px rgba(60,200,60,.3)}
+.cell.hl-move{box-shadow:inset 0 0 0 2px #48f,0 0 8px rgba(60,100,255,.3)}
+.cell.hl-attack{box-shadow:inset 0 0 0 2px #f44,0 0 8px rgba(255,60,60,.4)}
+.cell.hl-selected{box-shadow:inset 0 0 0 2px var(--gold),0 0 12px rgba(212,168,67,.4)}
+.unit-token{display:flex;flex-direction:column;align-items:center;justify-content:center;width:90%;height:85%;border-radius:4px;border:2px solid #888;font-size:10px;font-weight:bold;line-height:1.2;text-align:center;position:relative;padding:1px}
+.unit-token.owner-0{border-color:#4a8af5;background:rgba(30,60,120,.7)}
+.unit-token.owner-1{border-color:#f54a4a;background:rgba(120,30,30,.7)}
+.unit-token .u-name{font-size:0;opacity:0;position:absolute;top:-18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:var(--text);padding:2px 6px;border-radius:3px;white-space:nowrap;pointer-events:none;transition:opacity .15s,font-size 0s;z-index:10}
+.unit-token:hover .u-name{font-size:9px;opacity:1}
+.unit-token .u-stats{display:flex;justify-content:space-between;width:100%;position:absolute;bottom:0;left:0;right:0;padding:0 2px}
+.unit-token .u-atk{color:#fff;font-size:9px;font-weight:bold;background:rgba(200,50,50,.7);padding:0 3px;border-radius:2px;line-height:1.4}
+.unit-token .u-hp{color:#fff;font-size:9px;font-weight:bold;background:rgba(50,160,50,.7);padding:0 3px;border-radius:2px;line-height:1.4}
+.unit-token .u-stars{color:var(--gold);font-size:8px;position:absolute;top:0;right:2px}
+.unit-token .u-kw{position:absolute;top:0;left:2px;display:flex;gap:1px}
+.unit-token .u-kw .kw-icon{width:10px;height:10px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;background:rgba(0,0,0,.6);color:#ddd;line-height:1}
+.unit-token.is-structure{border-style:dashed;border-color:#aaa}
+.unit-token.exhausted{opacity:.6}
+.sidebar{width:220px;background:var(--bg2);border-left:1px solid #333;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.phase-section{padding:10px;border-bottom:1px solid #333}
+.phase-list{display:flex;flex-direction:column;gap:3px;margin:8px 0}
+.phase-item{padding:4px 8px;border-radius:3px;font-size:12px;color:var(--dim);background:var(--bg)}
+.phase-item.active{background:var(--bg3);color:var(--gold);font-weight:bold;border:1px solid var(--gold)}
+.phase-item.done{color:#555;text-decoration:line-through}
+#next-phase-btn{width:100%;margin-top:6px}
+.log-section{flex:1;overflow-y:auto;padding:10px;font-size:11px}
+.log-section .log-entry{padding:3px 0;border-bottom:1px solid #1a1a2a;color:var(--dim)}
+.log-section .log-entry:last-child{color:var(--text)}
+.hand-section{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg2);border-top:1px solid #333;overflow-x:auto;min-height:150px}
+.card{width:110px;min-width:110px;height:155px;background:var(--panel);border:2px solid #555;border-radius:6px;padding:5px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;font-size:10px;position:relative;flex-shrink:0}
+.card:hover{transform:translateY(-6px);z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.card.selected{transform:translateY(-10px);border-color:var(--gold);box-shadow:0 0 15px rgba(212,168,67,.4)}
+.card .c-cost{position:absolute;top:3px;left:5px;background:var(--mana-blue,#2980b9);color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:11px}
+.card .c-name{text-align:center;font-weight:bold;font-size:10px;margin-top:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .c-art{flex:1;display:flex;align-items:center;justify-content:center;margin:3px 0;border-radius:3px;font-size:20px;min-height:30px;overflow:hidden}
+.card .c-art svg{width:100%;height:100%;max-height:50px}
+.u-art{width:36px;height:36px;margin:0 auto 1px}.u-art svg{width:100%;height:100%}
+.card .c-type{font-size:8px;text-align:center;color:var(--dim)}
+.card .c-text{font-size:8px;color:#bbb;text-align:center;flex:1;overflow:hidden;line-height:1.3;margin:2px 0}
+.card .c-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.card .c-atk{color:#f88;font-weight:bold;background:rgba(200,50,50,.2);padding:1px 5px;border-radius:3px}
+.card .c-hp{color:#8f8;font-weight:bold;background:rgba(50,200,50,.2);padding:1px 5px;border-radius:3px}
+.card .c-elem-badge{font-size:8px;padding:1px 4px;border-radius:8px;color:#fff;font-weight:bold}
+.card.elem-fire{border-color:var(--fire)}.card.elem-earth{border-color:var(--earth)}.card.elem-wind{border-color:var(--wind)}
+.card.elem-shadow{border-color:var(--shadow)}.card.elem-light{border-color:var(--light)}.card.elem-arcane{border-color:var(--arcane)}
+.card.rarity-common{border-color:#666}
+.card.rarity-rare{border-color:#4488ff;box-shadow:inset 0 0 12px rgba(68,136,255,.2),0 0 6px rgba(68,136,255,.12)}
+.card.rarity-epic{border-color:#a855f5;box-shadow:inset 0 0 14px rgba(168,85,245,.22),0 0 8px rgba(168,85,245,.15)}
+.card.rarity-legendary{border-width:3px;border-color:#ff8800;box-shadow:inset 0 0 18px rgba(255,160,0,.25),0 0 12px rgba(255,200,0,.18);animation:legendaryGlow 3s ease-in-out infinite}
+@keyframes legendaryGlow{0%,100%{box-shadow:inset 0 0 15px rgba(255,136,0,.25),0 0 8px rgba(255,200,0,.12)}50%{box-shadow:inset 0 0 28px rgba(255,200,0,.35),0 0 16px rgba(255,220,50,.22)}}
+.card.unplayable{opacity:.5}
+
+/* Overlays */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:20px}
+.overlay.active{display:flex}
+.overlay h2{font-size:2em;color:var(--gold)}
+#victory-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.v-spark{position:absolute;border-radius:50%;animation:vSparkle var(--dur,2s) ease-out forwards}
+@keyframes vSparkle{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--vx,0),var(--vy,-200px)) scale(0);opacity:0}}
+
+/* Tooltip */
+#tooltip{position:fixed;background:var(--bg2);border:1px solid var(--gold);border-radius:6px;padding:10px 14px;font-size:12px;max-width:280px;z-index:200;pointer-events:none;display:none;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,.6)}
+#tooltip .tt-title{font-weight:bold;color:var(--gold);margin-bottom:4px}
+#tooltip .tt-stats{color:#aaa;font-size:11px}
+#tooltip .tt-text{margin-top:4px}
+
+/* Damage popup */
+.dmg-popup{position:absolute;font-size:18px;font-weight:bold;color:#ff4444;text-shadow:0 0 6px #000;animation:dmgFloat .8s ease-out forwards;z-index:50;pointer-events:none}
+.dmg-popup.heal{color:#44ff44}
+@keyframes dmgFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-30px)}}
+.vet-popup{position:absolute;font-size:12px;font-weight:bold;color:var(--gold);text-shadow:0 0 8px rgba(212,168,67,.6);animation:vetFlash 1s ease-out forwards;z-index:50;pointer-events:none}
+@keyframes vetFlash{0%{opacity:1;transform:scale(1)}50%{transform:scale(1.3)}100%{opacity:0;transform:scale(1)}}
+
+/* Particles */
+.particle{position:absolute;pointer-events:none;z-index:2}
+.fire-p{width:3px;height:3px;background:#f84;border-radius:50%;bottom:30%;animation:fireFloat 1.2s ease-out infinite}
+.fire-p:nth-child(odd){animation-delay:.4s;background:#fc6;width:2px;height:2px}
+@keyframes fireFloat{0%{opacity:.9;transform:translateY(0) scale(1)}60%{opacity:.5}100%{opacity:0;transform:translateY(-18px) scale(.2)}}
+.leaf-p{width:4px;height:3px;background:#4a3;border-radius:40% 0;top:10%;animation:leafDrift 5s ease-in-out infinite}
+@keyframes leafDrift{0%{transform:translate(0,0) rotate(0);opacity:.6}30%{transform:translate(8px,10px) rotate(120deg)}60%{transform:translate(3px,22px) rotate(240deg);opacity:.4}100%{transform:translate(-3px,30px) rotate(400deg);opacity:0}}
+.water-p{width:6px;height:2px;background:rgba(120,180,255,.2);border-radius:50%;animation:waterShine 3.5s ease-in-out infinite;top:45%}
+@keyframes waterShine{0%,100%{transform:translateX(-3px) scaleX(.8);opacity:.2}50%{transform:translateX(5px) scaleX(1.4);opacity:.45}}
+.swamp-p{width:4px;height:4px;background:rgba(100,120,0,.3);border-radius:50%;bottom:25%;animation:swampBub 4s ease-in-out infinite}
+@keyframes swampBub{0%,85%,100%{transform:scale(0);opacity:0}40%{transform:scale(1);opacity:.45}50%{transform:scale(1.15);opacity:.2}52%{transform:scale(0);opacity:0}}
+.effect-poison::after{content:'';position:absolute;bottom:0;left:35%;width:3px;height:3px;background:#4f4;border-radius:50%;animation:poisonDrip 1s infinite;z-index:3}
+@keyframes poisonDrip{0%{transform:translateY(-4px);opacity:.9}100%{transform:translateY(10px);opacity:0}}
+.effect-divine-shield::before{content:'';position:absolute;inset:-3px;border:2px solid rgba(255,215,0,.5);border-radius:6px;animation:dsShimmer 2s ease-in-out infinite;z-index:3;pointer-events:none}
+@keyframes dsShimmer{0%,100%{box-shadow:0 0 3px rgba(255,215,0,.2);opacity:.4}50%{box-shadow:0 0 10px rgba(255,215,0,.5);opacity:1}}
+.effect-frozen{animation:frozenShiver .12s linear infinite!important;filter:brightness(1.25) saturate(.4) hue-rotate(180deg)!important}
+@keyframes frozenShiver{0%,100%{transform:translate(0,0)}33%{transform:translate(-1px,0)}66%{transform:translate(1px,0)}}
+.effect-stealth{animation:stealthPulse 2.5s ease-in-out infinite!important}
+@keyframes stealthPulse{0%,100%{opacity:.2;filter:blur(.5px)}50%{opacity:.4;filter:blur(0)}}
+.effect-ward::before{content:'';position:absolute;inset:-3px;border:2px solid rgba(168,85,245,.4);border-radius:6px;animation:wardGlow 2s ease-in-out infinite;z-index:3;pointer-events:none}
+@keyframes wardGlow{0%,100%{box-shadow:0 0 4px rgba(168,85,245,.2)}50%{box-shadow:0 0 8px rgba(168,85,245,.4)}}
+
+/* UI Chrome */
+.sidebar{border-left:2px solid #2a2a5a;background:linear-gradient(180deg,var(--bg2) 0%,#0d0d22 100%)}
+.player-bar{background:linear-gradient(90deg,var(--bg2),#161638,var(--bg2));border-image:linear-gradient(90deg,transparent,#3a3a6a,transparent) 1}
+.player-bar.p2{border-bottom:2px solid;border-image:linear-gradient(90deg,transparent,#3a3a6a,transparent) 1}
+.player-bar.p1{border-top:2px solid;border-bottom:none;border-image:linear-gradient(90deg,transparent,#3a3a6a,transparent) 1}
+.phase-item.active{position:relative;overflow:hidden}
+.phase-item.active::after{content:'';position:absolute;left:0;bottom:0;height:2px;background:linear-gradient(90deg,var(--gold),#fff8,var(--gold));animation:phaseProgress 1.5s ease-out forwards;width:100%}
+@keyframes phaseProgress{0%{width:0;opacity:0}20%{opacity:1}100%{width:100%}}
+.overlay h2{animation:overlaySlideIn .5s ease-out}
+@keyframes overlaySlideIn{0%{transform:translateY(-40px) scale(.9);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+#board{border:2px solid #3a3a6a;box-shadow:0 0 30px rgba(30,30,80,.4)}
+.hand-section{background:linear-gradient(180deg,var(--bg2),#0d0d22);border-top:2px solid;border-image:linear-gradient(90deg,transparent,#3a3a6a,transparent) 1}
+.hp-bar-outer{border:1px solid #555;box-shadow:inset 0 1px 3px rgba(0,0,0,.5)}
+.hp-bar-inner{background:linear-gradient(90deg,#8b1a1a,#c0392b,#e74c3c);text-shadow:0 1px 2px #000}
+.titan-portrait{box-shadow:0 0 10px rgba(212,168,67,.2)}
+
+/* Deck Builder */
+.db-container{display:flex;gap:20px;width:100%;max-width:1100px;flex:1;overflow:hidden}
+.db-pool{flex:1;overflow-y:auto;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;padding:10px;background:var(--bg2);border-radius:6px}
+.db-deck{width:280px;display:flex;flex-direction:column;background:var(--bg2);border-radius:6px;padding:10px}
+.db-deck-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:3px;margin:8px 0}
+.db-deck-item{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:var(--bg);border-radius:3px;font-size:12px}
+.db-deck-item .cost-badge{color:var(--mana-blue,#4a9eff);font-weight:bold;margin-right:6px}
+.db-controls{display:flex;gap:6px;flex-wrap:wrap}
+.db-controls input{flex:1;min-width:100px}
+.db-filter{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.db-filter select,.db-filter input{font-size:12px;padding:4px 8px}
+
+/* Card Creator */
+.cc-container{display:flex;gap:20px;width:100%;max-width:1000px;flex:1;overflow:auto}
+.cc-form{flex:1;display:flex;flex-direction:column;gap:8px;overflow-y:auto;padding:10px;background:var(--bg2);border-radius:6px}
+.cc-form label{display:flex;flex-direction:column;gap:3px;font-size:13px}
+.cc-form label span{color:var(--dim);font-size:11px}
+.cc-form .row{display:flex;gap:8px}
+.cc-form .row label{flex:1}
+.cc-preview{width:260px;display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px}
+.cc-preview .card{transform:scale(1.5);transform-origin:top center;margin-bottom:80px}
+.cc-saved{width:100%;max-width:1000px;margin-top:15px}
+.cc-saved-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;max-height:200px;overflow-y:auto}
+.cc-saved-item{background:var(--bg2);padding:4px 10px;border-radius:4px;font-size:12px;display:flex;align-items:center;gap:8px}
+
+/* Rules */
+.rules-content{max-width:800px;width:100%;background:var(--bg2);border-radius:8px;padding:20px 30px;max-height:70vh;overflow-y:auto;line-height:1.7;font-size:14px}
+.rules-content h3{margin-top:16px;margin-bottom:6px}
+.rules-content ul{padding-left:20px;margin:6px 0}
+.rules-content li{margin:3px 0}
+.rules-content .kw{color:var(--gold);font-weight:bold}
+.back-btn{margin-top:15px}
+@media(max-width:900px){.sidebar{width:160px}.card{width:90px;min-width:90px;height:130px}.sidebar .phase-item{font-size:10px}}
+@media(max-width:700px){.sidebar{display:none}.db-container{flex-direction:column}.cc-container{flex-direction:column}}
+/* Drag ghost */
+.drag-ghost{position:fixed;pointer-events:none;z-index:300;opacity:.85;transform:rotate(-3deg) scale(.9);filter:drop-shadow(0 4px 12px rgba(0,0,0,.6));transition:none}
+/* Animation layer */
+#anim-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:45;overflow:hidden}
+.anim-el{position:absolute;pointer-events:none}
+.anim-slash{width:40px;height:40px;animation:slashAnim .35s ease-out forwards}
+.anim-proj{width:10px;height:10px;border-radius:50%;animation:projMove var(--dur,.4s) linear forwards}
+.anim-burst{width:50px;height:50px;border-radius:50%;animation:burstAnim .45s ease-out forwards}
+.anim-death{width:30px;height:30px;animation:deathFly .4s ease-out forwards}
+.anim-heal{width:8px;height:8px;border-radius:50%;background:#4f4;animation:healRise .6s ease-out forwards}
+.anim-aoe{position:absolute;top:0;left:0;width:100%;height:100%;animation:aoeFlash .3s ease-out forwards}
+@keyframes slashAnim{0%{transform:scale(.5) rotate(-30deg);opacity:1}100%{transform:scale(1.3) rotate(30deg);opacity:0}}
+@keyframes projMove{0%{transform:translate(var(--sx,0),var(--sy,0));opacity:1}100%{transform:translate(var(--ex,0),var(--ey,0));opacity:.6}}
+@keyframes burstAnim{0%{transform:scale(.2);opacity:.9}60%{transform:scale(1.2);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+@keyframes deathFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx,10px),var(--dy,-20px)) scale(.3);opacity:0}}
+@keyframes healRise{0%{transform:translateY(0);opacity:.9}100%{transform:translateY(-30px);opacity:0}}
+@keyframes aoeFlash{0%{opacity:.35}100%{opacity:0}}
+</style>
+</head>
+<body>
+<!-- MENU -->
+<div id="menu-screen" class="screen active">
+<h1>Titanfall Chronicles</h1>
+<p class="subtitle">A Tactical Fantasy Card Game</p>
+<div class="menu-buttons">
+<button class="btn-primary" onclick="showScreen('newgame-screen')">New Game</button>
+<button class="btn-primary" onclick="showScreen('deckbuilder-screen');initDeckBuilder()">Deck Builder</button>
+<button class="btn-primary" onclick="showScreen('cardcreator-screen');initCardCreator()">Card Creator</button>
+<button class="btn-primary" onclick="showScreen('rules-screen')">Rules &amp; Help</button>
+<button class="btn-secondary" id="sfx-toggle" onclick="let on=SFX.toggle();this.textContent=on?'Sound: ON':'Sound: OFF'">Sound: ON</button>
+</div>
+</div>
+
+<!-- NEW GAME -->
+<div id="newgame-screen" class="screen">
+<h2>New Game Setup</h2>
+<div class="ng-container">
+<div class="titan-select"><h3>Player 1 - Choose Titan</h3><div id="p1-titans" class="titan-grid"></div></div>
+<div class="titan-select"><h3>Player 2 - Choose Titan</h3><div id="p2-titans" class="titan-grid"></div></div>
+</div>
+<div class="map-select"><h3>Select Map</h3><div id="map-options" class="map-grid"></div></div>
+<button class="btn-primary ng-start" onclick="launchGame()">Start Battle</button>
+<button class="btn-secondary back-btn" onclick="showScreen('menu-screen')">Back</button>
+</div>
+
+<!-- GAME -->
+<div id="game-screen" class="screen">
+<div class="player-bar p2" id="p2-bar"></div>
+<div class="game-middle">
+<div id="board-wrap"><div id="board"></div><div id="anim-layer"></div></div>
+<div class="sidebar">
+<div class="phase-section"><h3>Turn <span id="turn-num">1</span></h3><div class="phase-list" id="phase-list"></div>
+<button id="next-phase-btn" class="btn-primary btn-sm" onclick="nextPhase()">Next Phase</button></div>
+<div class="log-section" id="game-log"></div>
+</div>
+</div>
+<div class="player-bar p1" id="p1-bar"></div>
+<div class="hand-section" id="hand-area"></div>
+</div>
+
+<!-- DECK BUILDER -->
+<div id="deckbuilder-screen" class="screen">
+<h2>Deck Builder</h2>
+<div class="db-filter" id="db-filter"></div>
+<div class="db-container">
+<div class="db-pool" id="db-pool"></div>
+<div class="db-deck"><h3>Deck (<span id="db-count">0</span>/30)</h3>
+<div class="db-deck-list" id="db-deck-list"></div>
+<div class="db-controls">
+<input id="db-deck-name" placeholder="Deck name..."/>
+<button class="btn-secondary btn-sm" onclick="saveDeck()">Save</button>
+<select id="db-load-select" onchange="loadDeck(this.value)"><option value="">Load deck...</option></select>
+<button class="btn-danger btn-sm" onclick="clearDeck()">Clear</button>
+</div>
+</div>
+</div>
+<button class="btn-secondary back-btn" onclick="showScreen('menu-screen')">Back</button>
+</div>
+
+<!-- CARD CREATOR -->
+<div id="cardcreator-screen" class="screen">
+<h2>Card Creator</h2>
+<div class="cc-container">
+<div class="cc-form" id="cc-form"></div>
+<div class="cc-preview"><h3>Preview</h3><div id="cc-preview-card"></div></div>
+</div>
+<div class="cc-saved"><h3>Custom Cards</h3><div class="cc-saved-list" id="cc-saved-list"></div></div>
+<button class="btn-secondary back-btn" onclick="showScreen('menu-screen')">Back</button>
+</div>
+
+<!-- RULES -->
+<div id="rules-screen" class="screen">
+<h2>Rules &amp; Help</h2>
+<div class="rules-content" id="rules-content"></div>
+<button class="btn-secondary back-btn" onclick="showScreen('menu-screen')">Back</button>
+</div>
+
+<!-- OVERLAYS -->
+<div id="turn-overlay" class="overlay">
+<h2 id="turn-overlay-text">Player 1's Turn</h2>
+<p style="color:var(--dim)">Pass the device to the next player</p>
+<button class="btn-primary" onclick="dismissTurnOverlay()">Ready</button>
+</div>
+<div id="victory-overlay" class="overlay">
+<div id="victory-particles"></div>
+<h2 id="victory-text">Victory!</h2>
+<button class="btn-primary" onclick="showScreen('menu-screen')">Main Menu</button>
+</div>
+<div id="tooltip"></div>
+<script>
+// ====================== CONSTANTS ======================
+const PHASES = ['Refresh','Draw','Deploy','Movement','Combat','End'];
+const ELEMENTS = {fire:{name:'Fire',color:'#e84430',icon:'🔥'},earth:{name:'Earth',color:'#8b6914',icon:'🪨'},wind:{name:'Wind',color:'#30b8c8',icon:'💨'},shadow:{name:'Shadow',color:'#7030a0',icon:'🌑'},light:{name:'Light',color:'#e8d44d',icon:'✨'},arcane:{name:'Arcane',color:'#a855f5',icon:'🔮'}};
+const TERRAIN_INFO = {
+  plain:{name:'Plain',color:'#3a5a3a',desc:'Normal terrain.',defBonus:0},
+  forest:{name:'Forest',color:'#1e4a1e',desc:'+2 defense. Elves move +1 here.',defBonus:2},
+  mountain:{name:'Mountain',color:'#4a4a5a',desc:'Impassable (except Flying). Height +2.',defBonus:0},
+  water:{name:'Water',color:'#1a3a6a',desc:'Movement cost 2. No melee across.',defBonus:0},
+  swamp:{name:'Swamp',color:'#2a3a1a',desc:'Units entering take 1 poison damage.',defBonus:0},
+  hill:{name:'Hill',color:'#5a5a2a',desc:'Height +1, +1 defense.',defBonus:1},
+  volcano:{name:'Volcano',color:'#4a1a1a',desc:'Fire units +2 Attack here.',defBonus:0},
+  ruins:{name:'Ruins',color:'#3a2a4a',desc:'Arcane spells cost 1 less from here.',defBonus:0}
+};
+const RACES = ['Human','Elf','Dwarf','Orc','Goblin','Dragon','Undead','Demon','Beast','Elemental','Angel','Merfolk','Construct','Spirit'];
+const SYNERGY_DATA = {
+  Elf:{t3:'+1 Move in forests',t5:'All Elves gain Stealth',fn3:(u,b)=>{if(getTerrain(u._r,u._c)==='forest')u._moveBonus=(u._moveBonus||0)+1},fn5:(u)=>{if(!u.kw.includes('stealth'))u.kw.push('stealth')}},
+  Dwarf:{t3:'+1 HP to all Dwarves',t5:'+1 Armor to all Dwarves',fn3:(u)=>{u.hp+=1;u.maxHp+=1},fn5:(u)=>{u._armor=(u._armor||0)+1}},
+  Orc:{t3:'+1 Atk after killing',t5:'Charge on play',fn3:(u)=>{u._orcBonus=true},fn5:(u)=>{if(!u.kw.includes('charge'))u.kw.push('charge')}},
+  Dragon:{t3:'All Dragons gain Flying',t5:'+2 Attack vs ground units',fn3:(u)=>{if(!u.kw.includes('flying'))u.kw.push('flying')},fn5:(u)=>{u._dragonBonus=2}},
+  Undead:{t3:'Death returns 1/1 skeleton',t5:'All Undead gain Lifesteal',fn3:(u)=>{u._undeadRespawn=true},fn5:(u)=>{if(!u.kw.includes('lifesteal'))u.kw.push('lifesteal')}},
+  Demon:{t3:'+1 Attack to all Demons',t5:'Deal 1 damage to enemy Titan on summon',fn3:(u)=>{u.atk+=1},fn5:(u)=>{u._demonSummon=true}},
+  Human:{t3:'Draw 1 card when Human played',t5:'+1/+1 to all Humans',fn3:(u)=>{u._humanDraw=true},fn5:(u)=>{u.atk+=1;u.hp+=1;u.maxHp+=1}},
+  Beast:{t3:'+1 Move to all Beasts',t5:'Beasts heal 1 at end of turn',fn3:(u)=>{u.move+=1},fn5:(u)=>{u._beastHeal=true}},
+  Angel:{t3:'Heal adjacent allies 1 at end of turn',t5:'Divine Shield on play',fn3:(u)=>{u._angelHeal=true},fn5:(u)=>{if(!u.kw.includes('divine_shield'))u.kw.push('divine_shield')}},
+  Goblin:{t3:'Goblins cost 1 less',t5:'Goblins +2 Attack on first strike',fn3:null,fn5:(u)=>{u._goblinStrike=true}},
+  Merfolk:{t3:'No water movement penalty',t5:'+2 Attack in water',fn3:(u)=>{u._noWaterPenalty=true},fn5:(u)=>{u._merfolkWater=true}},
+  Elemental:{t3:'+1 Attack matching terrain',t5:'Immune to terrain penalties',fn3:(u)=>{u._elemTerrain=true},fn5:(u)=>{u._elemImmune=true}},
+  Construct:{t3:'+2 HP to all Constructs',t5:'Armor 2 to all Constructs',fn3:(u)=>{u.hp+=2;u.maxHp+=2},fn5:(u)=>{u._armor=(u._armor||0)+2}},
+  Spirit:{t3:'Spirits gain Elusive',t5:'Spirits phase through units',fn3:(u)=>{if(!u.kw.includes('elusive'))u.kw.push('elusive')},fn5:(u)=>{u._phaseThrough=true}}
+};
+const ALL_KEYWORDS = ['rush','charge','taunt','flying','stealth','divine_shield','windfury','guard','swift','poisonous','lifesteal','trample','elusive','ward','haste','freeze','deathrattle','battlecry','enrage','inspire','ranged','regen','armor','bleed'];
+
+// ====================== MAPS ======================
+// t=terrain key, h=height; 5 rows x 7 cols
+const MAPS = [
+  {name:'Verdant Valley',desc:'Lush forests and gentle hills',tiles:[
+    [{t:'forest',h:1},{t:'plain',h:0},{t:'hill',h:1},{t:'plain',h:0},{t:'hill',h:1},{t:'plain',h:0},{t:'forest',h:1}],
+    [{t:'plain',h:0},{t:'forest',h:1},{t:'plain',h:0},{t:'plain',h:0},{t:'plain',h:0},{t:'forest',h:1},{t:'plain',h:0}],
+    [{t:'hill',h:1},{t:'plain',h:0},{t:'forest',h:1},{t:'hill',h:2},{t:'forest',h:1},{t:'plain',h:0},{t:'hill',h:1}],
+    [{t:'plain',h:0},{t:'forest',h:1},{t:'plain',h:0},{t:'plain',h:0},{t:'plain',h:0},{t:'forest',h:1},{t:'plain',h:0}],
+    [{t:'forest',h:1},{t:'plain',h:0},{t:'hill',h:1},{t:'plain',h:0},{t:'hill',h:1},{t:'plain',h:0},{t:'forest',h:1}]
+  ]},
+  {name:'Obsidian Peaks',desc:'Volcanic mountains and treacherous terrain',tiles:[
+    [{t:'mountain',h:3},{t:'hill',h:1},{t:'plain',h:0},{t:'volcano',h:1},{t:'plain',h:0},{t:'hill',h:1},{t:'mountain',h:3}],
+    [{t:'hill',h:1},{t:'plain',h:0},{t:'volcano',h:1},{t:'plain',h:0},{t:'volcano',h:1},{t:'plain',h:0},{t:'hill',h:1}],
+    [{t:'plain',h:0},{t:'volcano',h:1},{t:'hill',h:2},{t:'mountain',h:3},{t:'hill',h:2},{t:'volcano',h:1},{t:'plain',h:0}],
+    [{t:'hill',h:1},{t:'plain',h:0},{t:'volcano',h:1},{t:'plain',h:0},{t:'volcano',h:1},{t:'plain',h:0},{t:'hill',h:1}],
+    [{t:'mountain',h:3},{t:'hill',h:1},{t:'plain',h:0},{t:'volcano',h:1},{t:'plain',h:0},{t:'hill',h:1},{t:'mountain',h:3}]
+  ]},
+  {name:'Tidal Marshes',desc:'Swamps and waterways dominate',tiles:[
+    [{t:'plain',h:0},{t:'swamp',h:0},{t:'water',h:0},{t:'plain',h:0},{t:'water',h:0},{t:'swamp',h:0},{t:'plain',h:0}],
+    [{t:'swamp',h:0},{t:'plain',h:0},{t:'swamp',h:0},{t:'water',h:0},{t:'swamp',h:0},{t:'plain',h:0},{t:'swamp',h:0}],
+    [{t:'water',h:0},{t:'swamp',h:0},{t:'hill',h:1},{t:'swamp',h:0},{t:'hill',h:1},{t:'swamp',h:0},{t:'water',h:0}],
+    [{t:'swamp',h:0},{t:'plain',h:0},{t:'swamp',h:0},{t:'water',h:0},{t:'swamp',h:0},{t:'plain',h:0},{t:'swamp',h:0}],
+    [{t:'plain',h:0},{t:'swamp',h:0},{t:'water',h:0},{t:'plain',h:0},{t:'water',h:0},{t:'swamp',h:0},{t:'plain',h:0}]
+  ]},
+  {name:'Arcane Ruins',desc:'Ancient ruins with mystical energies',tiles:[
+    [{t:'ruins',h:0},{t:'plain',h:0},{t:'ruins',h:1},{t:'hill',h:1},{t:'ruins',h:1},{t:'plain',h:0},{t:'ruins',h:0}],
+    [{t:'plain',h:0},{t:'ruins',h:0},{t:'plain',h:0},{t:'ruins',h:1},{t:'plain',h:0},{t:'ruins',h:0},{t:'plain',h:0}],
+    [{t:'ruins',h:1},{t:'plain',h:0},{t:'ruins',h:2},{t:'mountain',h:3},{t:'ruins',h:2},{t:'plain',h:0},{t:'ruins',h:1}],
+    [{t:'plain',h:0},{t:'ruins',h:0},{t:'plain',h:0},{t:'ruins',h:1},{t:'plain',h:0},{t:'ruins',h:0},{t:'plain',h:0}],
+    [{t:'ruins',h:0},{t:'plain',h:0},{t:'ruins',h:1},{t:'hill',h:1},{t:'ruins',h:1},{t:'plain',h:0},{t:'ruins',h:0}]
+  ]},
+  {name:'Dragon\'s Spine',desc:'A ridge of mountains split by valleys',tiles:[
+    [{t:'hill',h:1},{t:'plain',h:0},{t:'mountain',h:3},{t:'forest',h:1},{t:'mountain',h:3},{t:'plain',h:0},{t:'hill',h:1}],
+    [{t:'plain',h:0},{t:'forest',h:1},{t:'hill',h:2},{t:'plain',h:0},{t:'hill',h:2},{t:'forest',h:1},{t:'plain',h:0}],
+    [{t:'forest',h:1},{t:'swamp',h:0},{t:'plain',h:0},{t:'volcano',h:2},{t:'plain',h:0},{t:'swamp',h:0},{t:'forest',h:1}],
+    [{t:'plain',h:0},{t:'forest',h:1},{t:'hill',h:2},{t:'plain',h:0},{t:'hill',h:2},{t:'forest',h:1},{t:'plain',h:0}],
+    [{t:'hill',h:1},{t:'plain',h:0},{t:'mountain',h:3},{t:'forest',h:1},{t:'mountain',h:3},{t:'plain',h:0},{t:'hill',h:1}]
+  ]}
+];
+
+// ====================== TITANS ======================
+const TITANS = [
+  {id:'kargath',name:'Firelord Kargath',elem:'fire',hp:30,
+   passiveText:'Fire units +2 Attack on volcano tiles.',
+   activeText:'Deal 4 damage split among enemies in target row. (3 Energy)',activeCost:3,
+   ultText:'Board-wide 3 fire damage to all enemies. Requires 3 kills.',ultReq:3,kills:0,
+   icon:'🔥',color:'#e84430'},
+  {id:'thalor',name:'Earthwarden Thalor',elem:'earth',hp:35,
+   passiveText:'Earth units gain Armor 2.',
+   activeText:'Give target ally Divine Shield + Taunt. (3 Energy)',activeCost:3,
+   ultText:'Summon two 3/3 Stone Walls with Taunt. Requires 4 kills.',ultReq:4,kills:0,
+   icon:'🪨',color:'#8b6914'},
+  {id:'sylara',name:'Windrider Sylara',elem:'wind',hp:25,
+   passiveText:'Wind units +2 Move.',
+   activeText:'Return target ally to hand, draw 1 card. (2 Energy)',activeCost:2,
+   ultText:'All allies gain +1 Move and Swift this turn. Requires 3 kills.',ultReq:3,kills:0,
+   icon:'💨',color:'#30b8c8'},
+  {id:'nyx',name:'Shadow Queen Nyx',elem:'shadow',hp:28,
+   passiveText:'Shadow units have Stealth until they attack.',
+   activeText:'Poison target enemy (3 dmg over 3 turns) + draw 1. (3 Energy)',activeCost:3,
+   ultText:'All enemies lose 2 HP and lose all buffs. Requires 3 kills.',ultReq:3,kills:0,
+   icon:'🌑',color:'#7030a0'},
+  {id:'elandor',name:'Archmage Elandor',elem:'arcane',hp:26,
+   passiveText:'Spells cost 1 less Energy.',
+   activeText:'Copy the last spell you played this game. (4 Energy)',activeCost:4,
+   ultText:'Draw 3 cards and reduce their cost by 2. Requires 4 kills.',ultReq:4,kills:0,
+   icon:'🔮',color:'#a855f5'}
+];
+
+// ====================== BASE CARDS ======================
+const BASE_CARDS = [
+  // ---- UNITS ----
+  {id:'elven_archer',name:'Elven Archer',cost:2,type:'unit',atk:2,hp:2,move:2,range:3,elem:'wind',race:'Elf',
+   kw:['swift'],text:'Swift. Range 3.',flavor:'Her arrows find their mark before the wind dies.',rarity:'common',
+   vet1:'Sharpshooter: +1 Range',vet2:'Volley: Windfury',vet3:'Pinpoint Strike: Deal 4 dmg to target (2 XP)'},
+  {id:'orc_berserker',name:'Orc Berserker',cost:3,type:'unit',atk:4,hp:3,move:2,range:1,elem:'fire',race:'Orc',
+   kw:['charge'],text:'Charge.',flavor:'The bloodlust never fades.',rarity:'common',
+   vet1:'Bloodlust: +1 Attack',vet2:'Enrage: +2 Atk when damaged',vet3:'Rampage: Atk all adjacent enemies (2 XP)'},
+  {id:'ancient_treant',name:'Ancient Treant',cost:6,type:'unit',atk:3,hp:10,move:1,range:1,elem:'earth',race:'Elemental',
+   kw:['taunt'],text:'Taunt.',flavor:'Older than the forest itself.',rarity:'epic',
+   vet1:'Rooted: +2 HP',vet2:'Thick Bark: Armor 3',vet3:'Overgrowth: Summon 2 Saplings adj (2 XP)'},
+  {id:'shadow_assassin',name:'Shadow Assassin',cost:3,type:'unit',atk:3,hp:2,move:3,range:1,elem:'shadow',race:'Human',
+   kw:['stealth','haste'],text:'Stealth. Haste.',flavor:'You see only the aftermath.',rarity:'rare',
+   vet1:'Lethal Training: +1 Attack',vet2:'Vanish: Re-stealth after kill',vet3:'Deathblow: Destroy target with ≤3 HP (2 XP)'},
+  {id:'dwarven_shieldbearer',name:'Dwarven Shield-Bearer',cost:2,type:'unit',atk:1,hp:5,move:1,range:1,elem:'earth',race:'Dwarf',
+   kw:['taunt'],text:'Taunt. Armor 1.',flavor:'None shall pass while I draw breath.',rarity:'common',
+   vet1:'Fortified: +2 HP',vet2:'Iron Wall: Armor 2',vet3:'Shield Bash: Deal 3 dmg + Freeze (2 XP)'},
+  {id:'fire_imp',name:'Fire Imp',cost:1,type:'unit',atk:2,hp:1,move:2,range:1,elem:'fire',race:'Demon',
+   kw:['rush'],text:'Rush.',flavor:'Small but very angry.',rarity:'common',
+   vet1:'Kindle: +1 HP',vet2:'Flare: +1 Attack',vet3:'Immolate: Deal 2 dmg to all adj (2 XP)'},
+  {id:'holy_knight',name:'Holy Knight',cost:4,type:'unit',atk:3,hp:4,move:2,range:1,elem:'light',race:'Human',
+   kw:['divine_shield'],text:'Divine Shield.',flavor:'Light guides my blade.',rarity:'rare',
+   vet1:'Blessed: +1/+1',vet2:'Radiance: Heal adj allies 1/turn',vet3:'Smite: Deal 5 holy dmg (2 XP)'},
+  {id:'goblin_saboteur',name:'Goblin Saboteur',cost:2,type:'unit',atk:2,hp:2,move:2,range:1,elem:'fire',race:'Goblin',
+   kw:['deathrattle'],text:'Deathrattle: Deal 2 dmg to adjacent.',flavor:'If I go, you come with me!',rarity:'common',
+   vet1:'Explosives: Deathrattle deals 3',vet2:'Evasion: +1 Move',vet3:'Mega Bomb: Deal 4 to all in 2 range (2 XP)'},
+  {id:'dragon_hatchling',name:'Dragon Hatchling',cost:3,type:'unit',atk:2,hp:3,move:2,range:1,elem:'fire',race:'Dragon',
+   kw:['flying'],text:'Flying.',flavor:'Tiny wings, big dreams.',rarity:'common',
+   vet1:'Growing: +1/+1',vet2:'Fire Breath: Range 2',vet3:'Dragonrage: +4 Atk this turn (2 XP)'},
+  {id:'undead_warrior',name:'Undead Warrior',cost:2,type:'unit',atk:2,hp:3,move:1,range:1,elem:'shadow',race:'Undead',
+   kw:[],text:'Relentless.',flavor:'Death is only the beginning.',rarity:'common',
+   vet1:'Unholy Strength: +1 Attack',vet2:'Resilient: Regen 1',vet3:'Arise: Resummon on death at 1 HP (2 XP)'},
+  {id:'angel_of_light',name:'Angel of Light',cost:7,type:'unit',atk:5,hp:6,move:3,range:1,elem:'light',race:'Angel',
+   kw:['flying','lifesteal'],text:'Flying. Lifesteal.',flavor:'Heaven\'s wrath descends.',rarity:'legendary',
+   vet1:'Blessed Wings: +1 Move',vet2:'Halo: Adj allies +1 Attack',vet3:'Divine Judgment: Destroy weakest enemy (2 XP)'},
+  {id:'merfolk_tidecaller',name:'Merfolk Tidecaller',cost:3,type:'unit',atk:2,hp:4,move:2,range:2,elem:'wind',race:'Merfolk',
+   kw:['ranged'],text:'Ranged 2. No water penalty.',flavor:'The tides answer her call.',rarity:'common',
+   vet1:'Tidal: +1 Range',vet2:'Splash: Hit adj to target for 1',vet3:'Tsunami: Deal 3 to enemy row (2 XP)'},
+  {id:'stone_golem',name:'Stone Golem',cost:5,type:'unit',atk:4,hp:8,move:1,range:1,elem:'earth',race:'Construct',
+   kw:['taunt'],text:'Taunt. Armor 2.',flavor:'Carved from the heart of the mountain.',rarity:'rare',
+   vet1:'Reinforced: +3 HP',vet2:'Quake Step: Dmg adj enemies 1 on move',vet3:'Shatter: Deal 6 to target (2 XP)'},
+  {id:'beast_rider',name:'Beast Rider',cost:3,type:'unit',atk:3,hp:3,move:3,range:1,elem:'wind',race:'Beast',
+   kw:['swift','charge'],text:'Swift. Charge.',flavor:'Born in the saddle.',rarity:'common',
+   vet1:'Trailblazer: +1 Move',vet2:'Momentum: +1 Atk after moving',vet3:'Stampede: Move+Atk in line (2 XP)'},
+  {id:'goblin_engineer',name:'Goblin Engineer',cost:2,type:'unit',atk:1,hp:2,move:2,range:1,elem:'fire',race:'Goblin',
+   kw:['battlecry'],text:'Battlecry: Summon 1/1 Mech.',flavor:'What could go wrong?',rarity:'common',
+   vet1:'Tinkerer: Mech gains +1/+1',vet2:'Upgrade: +1 Attack',vet3:'Deploy Turret: Summon 2/2 Range 2 mech (2 XP)'},
+  {id:'dark_necromancer',name:'Dark Necromancer',cost:5,type:'unit',atk:3,hp:4,move:1,range:2,elem:'shadow',race:'Undead',
+   kw:['ranged','inspire'],text:'Ranged 2. Inspire: Summon 1/1 Skeleton.',flavor:'The dead serve willingly.',rarity:'rare',
+   vet1:'Dark Power: +1 Attack',vet2:'Soul Harvest: Lifesteal',vet3:'Army of Dead: Summon 3 Skeletons (2 XP)'},
+  {id:'phoenix_hatchling',name:'Phoenix Hatchling',cost:4,type:'unit',atk:4,hp:3,move:2,range:1,elem:'fire',race:'Elemental',
+   kw:['flying','deathrattle'],text:'Flying. Deathrattle: Return to hand.',flavor:'From ashes reborn.',rarity:'rare',
+   vet1:'Blazing: +1 Attack',vet2:'Rebirth: Return at 2 HP instead',vet3:'Supernova: Deal 3 to all enemies adj (2 XP)'},
+  {id:'elven_sage',name:'Elven Sage',cost:4,type:'unit',atk:2,hp:3,move:2,range:2,elem:'arcane',race:'Elf',
+   kw:['ranged','battlecry'],text:'Ranged 2. Battlecry: Draw 1.',flavor:'Knowledge is the truest power.',rarity:'rare',
+   vet1:'Wisdom: +1 HP',vet2:'Insight: Draw 1 at end of turn',vet3:'Arcane Barrage: Deal 2 to 3 targets (2 XP)'},
+  {id:'orcish_warlord',name:'Orcish Warlord',cost:6,type:'unit',atk:5,hp:5,move:2,range:1,elem:'fire',race:'Orc',
+   kw:['charge','inspire'],text:'Charge. Inspire: Orcs +1 Atk.',flavor:'WAAARGH!',rarity:'epic',
+   vet1:'Warchief: +1/+1',vet2:'Rally: Allies +1 Atk for 1 turn',vet3:'Cataclysm: Deal 3 to all enemies (2 XP)'},
+  {id:'crystal_guardian',name:'Crystal Guardian',cost:5,type:'unit',atk:3,hp:7,move:1,range:1,elem:'arcane',race:'Construct',
+   kw:['ward','guard'],text:'Ward. Guard.',flavor:'Arcane energy solidified.',rarity:'rare',
+   vet1:'Resonance: +2 HP',vet2:'Reflect: Return 1 dmg to attackers',vet3:'Shatter Pulse: Silence adj enemies (2 XP)'},
+  {id:'swamp_lurker',name:'Swamp Lurker',cost:3,type:'unit',atk:3,hp:4,move:2,range:1,elem:'earth',race:'Beast',
+   kw:['poisonous'],text:'Poisonous. No swamp penalty.',flavor:'It waits beneath the murk.',rarity:'common',
+   vet1:'Toxic: +1 HP',vet2:'Camouflage: Stealth in swamp',vet3:'Devour: Kill unit with ≤3 HP, gain its HP (2 XP)'},
+  {id:'lightning_elemental',name:'Lightning Elemental',cost:4,type:'unit',atk:5,hp:2,move:3,range:1,elem:'wind',race:'Elemental',
+   kw:['windfury','haste'],text:'Windfury. Haste.',flavor:'Strikes twice before you blink.',rarity:'rare',
+   vet1:'Charged: +1 HP',vet2:'Overload: +1 Attack',vet3:'Chain Lightning: Hit 3 random enemies for 2 (2 XP)'},
+  {id:'vampire_lord',name:'Vampire Lord',cost:6,type:'unit',atk:4,hp:5,move:2,range:1,elem:'shadow',race:'Undead',
+   kw:['lifesteal','flying'],text:'Lifesteal. Flying.',flavor:'Eternal hunger knows no rest.',rarity:'epic',
+   vet1:'Blood Feast: +1 Attack',vet2:'Night Form: +1 Move',vet3:'Drain Soul: Steal 3 HP from enemy (2 XP)'},
+  {id:'dwarven_cannon',name:'Dwarven Cannon',cost:4,type:'unit',atk:3,hp:3,move:1,range:3,elem:'fire',race:'Dwarf',
+   kw:['ranged'],text:'Ranged 3.',flavor:'Dwarven engineering at its finest.',rarity:'common',
+   vet1:'Calibrated: +1 Range',vet2:'Explosive Shells: +1 Attack',vet3:'Bombardment: Deal 2 to 3×3 area (2 XP)'},
+  {id:'mountain_giant',name:'Mountain Giant',cost:8,type:'unit',atk:7,hp:7,move:1,range:1,elem:'earth',race:'Elemental',
+   kw:['trample'],text:'Trample.',flavor:'The mountain walks.',rarity:'legendary',
+   vet1:'Colossus: +2 HP',vet2:'Earthquake: Dmg 1 to adj on attack',vet3:'Landslide: Deal 5 in a line (2 XP)'},
+  {id:'spirit_fox',name:'Spirit Fox',cost:2,type:'unit',atk:2,hp:2,move:3,range:1,elem:'arcane',race:'Spirit',
+   kw:['elusive','swift'],text:'Elusive. Swift.',flavor:'Not quite of this world.',rarity:'common',
+   vet1:'Phase: +1 HP',vet2:'Flicker: Teleport 2 tiles',vet3:'Spirit Blast: Deal 3 to target (2 XP)'},
+  {id:'demon_brute',name:'Demon Brute',cost:4,type:'unit',atk:5,hp:4,move:2,range:1,elem:'shadow',race:'Demon',
+   kw:['enrage'],text:'Enrage: +2 Attack when damaged.',flavor:'Pain is just fuel.',rarity:'common',
+   vet1:'Hellforged: +1 HP',vet2:'Fury: +1 Attack',vet3:'Hellfire: Deal 4 to target, 2 to self (2 XP)'},
+  {id:'frost_mage',name:'Frost Mage',cost:3,type:'unit',atk:2,hp:3,move:1,range:2,elem:'wind',race:'Human',
+   kw:['ranged','freeze'],text:'Ranged 2. Attacks Freeze target.',flavor:'Winter is her weapon.',rarity:'common',
+   vet1:'Frostbite: +1 Attack',vet2:'Ice Armor: +2 HP',vet3:'Blizzard: Freeze all enemies in range (2 XP)'},
+  {id:'war_elephant',name:'War Elephant',cost:5,type:'unit',atk:4,hp:6,move:2,range:1,elem:'earth',race:'Beast',
+   kw:['trample','charge'],text:'Trample. Charge.',flavor:'The ground trembles.',rarity:'rare',
+   vet1:'Thick Hide: +2 HP',vet2:'Fury: +1 Attack',vet3:'Charge!: Move 3 and deal double dmg (2 XP)'},
+  {id:'angel_healer',name:'Angel Healer',cost:5,type:'unit',atk:2,hp:5,move:2,range:1,elem:'light',race:'Angel',
+   kw:['flying'],text:'Flying. End of turn: heal adjacent allies 2.',flavor:'Grace given form.',rarity:'rare',
+   vet1:'Blessed Touch: Heal +1',vet2:'Wings of Light: +1 Move',vet3:'Mass Heal: Heal all allies 3 (2 XP)'},
+  {id:'void_stalker',name:'Void Stalker',cost:4,type:'unit',atk:4,hp:3,move:2,range:1,elem:'shadow',race:'Spirit',
+   kw:['stealth'],text:'Stealth. Deals +2 from stealth.',flavor:'Darkness given purpose.',rarity:'rare',
+   vet1:'Shadow Step: +1 Move',vet2:'Void Touch: Lifesteal',vet3:'Annihilate: Deal 6 to target (2 XP)'},
+  {id:'arcane_construct',name:'Arcane Construct',cost:3,type:'unit',atk:2,hp:4,move:2,range:2,elem:'arcane',race:'Construct',
+   kw:['ranged'],text:'Ranged 2. Spells you cast give this +1 Atk.',flavor:'Feeds on magic itself.',rarity:'common',
+   vet1:'Overcharged: +1 Attack',vet2:'Mana Shield: Ward',vet3:'Arcane Beam: Deal dmg equal to Atk (2 XP)'},
+  {id:'dragonlord',name:'Elder Dragon',cost:9,type:'unit',atk:8,hp:8,move:2,range:2,elem:'fire',race:'Dragon',
+   kw:['flying','ranged','trample'],text:'Flying. Ranged 2. Trample.',flavor:'Lord of the skies.',rarity:'legendary',
+   vet1:'Ancient: +2 HP',vet2:'Inferno: +2 Attack',vet3:'Dragon Fire: Deal 5 to all in row (2 XP)'},
+  {id:'plague_bearer',name:'Plague Bearer',cost:3,type:'unit',atk:2,hp:4,move:1,range:1,elem:'shadow',race:'Undead',
+   kw:['poisonous','deathrattle'],text:'Poisonous. Deathrattle: Poison adj enemies.',flavor:'Spreads only suffering.',rarity:'common',
+   vet1:'Virulent: +1 Attack',vet2:'Festering: +2 HP',vet3:'Pandemic: Poison all enemies (2 XP)'},
+  {id:'light_priestess',name:'Light Priestess',cost:3,type:'unit',atk:1,hp:4,move:2,range:2,elem:'light',race:'Human',
+   kw:['ranged'],text:'Ranged 2. Battlecry: Heal ally 3.',flavor:'Faith shields the faithful.',rarity:'common',
+   vet1:'Devotion: +1 HP',vet2:'Prayer: Heal adj allies 1/turn',vet3:'Resurrection: Revive a dead ally at 3 HP (2 XP)'},
+
+  // ---- SPELLS ----
+  {id:'fireball',name:'Fireball',cost:3,type:'spell',elem:'fire',
+   text:'Deal 5 damage to target unit.',rarity:'common',vet1:'',vet2:'',vet3:''},
+  {id:'healing_light',name:'Healing Light',cost:2,type:'spell',elem:'light',
+   text:'Heal target ally 4 HP.',rarity:'common',vet1:'',vet2:'',vet3:''},
+  {id:'shadow_strike',name:'Shadow Strike',cost:2,type:'spell',elem:'shadow',
+   text:'Deal 3 damage. Draw 1 card.',rarity:'common',vet1:'',vet2:'',vet3:''},
+  {id:'earthquake',name:'Earthquake',cost:5,type:'spell',elem:'earth',
+   text:'Deal 2 damage to ALL non-Flying units.',rarity:'rare',vet1:'',vet2:'',vet3:''},
+  {id:'wind_rush',name:'Wind Rush',cost:2,type:'spell',elem:'wind',
+   text:'Give target ally +3 Move and Swift this turn.',rarity:'common',vet1:'',vet2:'',vet3:''},
+  {id:'arcane_intellect',name:'Arcane Intellect',cost:3,type:'spell',elem:'arcane',
+   text:'Draw 2 cards.',rarity:'common',vet1:'',vet2:'',vet3:''},
+  {id:'frost_nova',name:'Frost Nova',cost:4,type:'spell',elem:'wind',
+   text:'Freeze all enemy units for 1 turn.',rarity:'rare',vet1:'',vet2:'',vet3:''},
+  {id:'raise_dead',name:'Raise Dead',cost:3,type:'spell',elem:'shadow',
+   text:'Summon two 1/1 Skeleton tokens.',rarity:'common',vet1:'',vet2:'',vet3:''},
+  {id:'divine_favor',name:'Divine Favor',cost:2,type:'spell',elem:'light',
+   text:'Give target ally Divine Shield and +1/+1.',rarity:'rare',vet1:'',vet2:'',vet3:''},
+  {id:'lightning_bolt',name:'Lightning Bolt',cost:1,type:'spell',elem:'wind',
+   text:'Deal 3 damage to target unit.',rarity:'common',vet1:'',vet2:'',vet3:''},
+
+  // ---- STRUCTURES ----
+  {id:'elven_watchtower',name:'Elven Watchtower',cost:3,type:'structure',atk:0,hp:8,move:0,range:0,elem:'wind',race:'Elf',
+   kw:[],text:'Adjacent allies +1 Range.',rarity:'rare',
+   vet1:'Fortified: +3 HP',vet2:'Eagle Eye: +1 more Range to adj',vet3:'Arrow Rain: Deal 2 to all enemies in 3 range (2 XP)'},
+  {id:'orcish_war_drum',name:'Orcish War Drum',cost:3,type:'structure',atk:0,hp:5,move:0,range:0,elem:'fire',race:'Orc',
+   kw:[],text:'Adjacent allies +1 Attack.',rarity:'rare',
+   vet1:'Louder: +2 HP',vet2:'War Beat: +1 more Atk to adj',vet3:'Thunder Drum: All allies +2 Atk this turn (2 XP)'},
+  {id:'arcane_sanctum',name:'Arcane Sanctum',cost:4,type:'structure',atk:0,hp:6,move:0,range:0,elem:'arcane',race:'Construct',
+   kw:[],text:'Your spells cost 1 less.',rarity:'epic',
+   vet1:'Amplified: +3 HP',vet2:'Resonance: Spells deal +1 dmg',vet3:'Mana Surge: Gain 5 Energy (2 XP)'},
+  {id:'healing_fountain',name:'Healing Fountain',cost:3,type:'structure',atk:0,hp:5,move:0,range:0,elem:'light',race:'Construct',
+   kw:[],text:'Adjacent allies Regen 1.',rarity:'rare',
+   vet1:'Pure Water: +2 HP',vet2:'Flow: Regen 2 instead',vet3:'Overflow: Heal all allies 3 (2 XP)'}
+];
+
+// ====================== TOKEN DEFINITIONS ======================
+const TOKEN_CARDS = {
+  skeleton:{id:'skeleton',name:'Skeleton',cost:0,type:'unit',atk:1,hp:1,move:1,range:1,elem:'shadow',race:'Undead',kw:[],text:'Token.',vet1:'',vet2:'',vet3:'',rarity:'common',isToken:true},
+  sapling:{id:'sapling',name:'Sapling',cost:0,type:'unit',atk:1,hp:1,move:0,range:1,elem:'earth',race:'Elemental',kw:['taunt'],text:'Taunt. Token.',vet1:'',vet2:'',vet3:'',rarity:'common',isToken:true},
+  mech:{id:'mech',name:'Mech',cost:0,type:'unit',atk:1,hp:1,move:1,range:1,elem:'fire',race:'Construct',kw:[],text:'Token.',vet1:'',vet2:'',vet3:'',rarity:'common',isToken:true},
+  stone_wall:{id:'stone_wall',name:'Stone Wall',cost:0,type:'structure',atk:0,hp:3,move:0,range:0,elem:'earth',race:'Construct',kw:['taunt'],text:'Taunt. Token.',vet1:'',vet2:'',vet3:'',rarity:'common',isToken:true}
+};
+
+// ====================== SVG CARD ART ======================
+const CardArt = {
+  _sv:(inner)=>`<svg viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`,
+  _head:(x,y,c)=>`<circle cx="${x}" cy="${y}" r="5" fill="${c||'#f5deb3'}"/>`,
+  _body:(x,y,w,h,c)=>`<rect x="${x-w/2}" y="${y}" width="${w}" height="${h}" rx="2" fill="${c||'#555'}"/>`,
+  _sword:(x,y,a)=>`<g transform="translate(${x},${y}) rotate(${a||0})"><rect x="-1" y="-12" width="2" height="16" fill="#bbb"/><rect x="-3.5" y="3" width="7" height="2" rx="1" fill="#a85"/></g>`,
+  _bow:(x,y)=>`<path d="M${x},${y-10} Q${x+6},${y} ${x},${y+10}" fill="none" stroke="#8B4513" stroke-width="1.5"/><line x1="${x}" y1="${y-8}" x2="${x}" y2="${y+8}" stroke="#aaa" stroke-width=".5"/>`,
+  _shield:(x,y,c)=>`<path d="M${x},${y-6} L${x+6},${y-3} L${x+6},${y+4} L${x},${y+7} L${x-6},${y+4} L${x-6},${y-3} Z" fill="${c||'#4a6a9a'}" stroke="#ccc" stroke-width=".5"/>`,
+  _wings:(x,y,c,s)=>{let sz=s||10;return`<path d="M${x},${y} Q${x-sz},${y-sz} ${x-sz-3},${y-2} Q${x-sz+3},${y-3} ${x-3},${y} Z" fill="${c}" opacity=".8"/><path d="M${x},${y} Q${x+sz},${y-sz} ${x+sz+3},${y-2} Q${x+sz-3},${y-3} ${x+3},${y} Z" fill="${c}" opacity=".8"/>`;},
+  _flame:(x,y,s)=>`<path d="M${x},${y-s*2} Q${x+s},${y-s} ${x+s*.6},${y} Q${x},${y-s*.5} ${x-s*.6},${y} Q${x-s},${y-s} ${x},${y-s*2} Z" fill="#f80" opacity=".8"/><path d="M${x},${y-s*1.4} Q${x+s*.5},${y-s*.6} ${x+s*.3},${y} Q${x},${y-s*.3} ${x-s*.3},${y} Q${x-s*.5},${y-s*.6} ${x},${y-s*1.4} Z" fill="#ff4" opacity=".7"/>`,
+  _skull:(x,y,s)=>`<ellipse cx="${x}" cy="${y}" rx="${s}" ry="${s*1.1}" fill="#ddd"/><circle cx="${x-s*.35}" cy="${y-s*.2}" r="${s*.2}" fill="#333"/><circle cx="${x+s*.35}" cy="${y-s*.2}" r="${s*.2}" fill="#333"/><path d="M${x-s*.2},${y+s*.4} L${x+s*.2},${y+s*.4}" stroke="#333" stroke-width=".5"/>`,
+  _crown:(x,y)=>`<path d="M${x-5},${y} L${x-4},${y-4} L${x-2},${y-1} L${x},${y-5} L${x+2},${y-1} L${x+4},${y-4} L${x+5},${y} Z" fill="#fc0" stroke="#a80" stroke-width=".3"/>`,
+  _tree:(x,y,s)=>`<rect x="${x-1}" y="${y}" width="2" height="${s}" fill="#5a3a1a"/><path d="M${x},${y-s*.6} L${x+s*.7},${y+2} L${x-s*.7},${y+2} Z" fill="#2a6a2a"/><path d="M${x},${y-s} L${x+s*.5},${y-s*.2} L${x-s*.5},${y-s*.2} Z" fill="#3a7a3a"/>`,
+  _staff:(x,y)=>`<line x1="${x}" y1="${y-12}" x2="${x}" y2="${y+6}" stroke="#6a4a2a" stroke-width="1.5"/><circle cx="${x}" cy="${y-13}" r="3" fill="#a5f" opacity=".7"/><circle cx="${x}" cy="${y-13}" r="1.5" fill="#fff" opacity=".5"/>`,
+  _tower:(x,y,w,h,c)=>`<rect x="${x-w/2}" y="${y}" width="${w}" height="${h}" fill="${c||'#666'}"/><rect x="${x-w/2-1}" y="${y}" width="3" height="3" fill="${c||'#666'}"/><rect x="${x+w/2-2}" y="${y}" width="3" height="3" fill="${c||'#666'}"/><rect x="${x-w/2+1}" y="${y-2}" width="2" height="2" fill="${c||'#666'}"/>`,
+  _magic:(x,y,c,s)=>{s=s||3;return`<circle cx="${x}" cy="${y}" r="${s}" fill="${c}" opacity=".4"/><circle cx="${x}" cy="${y}" r="${s*.5}" fill="#fff" opacity=".6"/><line x1="${x-s}" y1="${y}" x2="${x+s}" y2="${y}" stroke="${c}" stroke-width=".5" opacity=".5"/><line x1="${x}" y1="${y-s}" x2="${x}" y2="${y+s}" stroke="${c}" stroke-width=".5" opacity=".5"/>`;},
+  elven_archer:()=>CardArt._sv(CardArt._head(20,10,'#f5deb3')+'<path d="M16,16 L14,34 L18,34 Z" fill="#2a5a2a"/><path d="M24,16 L22,34 L26,34 Z" fill="#2a5a2a"/><rect x="17" y="14" width="6" height="12" rx="1" fill="#3a7a3a"/>'+CardArt._bow(32,20)+'<line x1="32" y1="12" x2="36" y2="24" stroke="#aaa" stroke-width=".8"/><path d="M14,8 Q20,4 26,8" fill="none" stroke="#5a3" stroke-width="1"/>'),
+  orc_berserker:()=>CardArt._sv(CardArt._head(20,10,'#6a8a4a')+'<rect x="14" y="14" width="12" height="14" rx="1" fill="#8a4a2a"/><rect x="12" y="16" width="4" height="8" fill="#6a8a4a"/>'+CardArt._sword(30,22,-20)+'<path d="M18,5 L16,3 M22,5 L24,3" stroke="#6a8a4a" stroke-width="1.5"/><rect x="14" y="28" width="5" height="8" fill="#5a3a1a"/><rect x="21" y="28" width="5" height="8" fill="#5a3a1a"/>'),
+  ancient_treant:()=>CardArt._sv('<rect x="17" y="18" width="6" height="20" fill="#5a3a1a"/><rect x="14" y="22" width="3" height="12" fill="#4a2a0a" transform="rotate(-15,15,22)"/><rect x="23" y="22" width="3" height="12" fill="#4a2a0a" transform="rotate(15,24,22)"/><ellipse cx="20" cy="14" rx="12" ry="10" fill="#2a6a2a"/><ellipse cx="20" cy="12" rx="8" ry="7" fill="#3a8a3a"/><circle cx="17" cy="14" r="1.5" fill="#ff8"/><circle cx="23" cy="14" r="1.5" fill="#ff8"/>'),
+  shadow_assassin:()=>CardArt._sv('<path d="M20,6 L26,14 L24,36 L16,36 L14,14 Z" fill="#222"/><path d="M20,6 L24,14 L22,30 L18,30 L16,14 Z" fill="#333"/>'+CardArt._head(20,10,'#c8b8a0')+'<path d="M14,10 L26,10 L26,8 L14,8 Z" fill="#222"/><line x1="28" y1="18" x2="34" y2="12" stroke="#aaa" stroke-width="1"/><line x1="28" y1="20" x2="35" y2="14" stroke="#888" stroke-width=".8"/>'),
+  dwarven_shieldbearer:()=>CardArt._sv(CardArt._head(20,10,'#deb887')+'<rect x="13" y="14" width="14" height="12" rx="1" fill="#666"/><rect x="14" y="26" width="5" height="8" fill="#555"/><rect x="21" y="26" width="5" height="8" fill="#555"/>'+CardArt._shield(10,24,'#4a6a9a')+'<path d="M16,12 Q20,15 24,12" fill="#8a6a2a"/>'),
+  fire_imp:()=>CardArt._sv('<circle cx="20" cy="16" r="7" fill="#c83030"/>'+CardArt._flame(20,6,5)+'<circle cx="17" cy="14" r="1.5" fill="#ff0"/><circle cx="23" cy="14" r="1.5" fill="#ff0"/><path d="M17,19 L20,17 L23,19" fill="none" stroke="#800" stroke-width="1"/><path d="M14,22 L12,30 L16,28 Z" fill="#c83030"/><path d="M26,22 L28,30 L24,28 Z" fill="#c83030"/><path d="M20,24 L22,36 L18,36 Z" fill="#a02020"/>'),
+  holy_knight:()=>CardArt._sv(CardArt._head(20,10,'#f5deb3')+'<rect x="14" y="14" width="12" height="14" rx="1" fill="#ccc"/><rect x="13" y="16" width="14" height="2" fill="#ddd"/>'+CardArt._shield(11,26,'#3a5a9a')+CardArt._sword(30,20,0)+'<rect x="14" y="28" width="5" height="8" fill="#888"/><rect x="21" y="28" width="5" height="8" fill="#888"/><circle cx="20" cy="5" r="4" fill="none" stroke="#fc0" stroke-width=".8" opacity=".5"/>'),
+  goblin_saboteur:()=>CardArt._sv('<circle cx="20" cy="14" r="6" fill="#5a8a3a"/><circle cx="17" cy="12" r="2" fill="#ff0"/><circle cx="23" cy="12" r="2" fill="#ff0"/><circle cx="17" cy="12" r="1" fill="#000"/><circle cx="23" cy="12" r="1" fill="#000"/><path d="M17,17 Q20,19 23,17" stroke="#333" stroke-width=".8" fill="none"/><rect x="16" y="20" width="8" height="10" fill="#5a4a2a"/><circle cx="28" cy="22" r="4" fill="#833"/><line x1="26" y1="18" x2="30" y2="16" stroke="#a55" stroke-width="2"/>'),
+  dragon_hatchling:()=>CardArt._sv('<ellipse cx="20" cy="22" rx="8" ry="10" fill="#c84030"/>'+CardArt._wings(20,16,'#d85040',7)+'<circle cx="20" cy="14" r="5" fill="#d04828"/><circle cx="17" cy="13" r="1.5" fill="#fc0"/><circle cx="23" cy="13" r="1.5" fill="#fc0"/><path d="M18,17 Q20,19 22,17" stroke="#800" stroke-width=".6" fill="none"/><path d="M20,10 L18,7 L20,9 L22,7 Z" fill="#d85040"/>'),
+  undead_warrior:()=>CardArt._sv(CardArt._skull(20,12,5)+'<rect x="14" y="18" width="12" height="12" rx="1" fill="#444"/><rect x="13" y="20" width="14" height="2" fill="#555"/>'+CardArt._sword(29,22,-15)+'<rect x="14" y="30" width="5" height="8" fill="#3a3a3a"/><rect x="21" y="30" width="5" height="8" fill="#3a3a3a"/>'),
+  angel_of_light:()=>CardArt._sv(CardArt._head(20,14,'#ffe8c0')+CardArt._wings(20,18,'#ffe8a0',12)+'<rect x="16" y="18" width="8" height="14" rx="1" fill="#eee"/><rect x="14" y="32" width="12" height="4" fill="#ddd"/>'+CardArt._crown(20,8)+'<circle cx="20" cy="6" r="6" fill="none" stroke="#fc0" stroke-width=".6" opacity=".4"/>'),
+  merfolk_tidecaller:()=>CardArt._sv(CardArt._head(20,12,'#8ac8d8')+'<rect x="15" y="16" width="10" height="10" rx="1" fill="#2a6a8a"/><path d="M15,26 Q17,34 20,38 Q23,34 25,26 Z" fill="#3a8aaa"/>'+CardArt._staff(32,22)+'<path d="M8,30 Q12,26 16,30 Q20,34 24,30 Q28,26 32,30" fill="none" stroke="#4af" stroke-width="1" opacity=".4"/>'),
+  stone_golem:()=>CardArt._sv('<rect x="12" y="10" width="16" height="18" rx="3" fill="#777"/><rect x="10" y="14" width="6" height="10" rx="2" fill="#666"/><rect x="24" y="14" width="6" height="10" rx="2" fill="#666"/><rect x="14" y="28" width="5" height="10" rx="1" fill="#666"/><rect x="21" y="28" width="5" height="10" rx="1" fill="#666"/><circle cx="17" cy="16" r="2" fill="#4af"/><circle cx="23" cy="16" r="2" fill="#4af"/><path d="M16,22 L24,22" stroke="#555" stroke-width="1.5"/>'),
+  beast_rider:()=>CardArt._sv('<ellipse cx="20" cy="28" rx="10" ry="6" fill="#8a6a3a"/><rect x="16" y="22" width="8" height="8" fill="#9a7a4a"/>'+CardArt._head(20,14,'#deb887')+'<rect x="16" y="18" width="8" height="6" fill="#5a4a2a"/><path d="M12,32 L10,38 M16,34 L15,40 M24,34 L25,40 M28,32 L30,38" stroke="#7a5a2a" stroke-width="1.5"/>'),
+  goblin_engineer:()=>CardArt._sv('<circle cx="20" cy="14" r="6" fill="#5a8a3a"/><circle cx="17" cy="12" r="1.5" fill="#ff0"/><circle cx="23" cy="12" r="1.5" fill="#ff0"/><rect x="15" y="20" width="10" height="10" fill="#5a4a2a"/><rect x="26" y="18" width="8" height="6" rx="1" fill="#888"/><rect x="28" y="24" width="4" height="6" fill="#666"/><circle cx="30" cy="20" r="2" fill="#aaa" stroke="#666" stroke-width=".5"/>'),
+  dark_necromancer:()=>CardArt._sv('<path d="M20,4 L28,12 L26,38 L14,38 L12,12 Z" fill="#2a1a3a"/>'+CardArt._head(20,12,'#c8b890')+'<path d="M12,10 L28,10 L28,6 L12,6 Z" fill="#1a0a2a"/>'+CardArt._staff(10,22)+'<circle cx="10" cy="9" r="3" fill="#a5f" opacity=".6"/>'+CardArt._skull(30,30,3)),
+  phoenix_hatchling:()=>CardArt._sv(CardArt._wings(20,18,'#f80',10)+CardArt._flame(20,4,6)+'<ellipse cx="20" cy="22" rx="6" ry="8" fill="#e86020"/><circle cx="20" cy="16" r="4.5" fill="#f08030"/><circle cx="18" cy="15" r="1" fill="#ff0"/><circle cx="22" cy="15" r="1" fill="#ff0"/><path d="M16,28 L14,36 M20,30 L20,38 M24,28 L26,36" stroke="#f80" stroke-width="1"/>'),
+  elven_sage:()=>CardArt._sv(CardArt._head(20,12,'#f5deb3')+'<rect x="15" y="16" width="10" height="14" rx="1" fill="#3a5a7a"/><path d="M12,8 Q20,2 28,8" fill="none" stroke="#5a3" stroke-width="1.5"/>'+CardArt._staff(30,20)+'<path d="M14,30 L12,38 M26,30 L28,38" stroke="#3a5a7a" stroke-width="2"/>'),
+  orcish_warlord:()=>CardArt._sv(CardArt._head(20,10,'#6a8a4a')+CardArt._crown(20,4)+'<rect x="12" y="14" width="16" height="14" rx="1" fill="#8a4a2a"/><rect x="10" y="16" width="5" height="10" fill="#6a8a4a"/>'+CardArt._sword(8,24,-30)+CardArt._sword(32,24,30)+'<rect x="14" y="28" width="5" height="10" fill="#5a3a1a"/><rect x="21" y="28" width="5" height="10" fill="#5a3a1a"/>'),
+  crystal_guardian:()=>CardArt._sv('<path d="M20,4 L30,14 L28,34 L12,34 L10,14 Z" fill="#7a5aaa" opacity=".7"/><path d="M20,8 L26,14 L25,30 L15,30 L14,14 Z" fill="#a87af5" opacity=".5"/><circle cx="20" cy="18" r="3" fill="#fff" opacity=".5"/>'+CardArt._magic(20,18,'#a5f',5)),
+  swamp_lurker:()=>CardArt._sv('<ellipse cx="20" cy="26" rx="12" ry="8" fill="#3a5a2a"/><ellipse cx="20" cy="22" rx="9" ry="6" fill="#4a6a3a"/><circle cx="16" cy="18" r="3" fill="#8a0" stroke="#5a0" stroke-width=".5"/><circle cx="24" cy="18" r="3" fill="#8a0" stroke="#5a0" stroke-width=".5"/><circle cx="16" cy="17" r="1.5" fill="#000"/><circle cx="24" cy="17" r="1.5" fill="#000"/>'),
+  lightning_elemental:()=>CardArt._sv('<path d="M22,4 L16,18 L22,16 L14,34" stroke="#4cf" stroke-width="3" fill="none"/><path d="M22,4 L16,18 L22,16 L14,34" stroke="#fff" stroke-width="1" fill="none" opacity=".6"/><circle cx="18" cy="18" r="6" fill="#2af" opacity=".2"/>'+CardArt._magic(26,12,'#4cf',4)),
+  vampire_lord:()=>CardArt._sv(CardArt._head(20,12,'#e8d8c8')+CardArt._wings(20,18,'#333',10)+'<rect x="15" y="16" width="10" height="14" rx="1" fill="#2a0a1a"/><path d="M17,17 L18,14 M23,17 L22,14" stroke="#fff" stroke-width=".8"/>'),
+  dwarven_cannon:()=>CardArt._sv(CardArt._head(20,10,'#deb887')+'<rect x="14" y="14" width="12" height="10" rx="1" fill="#666"/><rect x="24" y="14" width="12" height="4" rx="1" fill="#555"/><circle cx="36" cy="16" r="2" fill="#333"/><rect x="14" y="24" width="12" height="10" fill="#555"/>'),
+  mountain_giant:()=>CardArt._sv('<rect x="8" y="8" width="24" height="24" rx="4" fill="#7a6a5a"/><rect x="6" y="14" width="8" height="14" rx="3" fill="#6a5a4a"/><rect x="26" y="14" width="8" height="14" rx="3" fill="#6a5a4a"/><circle cx="16" cy="16" r="2.5" fill="#4af"/><circle cx="24" cy="16" r="2.5" fill="#4af"/>'),
+  spirit_fox:()=>CardArt._sv('<ellipse cx="20" cy="24" rx="8" ry="6" fill="#8a6af5" opacity=".7"/><circle cx="20" cy="16" r="5" fill="#9a7af5" opacity=".8"/><path d="M16,12 L14,6 L18,10 Z" fill="#a88af5"/><path d="M24,12 L26,6 L22,10 Z" fill="#a88af5"/><circle cx="18" cy="15" r="1" fill="#fff"/><circle cx="22" cy="15" r="1" fill="#fff"/>'),
+  demon_brute:()=>CardArt._sv('<circle cx="20" cy="14" r="7" fill="#8a2a2a"/><path d="M14,8 L10,2 M26,8 L30,2" stroke="#6a1a1a" stroke-width="2"/><circle cx="17" cy="12" r="2" fill="#f00"/><circle cx="23" cy="12" r="2" fill="#f00"/><rect x="12" y="20" width="16" height="14" rx="2" fill="#6a2a2a"/>'+CardArt._sword(32,26,20)),
+  frost_mage:()=>CardArt._sv(CardArt._head(20,12,'#d8e8f8')+'<rect x="15" y="16" width="10" height="14" rx="1" fill="#4a6a8a"/>'+CardArt._staff(10,22)+'<circle cx="10" cy="9" r="3.5" fill="#8cf" opacity=".5"/><path d="M7,9 L13,9 M10,6 L10,12" stroke="#aef" stroke-width=".5"/>'),
+  war_elephant:()=>CardArt._sv('<ellipse cx="20" cy="26" rx="14" ry="10" fill="#888"/><ellipse cx="20" cy="18" rx="10" ry="8" fill="#999"/><path d="M14,20 Q10,30 8,36" stroke="#888" stroke-width="3" fill="none"/><circle cx="15" cy="16" r="2" fill="#555"/><circle cx="25" cy="16" r="2" fill="#555"/>'),
+  angel_healer:()=>CardArt._sv(CardArt._head(20,14,'#ffe8c0')+CardArt._wings(20,18,'#ddf0ff',10)+'<rect x="16" y="18" width="8" height="12" rx="1" fill="#eef"/>'+CardArt._magic(20,32,'#4f8',3)),
+  void_stalker:()=>CardArt._sv('<path d="M20,6 L28,16 L26,38 L14,38 L12,16 Z" fill="#1a0a2a" opacity=".8"/><circle cx="20" cy="14" r="5" fill="#2a1a3a"/><circle cx="18" cy="13" r="1.5" fill="#a0f"/><circle cx="22" cy="13" r="1.5" fill="#a0f"/>'),
+  arcane_construct:()=>CardArt._sv('<rect x="12" y="10" width="16" height="20" rx="2" fill="#6a5a8a"/><rect x="10" y="14" width="6" height="8" rx="2" fill="#5a4a7a"/><rect x="24" y="14" width="6" height="8" rx="2" fill="#5a4a7a"/>'+CardArt._magic(20,18,'#a5f',4)),
+  dragonlord:()=>CardArt._sv('<ellipse cx="20" cy="24" rx="12" ry="10" fill="#8a2a1a"/>'+CardArt._wings(20,14,'#a83a2a',14)+'<circle cx="20" cy="14" r="6" fill="#9a3a2a"/><circle cx="17" cy="12" r="2" fill="#fc0"/><circle cx="23" cy="12" r="2" fill="#fc0"/>'+CardArt._crown(20,6)+CardArt._flame(20,2,4)),
+  plague_bearer:()=>CardArt._sv(CardArt._skull(20,12,5)+'<rect x="14" y="18" width="12" height="12" rx="1" fill="#3a4a2a"/><circle cx="14" cy="30" r="2" fill="#4a2" opacity=".5"/><circle cx="26" cy="28" r="1.5" fill="#4a2" opacity=".5"/>'),
+  light_priestess:()=>CardArt._sv(CardArt._head(20,12,'#ffe8c8')+'<rect x="15" y="16" width="10" height="14" rx="1" fill="#eee"/>'+CardArt._staff(32,20)+'<circle cx="32" cy="7" r="3" fill="#fc0" opacity=".4"/>'+CardArt._magic(20,34,'#fc0',3)),
+  fireball:()=>CardArt._sv(CardArt._flame(20,8,10)+'<circle cx="20" cy="22" r="10" fill="#f60" opacity=".3"/><circle cx="20" cy="22" r="6" fill="#f80" opacity=".4"/>'),
+  healing_light:()=>CardArt._sv('<circle cx="20" cy="20" r="12" fill="#fc0" opacity=".15"/><circle cx="20" cy="20" r="8" fill="#fc0" opacity=".2"/><path d="M20,8 L20,32 M8,20 L32,20" stroke="#fc0" stroke-width="2" opacity=".5"/>'),
+  shadow_strike:()=>CardArt._sv('<path d="M8,8 L32,36" stroke="#60a" stroke-width="4" opacity=".6"/><path d="M8,8 L32,36" stroke="#a0f" stroke-width="1.5"/><circle cx="30" cy="34" r="6" fill="#40a" opacity=".3"/>'),
+  earthquake:()=>CardArt._sv('<path d="M4,22 L10,18 L16,24 L22,16 L28,26 L34,20 L40,22" fill="none" stroke="#8a6a2a" stroke-width="2.5"/><path d="M4,28 L10,24 L16,30 L22,22 L28,32 L34,26 L40,28" fill="none" stroke="#6a4a1a" stroke-width="2" opacity=".6"/>'),
+  wind_rush:()=>CardArt._sv('<path d="M6,16 Q20,12 34,16" fill="none" stroke="#4cf" stroke-width="2" opacity=".6"/><path d="M8,22 Q22,18 36,22" fill="none" stroke="#6df" stroke-width="1.5" opacity=".5"/><path d="M30,10 L36,14 L30,18" fill="none" stroke="#8ef" stroke-width="1.5"/>'),
+  arcane_intellect:()=>CardArt._sv(CardArt._magic(20,20,'#a5f',10)+'<circle cx="20" cy="20" r="6" fill="#a5f" opacity=".2"/>'+CardArt._magic(12,14,'#a5f',3)+CardArt._magic(28,26,'#a5f',3)),
+  frost_nova:()=>CardArt._sv('<circle cx="20" cy="22" r="14" fill="#8cf" opacity=".15"/><path d="M20,6 L20,38 M6,22 L34,22 M10,12 L30,32 M30,12 L10,32" stroke="#aef" stroke-width="1.5" opacity=".5"/><circle cx="20" cy="22" r="2" fill="#fff" opacity=".5"/>'),
+  raise_dead:()=>CardArt._sv(CardArt._skull(14,16,4)+CardArt._skull(26,16,4)+'<circle cx="20" cy="34" r="4" fill="#60a" opacity=".3"/>'),
+  divine_favor:()=>CardArt._sv(CardArt._shield(20,20,'#4a6aaa')+'<circle cx="20" cy="18" r="8" fill="#fc0" opacity=".15"/><path d="M20,10 L20,26 M14,18 L26,18" stroke="#fc0" stroke-width="1.5" opacity=".6"/>'),
+  lightning_bolt:()=>CardArt._sv('<path d="M24,2 L14,20 L22,18 L12,40" stroke="#4cf" stroke-width="3.5" fill="none"/><path d="M24,2 L14,20 L22,18 L12,40" stroke="#fff" stroke-width="1.5" fill="none" opacity=".7"/>'),
+  elven_watchtower:()=>CardArt._sv(CardArt._tower(20,8,8,28,'#4a6a4a')+'<path d="M12,8 L20,2 L28,8 Z" fill="#3a5a3a"/><rect x="18" y="14" width="4" height="5" fill="#2a4a2a"/>'),
+  orcish_war_drum:()=>CardArt._sv('<ellipse cx="20" cy="16" rx="12" ry="5" fill="#8a4a2a"/><rect x="8" y="16" width="24" height="14" fill="#7a3a1a"/><ellipse cx="20" cy="30" rx="12" ry="5" fill="#6a2a0a"/><line x1="14" y1="10" x2="14" y2="6" stroke="#5a3a1a" stroke-width="2"/><circle cx="14" cy="5" r="2" fill="#aaa"/><line x1="26" y1="10" x2="26" y2="6" stroke="#5a3a1a" stroke-width="2"/><circle cx="26" cy="5" r="2" fill="#aaa"/>'),
+  arcane_sanctum:()=>CardArt._sv('<rect x="12" y="14" width="16" height="22" rx="1" fill="#4a3a6a"/><path d="M10,14 L20,4 L30,14 Z" fill="#5a4a7a"/>'+CardArt._magic(20,22,'#a5f',6)+'<rect x="18" y="26" width="4" height="10" fill="#3a2a5a"/>'),
+  healing_fountain:()=>CardArt._sv('<ellipse cx="20" cy="32" rx="12" ry="5" fill="#4a7a9a"/><rect x="12" y="24" width="16" height="8" fill="#5a8aaa"/><path d="M20,12 Q22,18 20,24 Q18,18 20,12 Z" fill="#8cf" opacity=".6"/>'+CardArt._magic(20,20,'#4f8',3)),
+  skeleton:()=>CardArt._sv(CardArt._skull(20,14,4)+'<rect x="16" y="20" width="8" height="10" fill="#ccc" opacity=".5"/>'),
+  sapling:()=>CardArt._sv(CardArt._tree(20,16,10)),
+  mech:()=>CardArt._sv('<rect x="14" y="10" width="12" height="14" rx="1" fill="#888"/><rect x="12" y="14" width="4" height="8" rx="1" fill="#777"/><rect x="24" y="14" width="4" height="8" rx="1" fill="#777"/><circle cx="18" cy="16" r="1.5" fill="#f00"/><circle cx="22" cy="16" r="1.5" fill="#f00"/>'),
+  stone_wall:()=>CardArt._sv('<rect x="8" y="10" width="24" height="26" rx="2" fill="#777"/><rect x="10" y="12" width="8" height="6" fill="#666" stroke="#888" stroke-width=".5"/><rect x="22" y="12" width="8" height="6" fill="#666" stroke="#888" stroke-width=".5"/>'),
+  _generic:(type,elem)=>{let c=(typeof ELEMENTS!=='undefined'&&ELEMENTS[elem])?ELEMENTS[elem].color:'#888';if(type==='spell')return CardArt._sv(`<circle cx="20" cy="20" r="12" fill="${c}" opacity=".2"/>${CardArt._magic(20,20,c,8)}`);if(type==='structure')return CardArt._sv(CardArt._tower(20,10,10,24,c));return CardArt._sv(CardArt._head(20,12,c+'88')+`<rect x="14" y="16" width="12" height="14" rx="2" fill="${c}" opacity=".5"/>`+CardArt._sword(30,22,0));}
+};
+
+// ====================== TERRAIN SVG ICONS ======================
+const TerrainSVG = {
+  _sv:(inner)=>`<svg viewBox="0 0 60 48" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`,
+  plain:()=>TerrainSVG._sv(
+    '<path d="M10,38 Q12,28 14,38" stroke="#5a8a4a" stroke-width="1.5" fill="none"/>' +
+    '<path d="M20,40 Q22,26 24,40" stroke="#4a7a3a" stroke-width="1.8" fill="none"/>' +
+    '<path d="M18,39 Q20,30 22,39" stroke="#6a9a5a" stroke-width="1.2" fill="none"/>' +
+    '<path d="M32,38 Q34,30 36,38" stroke="#5a8a4a" stroke-width="1.5" fill="none"/>' +
+    '<path d="M40,39 Q42,32 44,39" stroke="#4a7a3a" stroke-width="1.3" fill="none"/>' +
+    '<path d="M28,40 Q30,34 32,40" stroke="#6a9a5a" stroke-width="1" fill="none"/>'
+  ),
+  forest:()=>TerrainSVG._sv(
+    '<polygon points="20,8 28,26 12,26" fill="#1a5a1a"/>' +
+    '<polygon points="20,4 26,18 14,18" fill="#2a7a2a"/>' +
+    '<rect x="18" y="26" width="4" height="8" fill="#5a3a1a"/>' +
+    '<polygon points="38,14 44,28 32,28" fill="#1a5a1a" opacity=".8"/>' +
+    '<polygon points="38,10 43,22 33,22" fill="#2a6a2a" opacity=".8"/>' +
+    '<rect x="36" y="28" width="4" height="6" fill="#4a2a0a" opacity=".8"/>'
+  ),
+  mountain:()=>TerrainSVG._sv(
+    '<polygon points="30,6 48,40 12,40" fill="#5a5a6a"/>' +
+    '<polygon points="30,6 40,40 20,40" fill="#6a6a7a"/>' +
+    '<polygon points="30,6 34,16 26,16" fill="#dde8f0" opacity=".7"/>' +
+    '<polygon points="30,6 32,12 28,12" fill="#fff" opacity=".5"/>'
+  ),
+  water:()=>TerrainSVG._sv(
+    '<path d="M4,22 Q12,16 20,22 Q28,28 36,22 Q44,16 52,22" fill="none" stroke="#4a8aee" stroke-width="2.5" opacity=".7">' +
+    '<animate attributeName="d" dur="3s" repeatCount="indefinite" values="M4,22 Q12,16 20,22 Q28,28 36,22 Q44,16 52,22;M4,22 Q12,28 20,22 Q28,16 36,22 Q44,28 52,22;M4,22 Q12,16 20,22 Q28,28 36,22 Q44,16 52,22"/></path>' +
+    '<path d="M2,32 Q10,26 18,32 Q26,38 34,32 Q42,26 50,32" fill="none" stroke="#3a7ade" stroke-width="2" opacity=".5">' +
+    '<animate attributeName="d" dur="3.5s" repeatCount="indefinite" values="M2,32 Q10,26 18,32 Q26,38 34,32 Q42,26 50,32;M2,32 Q10,38 18,32 Q26,26 34,32 Q42,38 50,32;M2,32 Q10,26 18,32 Q26,38 34,32 Q42,26 50,32"/></path>'
+  ),
+  swamp:()=>TerrainSVG._sv(
+    '<ellipse cx="30" cy="34" rx="18" ry="8" fill="#2a3a1a" opacity=".6"/>' +
+    '<ellipse cx="30" cy="34" rx="12" ry="5" fill="#1a2a0a" opacity=".5"/>' +
+    '<circle cx="22" cy="30" r="2" fill="#5a6a2a" opacity=".5"/>' +
+    '<circle cx="36" cy="32" r="1.5" fill="#4a5a1a" opacity=".5"/>' +
+    '<circle cx="28" cy="28" r="1" fill="#6a7a3a" opacity=".4"/>' +
+    '<rect x="40" y="18" width="2" height="14" fill="#3a2a1a"/>' +
+    '<path d="M38,18 Q41,14 44,18" fill="none" stroke="#3a2a1a" stroke-width="1.5"/>'
+  ),
+  hill:()=>TerrainSVG._sv(
+    '<ellipse cx="30" cy="36" rx="24" ry="12" fill="#6a6a34"/>' +
+    '<ellipse cx="30" cy="34" rx="20" ry="10" fill="#7a7a44"/>' +
+    '<ellipse cx="28" cy="33" rx="14" ry="7" fill="#8a8a50" opacity=".5"/>' +
+    '<path d="M10,38 Q30,20 50,38" fill="none" stroke="rgba(0,0,0,.15)" stroke-width="1.5"/>'
+  ),
+  volcano:()=>TerrainSVG._sv(
+    '<polygon points="30,8 48,40 12,40" fill="#5a2010"/>' +
+    '<polygon points="30,8 42,40 18,40" fill="#6a2a14"/>' +
+    '<ellipse cx="30" cy="14" rx="6" ry="3" fill="#e86020" opacity=".7"/>' +
+    '<ellipse cx="30" cy="14" rx="4" ry="2" fill="#fc8030" opacity=".6"/>' +
+    '<path d="M26,12 Q24,4 28,6" stroke="#f84" stroke-width="1.5" fill="none" opacity=".6"/>' +
+    '<path d="M34,12 Q36,2 32,5" stroke="#fa6" stroke-width="1.5" fill="none" opacity=".5"/>' +
+    '<path d="M30,11 Q30,3 31,6" stroke="#fc8" stroke-width="1" fill="none" opacity=".5"/>'
+  ),
+  ruins:()=>TerrainSVG._sv(
+    '<rect x="14" y="16" width="5" height="24" fill="#6a5a8a" rx="1"/>' +
+    '<rect x="26" y="20" width="5" height="20" fill="#5a4a7a" rx="1"/>' +
+    '<rect x="38" y="22" width="5" height="18" fill="#6a5a8a" rx="1" transform="rotate(8,40,40)"/>' +
+    '<rect x="12" y="14" width="22" height="3" fill="#7a6a9a" rx="1"/>' +
+    '<circle cx="17" cy="28" r="1.5" fill="#a87af5" opacity=".3"/>' +
+    '<circle cx="29" cy="32" r="1" fill="#a87af5" opacity=".25"/>'
+  )
+};
+
+// ====================== PROCEDURAL AUDIO (SFX) ======================
+const SFX={
+  ctx:null,enabled:true,master:null,ambient:null,
+  init(){
+    try{this.ctx=new (window.AudioContext||window.webkitAudioContext)();this.master=this.ctx.createGain();this.master.gain.value=0.4;this.master.connect(this.ctx.destination)}catch(e){this.enabled=false}
+  },
+  ensure(){if(!this.ctx)this.init();if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume()},
+  toggle(){this.enabled=!this.enabled;if(!this.enabled&&this.ambient){this.ambient.stop();this.ambient=null}if(this.enabled)this.ambientLoop();return this.enabled},
+  _g(v){let g=this.ctx.createGain();g.gain.value=v||0.3;g.connect(this.master);return g},
+  _osc(type,freq,dur,g){let o=this.ctx.createOscillator();o.type=type;o.frequency.value=freq;o.connect(g);o.start(this.ctx.currentTime);o.stop(this.ctx.currentTime+dur);return o},
+  _noise(dur){let sr=this.ctx.sampleRate,buf=this.ctx.createBuffer(1,sr*dur,sr),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;let n=this.ctx.createBufferSource();n.buffer=buf;return n},
+  swordHit(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime,g=this._g(0.25);
+    g.gain.setValueAtTime(0.25,t);g.gain.exponentialRampToValueAtTime(0.01,t+0.15);
+    let n=this._noise(0.15);let f=this.ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=2000;f.Q.value=2;
+    n.connect(f);f.connect(g);n.start(t);n.stop(t+0.15);
+    let o=this.ctx.createOscillator();o.type='sine';o.frequency.value=120;o.connect(g);o.start(t);o.stop(t+0.08);
+  },
+  arrowShot(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime,g=this._g(0.2);
+    g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.01,t+0.25);
+    let n=this._noise(0.25);let f=this.ctx.createBiquadFilter();f.type='highpass';f.frequency.value=3000;
+    n.connect(f);f.connect(g);n.start(t);n.stop(t+0.25);
+  },
+  fireball(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime,g=this._g(0.3);
+    g.gain.setValueAtTime(0.01,t);g.gain.linearRampToValueAtTime(0.3,t+0.15);g.gain.exponentialRampToValueAtTime(0.01,t+0.5);
+    let o=this.ctx.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(100,t);o.frequency.exponentialRampToValueAtTime(400,t+0.15);o.frequency.exponentialRampToValueAtTime(60,t+0.5);
+    o.connect(g);o.start(t);o.stop(t+0.5);
+    let n=this._noise(0.4);let f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=800;
+    let ng=this._g(0.15);ng.gain.setValueAtTime(0.01,t+0.1);ng.gain.linearRampToValueAtTime(0.15,t+0.2);ng.gain.exponentialRampToValueAtTime(0.01,t+0.5);
+    n.connect(f);f.connect(ng);n.start(t+0.1);n.stop(t+0.5);
+  },
+  iceCrack(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime;
+    for(let i=0;i<4;i++){let g=this._g(0.15);g.gain.setValueAtTime(0.15,t+i*0.06);g.gain.exponentialRampToValueAtTime(0.01,t+i*0.06+0.05);
+    let o=this.ctx.createOscillator();o.type='square';o.frequency.value=3000+Math.random()*2000;o.connect(g);o.start(t+i*0.06);o.stop(t+i*0.06+0.05)}
+    let sg=this._g(0.1);sg.gain.setValueAtTime(0.1,t+0.2);sg.gain.exponentialRampToValueAtTime(0.01,t+0.6);
+    let o2=this.ctx.createOscillator();o2.type='sine';o2.frequency.value=6000;o2.connect(sg);o2.start(t+0.2);o2.stop(t+0.6);
+  },
+  shadowHum(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime,g=this._g(0.15);
+    g.gain.setValueAtTime(0.15,t);g.gain.exponentialRampToValueAtTime(0.01,t+0.6);
+    let o1=this.ctx.createOscillator();o1.type='sine';o1.frequency.value=80;o1.connect(g);o1.start(t);o1.stop(t+0.6);
+    let o2=this.ctx.createOscillator();o2.type='sine';o2.frequency.value=83;o2.connect(g);o2.start(t);o2.stop(t+0.6);
+  },
+  healChime(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime;
+    [523,659,784].forEach((f,i)=>{let g=this._g(0.12);g.gain.setValueAtTime(0.12,t+i*0.12);g.gain.exponentialRampToValueAtTime(0.01,t+i*0.12+0.4);
+    let o=this.ctx.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);o.start(t+i*0.12);o.stop(t+i*0.12+0.4)});
+  },
+  arcanePulse(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime,g=this._g(0.2);
+    g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.01,t+0.4);
+    let o=this.ctx.createOscillator();o.type='sine';o.frequency.value=300;
+    let lfo=this.ctx.createOscillator();lfo.type='sine';lfo.frequency.value=15;let lg=this.ctx.createGain();lg.gain.value=100;
+    lfo.connect(lg);lg.connect(o.frequency);o.connect(g);o.start(t);o.stop(t+0.4);lfo.start(t);lfo.stop(t+0.4);
+  },
+  cardPlay(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime,g=this._g(0.15);
+    g.gain.setValueAtTime(0.15,t);g.gain.exponentialRampToValueAtTime(0.01,t+0.08);
+    let n=this._noise(0.08);let f=this.ctx.createBiquadFilter();f.type='highpass';f.frequency.value=4000;
+    n.connect(f);f.connect(g);n.start(t);n.stop(t+0.08);
+  },
+  uiClick(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime,g=this._g(0.08);
+    g.gain.setValueAtTime(0.08,t);g.gain.exponentialRampToValueAtTime(0.01,t+0.04);
+    let o=this.ctx.createOscillator();o.type='sine';o.frequency.value=800;o.connect(g);o.start(t);o.stop(t+0.04);
+  },
+  phaseChange(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime;
+    [440,554].forEach((f,i)=>{let g=this._g(0.1);g.gain.setValueAtTime(0.1,t+i*0.1);g.gain.exponentialRampToValueAtTime(0.01,t+i*0.1+0.2);
+    let o=this.ctx.createOscillator();o.type='triangle';o.frequency.value=f;o.connect(g);o.start(t+i*0.1);o.stop(t+i*0.1+0.2)});
+  },
+  deathSound(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime,g=this._g(0.2);
+    g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.01,t+0.4);
+    let o=this.ctx.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(60,t+0.4);
+    o.connect(g);o.start(t);o.stop(t+0.4);
+    let ng=this._g(0.1);ng.gain.setValueAtTime(0.1,t+0.1);ng.gain.exponentialRampToValueAtTime(0.01,t+0.4);
+    let n=this._noise(0.3);n.connect(ng);n.start(t+0.1);n.stop(t+0.4);
+  },
+  victory(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime;
+    [523,659,784,1047].forEach((f,i)=>{let g=this._g(0.2);g.gain.setValueAtTime(0.2,t+i*0.18);g.gain.exponentialRampToValueAtTime(0.01,t+i*0.18+0.5);
+    let o=this.ctx.createOscillator();o.type='triangle';o.frequency.value=f;o.connect(g);o.start(t+i*0.18);o.stop(t+i*0.18+0.5)});
+  },
+  defeat(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime;
+    [400,350,300,200].forEach((f,i)=>{let g=this._g(0.15);g.gain.setValueAtTime(0.15,t+i*0.2);g.gain.exponentialRampToValueAtTime(0.01,t+i*0.2+0.5);
+    let o=this.ctx.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);o.start(t+i*0.2);o.stop(t+i*0.2+0.5)});
+  },
+  levelUp(){
+    if(!this.enabled||!this.ctx)return;let t=this.ctx.currentTime;
+    [600,750,900,1200].forEach((f,i)=>{let g=this._g(0.15);g.gain.setValueAtTime(0.15,t+i*0.08);g.gain.exponentialRampToValueAtTime(0.01,t+i*0.08+0.3);
+    let o=this.ctx.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);o.start(t+i*0.08);o.stop(t+i*0.08+0.3)});
+  },
+  ambientLoop(){
+    if(!this.enabled||!this.ctx||this.ambient)return;
+    let o=this.ctx.createOscillator();o.type='sine';o.frequency.value=55;
+    let g=this.ctx.createGain();g.gain.value=0.04;
+    let f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=200;
+    let lfo=this.ctx.createOscillator();lfo.type='sine';lfo.frequency.value=0.1;let lg=this.ctx.createGain();lg.gain.value=30;
+    lfo.connect(lg);lg.connect(f.frequency);o.connect(f);f.connect(g);g.connect(this.master);
+    o.start();lfo.start();this.ambient=o;this.ambient._lfo=lfo;this.ambient._g=g;
+  }
+};
+
+// ====================== ANIMATION SYSTEM ======================
+const Anim={
+  layer(){return document.getElementById('anim-layer')},
+  clear(){let l=this.layer();if(l)l.innerHTML=''},
+  _cellCenter(r,c){
+    let board=document.getElementById('board');if(!board)return{x:0,y:0};
+    let cell=board.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+    if(!cell)return{x:0,y:0};
+    let br=board.getBoundingClientRect(),cr=cell.getBoundingClientRect();
+    return{x:cr.left-br.left+cr.width/2,y:cr.top-br.top+cr.height/2}
+  },
+  _spawn(cls,x,y,extra){
+    let el=document.createElement('div');el.className='anim-el '+cls;
+    el.style.left=(x-20)+'px';el.style.top=(y-20)+'px';
+    if(extra)Object.assign(el.style,extra);
+    let l=this.layer();if(l)l.appendChild(el);
+    return el;
+  },
+  meleeSlash(r,c){
+    let{x,y}=this._cellCenter(r,c);
+    let el=this._spawn('anim-slash',x,y);
+    el.innerHTML='<svg viewBox="0 0 40 40" width="40" height="40"><path d="M8 32 L20 8 L24 12 L12 36Z" fill="#fff" opacity=".8"/><path d="M12 30 L28 6 L32 10 L16 34Z" fill="#ffa" opacity=".6"/></svg>';
+    setTimeout(()=>el.remove(),360);
+  },
+  rangedProjectile(fr,fc,tr,tc,color){
+    let from=this._cellCenter(fr,fc),to=this._cellCenter(tr,tc);
+    let dx=to.x-from.x,dy=to.y-from.y;
+    let dist=Math.sqrt(dx*dx+dy*dy);
+    let dur=Math.max(200,Math.min(500,dist*2));
+    let el=document.createElement('div');el.className='anim-el anim-proj';
+    el.style.left=from.x-5+'px';el.style.top=from.y-5+'px';
+    el.style.background=color||'#ff0';el.style.boxShadow='0 0 6px '+(color||'#ff0');
+    el.style.setProperty('--sx','0px');el.style.setProperty('--sy','0px');
+    el.style.setProperty('--ex',dx+'px');el.style.setProperty('--ey',dy+'px');
+    el.style.setProperty('--dur',dur+'ms');
+    let l=this.layer();if(l)l.appendChild(el);
+    setTimeout(()=>el.remove(),dur+50);
+    return dur;
+  },
+  spellBurst(r,c,color){
+    let{x,y}=this._cellCenter(r,c);
+    let el=this._spawn('anim-burst',x,y,{background:'radial-gradient(circle,'+color+' 0%,transparent 70%)'});
+    setTimeout(()=>el.remove(),460);
+  },
+  deathShatter(r,c){
+    let{x,y}=this._cellCenter(r,c);
+    for(let i=0;i<5;i++){
+      let el=document.createElement('div');el.className='anim-el anim-death';
+      el.style.left=(x-15+Math.random()*10)+'px';el.style.top=(y-15+Math.random()*10)+'px';
+      el.style.setProperty('--dx',(Math.random()*40-20)+'px');el.style.setProperty('--dy',(-10-Math.random()*30)+'px');
+      el.style.background='#'+['f88','fa8','ff8','aaa','888'][i];el.style.width='6px';el.style.height='6px';
+      let l=this.layer();if(l)l.appendChild(el);
+      setTimeout(()=>el.remove(),420);
+    }
+  },
+  healRise(r,c){
+    let{x,y}=this._cellCenter(r,c);
+    for(let i=0;i<4;i++){
+      let el=document.createElement('div');el.className='anim-el anim-heal';
+      el.style.left=(x-4+Math.random()*16-8)+'px';el.style.top=(y+5)+'px';
+      el.style.animationDelay=(i*0.1)+'s';
+      let l=this.layer();if(l)l.appendChild(el);
+      setTimeout(()=>el.remove(),700);
+    }
+  },
+  aoeFlash(color){
+    let el=document.createElement('div');el.className='anim-el anim-aoe';
+    el.style.background=color||'rgba(255,100,50,.3)';
+    let l=this.layer();if(l)l.appendChild(el);
+    setTimeout(()=>el.remove(),320);
+  }
+};
+
+// ====================== GAME STATE ======================
+let G = {
+  screen:'menu', mapIdx:0, turn:1, ap:0, phase:0, deployLeft:3,
+  sel:null, highlights:[], lastSpell:null, animating:false,
+  p:[
+    {titanId:'',titan:null,hp:30,energy:10,hand:[],deck:[],grave:[],reaction:true,deckIds:[]},
+    {titanId:'',titan:null,hp:30,energy:10,hand:[],deck:[],grave:[],reaction:true,deckIds:[]}
+  ],
+  board:[], // 5x7 grid: null or unit object
+  log:[], animQueue:[]
+};
+let customCards = [];
+let savedDecks = {};
+let currentDeck = []; // deck builder state
+let dbFilter = {elem:'all',race:'all',type:'all',search:''};
+try { customCards = JSON.parse(localStorage.getItem('tc_cards')) || []; } catch(e) {}
+try { savedDecks = JSON.parse(localStorage.getItem('tc_decks')) || {}; } catch(e) {}
+
+// ====================== UTILITY ======================
+function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
+function shuffle(a) { for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function getCardPool() { return [...BASE_CARDS, ...customCards]; }
+function getCardById(id) { return getCardPool().find(c=>c.id===id) || TOKEN_CARDS[id] || null; }
+function getTerrain(r,c) { return MAPS[G.mapIdx].tiles[r][c].t; }
+function getHeight(r,c) { let t=MAPS[G.mapIdx].tiles[r][c]; let h=t.h; if(t.t==='mountain')h+=2; if(t.t==='hill')h+=1; return h; }
+function getTerrainDefBonus(r,c) { return TERRAIN_INFO[getTerrain(r,c)].defBonus||0; }
+function addLog(msg) { G.log.push(msg); if(G.log.length>80) G.log.shift(); renderLog(); }
+function enemy(p) { return p===0?1:0; }
+function inBounds(r,c) { return r>=0&&r<5&&c>=0&&c<7; }
+
+function createUnit(card, owner) {
+  return {
+    id:card.id, name:card.name, cost:card.cost, type:card.type||'unit',
+    atk:card.atk||0, hp:card.hp||1, maxHp:card.hp||1, move:card.move||0, range:card.range||1,
+    elem:card.elem||'', race:card.race||'', kw:[...(card.kw||[])],
+    text:card.text||'', vet1:card.vet1||'', vet2:card.vet2||'', vet3:card.vet3||'',
+    xp:0, vetLv:0, owner, ready:false, movesLeft:0, hasAttacked:false,
+    effects:[], _r:-1, _c:-1, _armor:0, _moveBonus:0, _turnBuffs:{},
+    _divine_shield:card.kw&&card.kw.includes('divine_shield'),
+    _ward:card.kw&&card.kw.includes('ward'),
+    _frozen:false, _stealthed:card.kw&&card.kw.includes('stealth'),
+    rarity:card.rarity||'common', isToken:card.isToken||false
+  };
+}
+
+function getAllUnits(owner) {
+  let units = [];
+  for(let r=0;r<5;r++) for(let c=0;c<7;c++) {
+    if(G.board[r][c] && (owner===undefined || G.board[r][c].owner===owner)) {
+      units.push({unit:G.board[r][c], r, c});
+    }
+  }
+  return units;
+}
+
+function countRace(owner, race) {
+  return getAllUnits(owner).filter(u=>u.unit.race===race && u.unit.type==='unit').length;
+}
+
+// ====================== GAME START ======================
+function startGame(p1TitanId, p2TitanId, mapIdx, p1DeckIds, p2DeckIds) {
+  G.mapIdx = mapIdx;
+  G.turn = 1; G.ap = 0; G.phase = 0; G.deployLeft = 3;
+  G.sel = null; G.highlights = []; G.log = []; G.lastSpell = null; G.animating = false;
+  G.board = Array.from({length:5}, ()=>Array(7).fill(null));
+
+  for(let i=0;i<2;i++) {
+    let tid = i===0?p1TitanId:p2TitanId;
+    let t = deepClone(TITANS.find(x=>x.id===tid));
+    t.kills = 0;
+    G.p[i].titanId = tid;
+    G.p[i].titan = t;
+    G.p[i].hp = t.hp;
+    G.p[i].energy = 10;
+    G.p[i].reaction = true;
+    G.p[i].hand = [];
+    G.p[i].grave = [];
+    let dids = i===0?p1DeckIds:p2DeckIds;
+    let deckCards = dids.map(id=>getCardById(id)).filter(Boolean);
+    G.p[i].deck = shuffle(deepClone(deckCards));
+    // Draw initial hand of 4
+    for(let d=0;d<4;d++) {
+      if(G.p[i].deck.length > 0) G.p[i].hand.push(G.p[i].deck.pop());
+    }
+  }
+
+  addLog('Game started! Turn 1 - Player 1\'s turn.');
+  addLog('Phase: ' + PHASES[G.phase]);
+  showScreen('game-screen');
+  SFX.ambientLoop();
+  runPhase();
+}
+
+// ====================== PHASE ENGINE ======================
+function nextPhase() {
+  if(G.animating) return;
+  G.sel = null;
+  G.highlights = [];
+  G.phase++;
+  if(G.phase >= PHASES.length) {
+    G.phase = 0;
+    G.ap = enemy(G.ap);
+    G.turn++;
+    addLog('--- Turn ' + G.turn + ' - Player ' + (G.ap+1) + ' ---');
+    showTurnOverlay();
+    return;
+  }
+  addLog('Phase: ' + PHASES[G.phase]);
+  SFX.phaseChange();
+  runPhase();
+}
+
+function runPhase() {
+  let p = G.p[G.ap];
+  switch(G.phase) {
+    case 0: // Refresh
+      p.energy = 10;
+      p.reaction = true;
+      G.deployLeft = 3;
+      // Apply titan passive cost reduction
+      applyTitanPassives();
+      // Ready all units and resolve ongoing effects
+      getAllUnits(G.ap).forEach(({unit,r,c}) => {
+        unit.ready = true;
+        unit.hasAttacked = false;
+        unit._turnBuffs = {};
+        // Resolve effects
+        unit.effects = unit.effects.filter(eff => {
+          if(eff.type === 'regen') {
+            let heal = Math.min(eff.val, unit.maxHp - unit.hp);
+            if(heal > 0) { unit.hp += heal; showPopup(r,c,'+'+heal,true); }
+            return true;
+          }
+          if(eff.type === 'poison') {
+            unit.hp -= eff.val;
+            showPopup(r,c,'-'+eff.val);
+            eff.dur--;
+            if(unit.hp <= 0) destroyUnit(r,c);
+            return eff.dur > 0;
+          }
+          if(eff.type === 'bleed') {
+            unit.hp -= eff.val;
+            showPopup(r,c,'-'+eff.val);
+            eff.dur--;
+            if(unit.hp <= 0) destroyUnit(r,c);
+            return eff.dur > 0;
+          }
+          return true;
+        });
+        // Unfreeze
+        if(unit._frozen) { unit._frozen = false; unit.ready = false; }
+        // Reapply stealth for shadow titan
+        if(G.p[unit.owner].titanId==='nyx' && unit.elem==='shadow' && !unit.hasAttacked) {
+          unit._stealthed = true;
+        }
+      });
+      // Healing Fountain aura: adjacent allies gain regen
+      getAllUnits(G.ap).forEach(({unit:su,r:sr,c:sc}) => {
+        if(su.id==='healing_fountain') {
+          let regenVal = su.vetLv>=2 ? 2 : 1;
+          getAdjacentUnits(sr,sc,G.ap).forEach(({unit:au,r:ar,c:ac}) => {
+            let h = Math.min(regenVal, au.maxHp - au.hp);
+            if(h>0) { au.hp += h; showPopup(ar,ac,'+'+h,true); }
+          });
+        }
+      });
+      // Apply synergies
+      applySynergies(G.ap);
+      addLog('Energy refilled to 10. Units readied.');
+      setTimeout(()=>nextPhase(), 400);
+      break;
+    case 1: // Draw
+      if(p.deck.length > 0) {
+        p.hand.push(p.deck.pop());
+        addLog('Player ' + (G.ap+1) + ' drew a card. (' + p.deck.length + ' left)');
+      } else {
+        // Fatigue
+        p.hp -= (G.turn - 5 > 0 ? G.turn - 5 : 1);
+        addLog('No cards to draw! Fatigue damage!');
+      }
+      setTimeout(()=>nextPhase(), 300);
+      break;
+    case 2: // Deploy
+      addLog('Deploy phase: ' + G.deployLeft + ' actions remaining. Play cards or activate Titan.');
+      break;
+    case 3: // Movement
+      getAllUnits(G.ap).forEach(({unit}) => {
+        unit.movesLeft = unit.move + (unit._moveBonus||0);
+        if(unit.kw.includes('swift')) unit.movesLeft += 1;
+        if(G.p[unit.owner].titanId==='sylara' && unit.elem==='wind') unit.movesLeft += 2;
+      });
+      addLog('Movement phase: Click your units to move them.');
+      break;
+    case 4: // Combat
+      addLog('Combat phase: Click your units to attack enemy targets.');
+      break;
+    case 5: // End
+      // Grant XP to surviving units
+      getAllUnits(G.ap).forEach(({unit,r,c}) => {
+        if(unit.type==='unit' && !unit.isToken && unit.xp < 3) {
+          unit.xp++;
+          if(unit.xp === 1 && unit.vetLv < 1) { applyVeteran(unit,1,r,c); }
+          else if(unit.xp === 2 && unit.vetLv < 2) { applyVeteran(unit,2,r,c); }
+          else if(unit.xp === 3 && unit.vetLv < 3) { applyVeteran(unit,3,r,c); }
+        }
+        // Angel Healer end-of-turn heal
+        if(unit.id==='angel_healer') {
+          let healAmt = 2 + (unit.vetLv>=1?1:0);
+          getAdjacentUnits(r,c,unit.owner).forEach(au => {
+            let h = Math.min(healAmt, au.unit.maxHp - au.unit.hp);
+            if(h>0) { au.unit.hp += h; showPopup(au.r,au.c,'+'+h,true); }
+          });
+        }
+        // Beast heal synergy
+        if(unit._beastHeal) {
+          let h = Math.min(1, unit.maxHp - unit.hp);
+          if(h>0) { unit.hp += h; }
+        }
+        // Angel heal synergy
+        if(unit._angelHeal) {
+          getAdjacentUnits(r,c,unit.owner).forEach(au => {
+            let h = Math.min(1, au.unit.maxHp - au.unit.hp);
+            if(h>0) { au.unit.hp += h; }
+          });
+        }
+        // Elven Sage vet2
+        if(unit.id==='elven_sage' && unit.vetLv>=2) {
+          drawCards(unit.owner, 1);
+        }
+      });
+      addLog('End phase complete.');
+      setTimeout(()=>nextPhase(), 500);
+      break;
+  }
+  render();
+}
+
+// ====================== VETERAN SYSTEM ======================
+function applyVeteran(unit, level, r, c) {
+  unit.vetLv = level;
+  let desc = level===1?unit.vet1:level===2?unit.vet2:unit.vet3;
+  if(!desc) return;
+  addLog(unit.name + ' reached Veteran ' + level + '! ' + desc);
+  showVetPopup(r,c,level);
+  SFX.levelUp();
+
+  // Parse and apply common patterns
+  let d = desc.toLowerCase();
+  if(d.includes('+1 attack') || d.includes('+1 atk')) unit.atk += 1;
+  if(d.includes('+2 attack') || d.includes('+2 atk')) unit.atk += 2;
+  if(d.includes('+1 hp')) { unit.hp += 1; unit.maxHp += 1; }
+  if(d.includes('+2 hp')) { unit.hp += 2; unit.maxHp += 2; }
+  if(d.includes('+3 hp')) { unit.hp += 3; unit.maxHp += 3; }
+  if(d.includes('+1/+1')) { unit.atk += 1; unit.hp += 1; unit.maxHp += 1; }
+  if(d.includes('+1 range')) unit.range += 1;
+  if(d.includes('+1 move')) unit.move += 1;
+  if(d.includes('windfury') && !unit.kw.includes('windfury')) unit.kw.push('windfury');
+  if(d.includes('lifesteal') && !unit.kw.includes('lifesteal')) unit.kw.push('lifesteal');
+  if(d.includes('regen')) {
+    let m = desc.match(/regen\s*(\d+)/i);
+    let rv = m ? parseInt(m[1]) : 1;
+    unit.effects.push({type:'regen',val:rv});
+  }
+  if(d.includes('armor')) {
+    let m = desc.match(/armor\s*(\d+)/i);
+    if(m) unit._armor += parseInt(m[1]);
+  }
+  if(d.includes('stealth') && !unit.kw.includes('stealth')) { unit.kw.push('stealth'); unit._stealthed = true; }
+  if(d.includes('ward') && !unit.kw.includes('ward')) { unit.kw.push('ward'); unit._ward = true; }
+  if(d.includes('range 2') && unit.range < 2) unit.range = 2;
+}
+
+function canActivateVet3(unit) {
+  return unit.vetLv >= 3 && unit.xp >= 2;
+}
+
+function activateVet3(unit, r, c, targetR, targetC) {
+  if(!canActivateVet3(unit)) return false;
+  unit.xp = 1; // Reset XP to 1 after use
+  unit.vetLv = 2; // Drop back to vet 2
+  let d = (unit.vet3||'').toLowerCase();
+  addLog(unit.name + ' activates: ' + unit.vet3);
+
+  // Common vet3 patterns
+  if(d.includes('deal') && d.includes('dmg') || d.includes('damage')) {
+    let m = unit.vet3.match(/(\d+)\s*(?:dmg|damage)/i);
+    let dmg = m ? parseInt(m[1]) : 3;
+    if(d.includes('all adj') || d.includes('adjacent')) {
+      getAdjacentUnits(r,c,enemy(unit.owner)).forEach(t => {
+        dealDamage(t.unit, dmg, t.r, t.c);
+      });
+    } else if(d.includes('all enemies') || d.includes('enemy row')) {
+      getAllUnits(enemy(unit.owner)).forEach(t => {
+        dealDamage(t.unit, dmg, t.r, t.c);
+      });
+    } else if(targetR!==undefined && G.board[targetR][targetC]) {
+      dealDamage(G.board[targetR][targetC], dmg, targetR, targetC);
+    }
+  }
+  if(d.includes('summon')) {
+    if(d.includes('sapling') || d.includes('saplings')) spawnTokensAdjacent(r,c,unit.owner,'sapling',2);
+    else if(d.includes('skeleton')) spawnTokensAdjacent(r,c,unit.owner,'skeleton',3);
+    else if(d.includes('mech')) spawnTokensAdjacent(r,c,unit.owner,'mech',1);
+  }
+  if(d.includes('heal all allies')) {
+    let m = unit.vet3.match(/heal\s*(?:all\s*allies\s*)?(\d+)/i);
+    let h = m ? parseInt(m[1]) : 3;
+    getAllUnits(unit.owner).forEach(t => {
+      let heal = Math.min(h, t.unit.maxHp - t.unit.hp);
+      if(heal>0) { t.unit.hp += heal; showPopup(t.r,t.c,'+'+heal,true); }
+    });
+  }
+  if(d.includes('freeze all')) {
+    getAllUnits(enemy(unit.owner)).forEach(t => { t.unit._frozen = true; });
+  }
+  if(d.includes('destroy') && targetR!==undefined && G.board[targetR][targetC]) {
+    destroyUnit(targetR, targetC);
+  }
+  if(d.includes('gain') && d.includes('energy')) {
+    let m = unit.vet3.match(/(\d+)\s*energy/i);
+    if(m) G.p[unit.owner].energy += parseInt(m[1]);
+  }
+  render();
+  return true;
+}
+
+// ====================== SYNERGY ======================
+function applySynergies(owner) {
+  for(let race of RACES) {
+    let count = countRace(owner, race);
+    let syn = SYNERGY_DATA[race];
+    if(!syn) continue;
+    if(count >= 3 && syn.fn3) {
+      getAllUnits(owner).filter(u=>u.unit.race===race).forEach(u=>syn.fn3(u.unit, G.board));
+    }
+    if(count >= 5 && syn.fn5) {
+      getAllUnits(owner).filter(u=>u.unit.race===race).forEach(u=>syn.fn5(u.unit));
+    }
+  }
+}
+
+// ====================== TITAN ======================
+function applyTitanPassives() {
+  for(let i=0;i<2;i++) {
+    let t = G.p[i].titan;
+    if(!t) continue;
+    switch(t.id) {
+      case 'kargath':
+        getAllUnits(i).forEach(({unit,r,c}) => {
+          if(unit.elem==='fire' && getTerrain(r,c)==='volcano') unit._turnBuffs.volcanoBuff = 2;
+        });
+        break;
+      case 'thalor':
+        getAllUnits(i).forEach(({unit}) => {
+          if(unit.elem==='earth') unit._armor = Math.max(unit._armor, 2);
+        });
+        break;
+      case 'nyx':
+        getAllUnits(i).forEach(({unit}) => {
+          if(unit.elem==='shadow' && !unit.hasAttacked) unit._stealthed = true;
+        });
+        break;
+    }
+  }
+}
+
+function activateTitan() {
+  let p = G.p[G.ap];
+  let t = p.titan;
+  if(!t || G.phase !== 2 || G.deployLeft <= 0) return;
+  if(p.energy < t.activeCost) { addLog('Not enough energy!'); return; }
+  p.energy -= t.activeCost;
+  G.deployLeft--;
+  addLog('Player ' + (G.ap+1) + ' activates ' + t.name + '!');
+
+  switch(t.id) {
+    case 'kargath': {
+      // Deal 4 damage split among enemies - just deal 2 to 2 random enemies
+      let enemies = getAllUnits(enemy(G.ap));
+      shuffle(enemies);
+      let dmgLeft = 4;
+      for(let e of enemies) {
+        if(dmgLeft <= 0) break;
+        let d = Math.min(2, dmgLeft);
+        dealDamage(e.unit, d, e.r, e.c);
+        dmgLeft -= d;
+      }
+      if(enemies.length === 0) { G.p[enemy(G.ap)].hp -= 4; addLog('No enemies on board. Titan takes 4!'); }
+      break;
+    }
+    case 'thalor': {
+      // Give target ally Divine Shield + Taunt - pick first ally without it
+      G.sel = {type:'titan_target', action:'thalor'};
+      G.highlights = getAllUnits(G.ap).map(u=>({r:u.r,c:u.c,type:'deploy'}));
+      addLog('Click an ally to grant Divine Shield + Taunt.');
+      render(); return;
+    }
+    case 'sylara': {
+      // Return target ally to hand + draw 1
+      G.sel = {type:'titan_target', action:'sylara'};
+      G.highlights = getAllUnits(G.ap).filter(u=>!u.unit.isToken).map(u=>({r:u.r,c:u.c,type:'deploy'}));
+      addLog('Click an ally to return to hand.');
+      render(); return;
+    }
+    case 'nyx': {
+      // Poison target enemy + draw 1
+      G.sel = {type:'titan_target', action:'nyx'};
+      G.highlights = getAllUnits(enemy(G.ap)).map(u=>({r:u.r,c:u.c,type:'attack'}));
+      addLog('Click an enemy to poison.');
+      render(); return;
+    }
+    case 'elandor': {
+      // Copy last spell
+      if(G.lastSpell) {
+        let copy = deepClone(G.lastSpell);
+        p.hand.push(copy);
+        addLog('Copied ' + copy.name + '!');
+      } else {
+        addLog('No spell to copy!');
+        p.energy += t.activeCost; G.deployLeft++;
+      }
+      break;
+    }
+  }
+  render();
+}
+
+function handleTitanTarget(r, c) {
+  let action = G.sel.action;
+  G.sel = null; G.highlights = [];
+  let unit = G.board[r][c];
+  if(!unit) return;
+
+  switch(action) {
+    case 'thalor':
+      if(unit.owner !== G.ap) return;
+      unit._divine_shield = true;
+      if(!unit.kw.includes('taunt')) unit.kw.push('taunt');
+      addLog(unit.name + ' gains Divine Shield and Taunt!');
+      break;
+    case 'sylara':
+      if(unit.owner !== G.ap || unit.isToken) return;
+      let card = getCardById(unit.id);
+      if(card) G.p[G.ap].hand.push(deepClone(card));
+      G.board[r][c] = null;
+      drawCards(G.ap, 1);
+      addLog(unit.name + ' returned to hand. Drew 1.');
+      break;
+    case 'nyx':
+      if(unit.owner === G.ap) return;
+      unit.effects.push({type:'poison',val:1,dur:3});
+      drawCards(G.ap, 1);
+      addLog(unit.name + ' poisoned! Drew 1.');
+      break;
+  }
+  render();
+}
+
+function checkUltimate() {
+  let p = G.p[G.ap];
+  let t = p.titan;
+  if(!t) return;
+  if(t.kills >= t.ultReq) {
+    addLog(t.name + ' ULTIMATE is ready!');
+  }
+}
+
+function activateUltimate() {
+  let p = G.p[G.ap];
+  let t = p.titan;
+  if(!t || t.kills < t.ultReq || G.phase !== 2 || G.deployLeft <= 0) return;
+  t.kills = 0;
+  G.deployLeft--;
+  addLog(t.name + ' unleashes ULTIMATE!');
+  switch(t.id) {
+    case 'kargath':
+      getAllUnits(enemy(G.ap)).forEach(e => dealDamage(e.unit, 3, e.r, e.c));
+      addLog('3 fire damage to all enemies!');
+      break;
+    case 'thalor':
+      spawnTokensAdjacent(4,3,0,'stone_wall',2);
+      addLog('Two Stone Walls summoned!');
+      break;
+    case 'sylara':
+      getAllUnits(G.ap).forEach(({unit}) => { unit.movesLeft += 1; unit.move += 1; });
+      addLog('All allies gain +1 Move and Swift!');
+      break;
+    case 'nyx':
+      getAllUnits(enemy(G.ap)).forEach(e => { e.unit.hp -= 2; e.unit.effects = []; showPopup(e.r,e.c,'-2'); if(e.unit.hp<=0) destroyUnit(e.r,e.c); });
+      addLog('All enemies lose 2 HP and buffs!');
+      break;
+    case 'elandor':
+      drawCards(G.ap, 3);
+      for(let i=0;i<3&&i<p.hand.length;i++) {
+        let c = p.hand[p.hand.length-1-i];
+        c.cost = Math.max(0, (c.cost||0) - 2);
+      }
+      addLog('Drew 3 cards, cost reduced by 2!');
+      break;
+  }
+  render();
+}
+
+// ====================== DEPLOYMENT ======================
+function getValidDeployTiles(card) {
+  let tiles = [];
+  let zones = G.ap === 0 ? [3,4] : [0,1];
+  // Can also deploy to row 2 if you have units there
+  let hasRow2 = getAllUnits(G.ap).some(u=>u.r===2);
+  if(hasRow2) zones.push(2);
+
+  for(let r of zones) {
+    for(let c=0;c<7;c++) {
+      if(G.board[r][c]) continue; // occupied
+      let t = getTerrain(r,c);
+      if(t === 'mountain' && !(card.kw && card.kw.includes('flying'))) continue;
+      tiles.push({r,c});
+    }
+  }
+  return tiles;
+}
+
+function deployCard(handIdx, r, c) {
+  let p = G.p[G.ap];
+  let card = p.hand[handIdx];
+  if(!card) return false;
+  if(G.phase !== 2 || G.deployLeft <= 0) return false;
+
+  let cost = card.cost || 0;
+  // Titan element discount
+  if(G.p[G.ap].titan && card.elem === G.p[G.ap].titan.elem) cost = Math.max(0, cost-1);
+  // Elandor spell discount
+  if(card.type === 'spell' && G.p[G.ap].titanId === 'elandor') cost = Math.max(0, cost-1);
+  // Arcane Sanctum discount
+  if(card.type === 'spell') {
+    getAllUnits(G.ap).forEach(u => { if(u.unit.id==='arcane_sanctum') cost = Math.max(0, cost-1); });
+  }
+  // Ruins discount for arcane spells
+  if(card.type === 'spell' && card.elem === 'arcane') {
+    // Check if caster is in ruins - use any unit position or titan position
+    // Simplified: just check if any ruins tile is in your zone
+  }
+  // Goblin synergy discount
+  if(card.race === 'Goblin' && countRace(G.ap, 'Goblin') >= 3) cost = Math.max(0, cost-1);
+
+  if(p.energy < cost) { addLog('Not enough energy! Need ' + cost); return false; }
+
+  if(card.type === 'spell') {
+    // Spells don't need board placement
+    p.energy -= cost;
+    G.deployLeft--;
+    p.hand.splice(handIdx, 1);
+    G.lastSpell = deepClone(card);
+    SFX.cardPlay();
+    resolveSpell(card, r, c);
+    // Inspire triggers
+    triggerInspire(G.ap);
+    render();
+    return true;
+  }
+
+  // Unit/Structure
+  let valid = getValidDeployTiles(card);
+  if(!valid.find(t=>t.r===r && t.c===c)) { addLog('Invalid placement!'); return false; }
+
+  p.energy -= cost;
+  G.deployLeft--;
+  p.hand.splice(handIdx, 1);
+
+  let unit = createUnit(card, G.ap);
+  unit._r = r; unit._c = c;
+  G.board[r][c] = unit;
+
+  // Handle terrain entry
+  if(getTerrain(r,c) === 'swamp') {
+    unit.hp -= 1;
+    showPopup(r,c,'-1');
+    if(unit.hp <= 0) { destroyUnit(r,c); return true; }
+  }
+
+  SFX.cardPlay();
+  addLog('Player ' + (G.ap+1) + ' deployed ' + card.name + '!');
+
+  // Haste/Rush
+  if(unit.kw.includes('haste') || unit.kw.includes('rush')) {
+    unit.ready = true;
+    unit.movesLeft = unit.move;
+  }
+  if(unit.kw.includes('charge')) {
+    unit.ready = true; // Can attack same turn
+  }
+
+  // Battlecry
+  if(unit.kw.includes('battlecry')) processBattlecry(unit, r, c);
+
+  // Inspire triggers
+  triggerInspire(G.ap);
+
+  // Demon synergy - summon damage
+  if(unit._demonSummon || (countRace(G.ap,'Demon')>=5 && unit.race==='Demon')) {
+    G.p[enemy(G.ap)].hp -= 1;
+    addLog('Demon synergy: enemy Titan takes 1 damage!');
+  }
+
+  // Human synergy draw
+  if(countRace(G.ap,'Human')>=3 && unit.race==='Human') {
+    drawCards(G.ap, 1);
+  }
+
+  checkWin();
+  render();
+  return true;
+}
+
+function resolveSpell(card, targetR, targetC) {
+  addLog('Cast ' + card.name + '!');
+  // Spell sound based on element
+  if(card.elem==='fire')SFX.fireball();else if(card.elem==='ice')SFX.iceCrack();else if(card.elem==='shadow')SFX.shadowHum();else if(card.elem==='nature'||card.id==='healing_light'||card.id==='divine_favor')SFX.healChime();else SFX.arcanePulse();
+  // Spell visual
+  let _ec=card.elem&&ELEMENTS[card.elem]?ELEMENTS[card.elem].color:'#a8f';
+  if(targetR!==undefined&&targetC!==undefined){
+    if(card.id==='healing_light'||card.id==='divine_favor')Anim.healRise(targetR,targetC);
+    else Anim.spellBurst(targetR,targetC,_ec);
+  }
+  if(card.id==='earthquake'||card.id==='frost_nova')Anim.aoeFlash(_ec+'55');
+  let target = (targetR!==undefined && targetC!==undefined) ? G.board[targetR][targetC] : null;
+
+  switch(card.id) {
+    case 'fireball':
+      if(target) { dealDamage(target, 5, targetR, targetC); }
+      else { G.p[enemy(G.ap)].hp -= 5; addLog('Fireball hits enemy Titan for 5!'); }
+      break;
+    case 'healing_light':
+      if(target && target.owner === G.ap) {
+        let h = Math.min(4, target.maxHp - target.hp);
+        target.hp += h; showPopup(targetR, targetC, '+'+h, true);
+      } else { G.p[G.ap].hp = Math.min(G.p[G.ap].titan.hp, G.p[G.ap].hp + 4); addLog('Healed Titan 4!'); }
+      break;
+    case 'shadow_strike':
+      if(target) { dealDamage(target, 3, targetR, targetC); }
+      else { G.p[enemy(G.ap)].hp -= 3; }
+      drawCards(G.ap, 1);
+      break;
+    case 'earthquake':
+      for(let r=0;r<5;r++) for(let c=0;c<7;c++) {
+        let u = G.board[r][c];
+        if(u && !u.kw.includes('flying')) dealDamage(u, 2, r, c);
+      }
+      break;
+    case 'wind_rush':
+      if(target && target.owner === G.ap) { target.movesLeft += 3; target.move += 3; }
+      break;
+    case 'arcane_intellect':
+      drawCards(G.ap, 2);
+      break;
+    case 'frost_nova':
+      getAllUnits(enemy(G.ap)).forEach(e => { e.unit._frozen = true; });
+      addLog('All enemies frozen!');
+      break;
+    case 'raise_dead':
+      spawnTokensInZone(G.ap, 'skeleton', 2);
+      break;
+    case 'divine_favor':
+      if(target && target.owner === G.ap) {
+        target._divine_shield = true;
+        target.atk += 1; target.hp += 1; target.maxHp += 1;
+      }
+      break;
+    case 'lightning_bolt':
+      if(target) { dealDamage(target, 3, targetR, targetC); }
+      else { G.p[enemy(G.ap)].hp -= 3; }
+      break;
+    default:
+      // Custom spell - try to parse text
+      let txt = (card.text||'').toLowerCase();
+      if(txt.includes('deal') && txt.includes('damage')) {
+        let m = card.text.match(/(\d+)\s*damage/i);
+        let dmg = m ? parseInt(m[1]) : 2;
+        if(target) dealDamage(target, dmg, targetR, targetC);
+        else { G.p[enemy(G.ap)].hp -= dmg; }
+      }
+      if(txt.includes('heal')) {
+        let m = card.text.match(/heal[s]?\s*(?:target\s*)?(?:ally\s*)?(\d+)/i);
+        let h = m ? parseInt(m[1]) : 2;
+        if(target && target.owner===G.ap) { target.hp = Math.min(target.maxHp, target.hp+h); showPopup(targetR,targetC,'+'+h,true); }
+      }
+      if(txt.includes('draw')) {
+        let m = card.text.match(/draw\s*(\d+)/i);
+        drawCards(G.ap, m ? parseInt(m[1]) : 1);
+      }
+      break;
+  }
+  // Arcane Sanctum vet2 - spells deal +1
+  // Already handled in damage
+  checkWin();
+}
+
+function processBattlecry(unit, r, c) {
+  switch(unit.id) {
+    case 'goblin_engineer':
+      spawnTokensAdjacent(r, c, unit.owner, 'mech', 1);
+      addLog('Battlecry: Summoned a Mech!');
+      break;
+    case 'elven_sage':
+      drawCards(unit.owner, 1);
+      addLog('Battlecry: Drew 1 card!');
+      break;
+    case 'light_priestess':
+      // Heal ally 3 - auto-target nearest ally
+      let allies = getAdjacentUnits(r,c,unit.owner);
+      if(allies.length > 0) {
+        let a = allies[0];
+        let h = Math.min(3, a.unit.maxHp - a.unit.hp);
+        a.unit.hp += h;
+        showPopup(a.r,a.c,'+'+h,true);
+        addLog('Battlecry: Healed ' + a.unit.name + ' for ' + h);
+      }
+      break;
+  }
+}
+
+function triggerInspire(owner) {
+  getAllUnits(owner).forEach(({unit,r,c}) => {
+    if(unit.kw.includes('inspire')) {
+      switch(unit.id) {
+        case 'dark_necromancer':
+          spawnTokensAdjacent(r,c,owner,'skeleton',1);
+          break;
+        case 'orcish_warlord':
+          getAllUnits(owner).filter(u=>u.unit.race==='Orc').forEach(u=>{ u.unit._turnBuffs.inspireAtk = (u.unit._turnBuffs.inspireAtk||0)+1; });
+          break;
+      }
+    }
+  });
+}
+
+// ====================== MOVEMENT ======================
+function getValidMoves(r, c) {
+  let unit = G.board[r][c];
+  if(!unit || unit.owner !== G.ap || !unit.ready || unit.type==='structure') return [];
+  let moves = [];
+  let maxDist = unit.movesLeft;
+  if(maxDist <= 0) return [];
+
+  // BFS considering terrain costs
+  let visited = {};
+  let queue = [{r,c,cost:0}];
+  visited[r+','+c] = 0;
+
+  while(queue.length > 0) {
+    let cur = queue.shift();
+    let dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+    for(let [dr,dc] of dirs) {
+      let nr = cur.r+dr, nc = cur.c+dc;
+      if(!inBounds(nr,nc)) continue;
+      let terrain = getTerrain(nr,nc);
+      // Impassable check
+      if(terrain === 'mountain' && !unit.kw.includes('flying')) continue;
+      // Occupied by another unit
+      if(G.board[nr][nc]) continue;
+
+      let moveCost = 1;
+      if(terrain === 'water' && !unit.kw.includes('flying')) {
+        if(unit._noWaterPenalty || unit.race==='Merfolk') moveCost = 1;
+        else moveCost = 2;
+      }
+      // Elf forest bonus
+      if(terrain === 'forest' && unit.race === 'Elf') moveCost = Math.max(0, moveCost - 1) || 1;
+      if(terrain === 'forest' && unit.race === 'Elf' && countRace(unit.owner,'Elf')>=3) moveCost = 0.5;
+
+      let totalCost = cur.cost + moveCost;
+      if(totalCost > maxDist) continue;
+      let key = nr+','+nc;
+      if(visited[key] !== undefined && visited[key] <= totalCost) continue;
+      visited[key] = totalCost;
+      moves.push({r:nr, c:nc});
+      queue.push({r:nr, c:nc, cost:totalCost});
+    }
+  }
+  return moves;
+}
+
+function moveUnit(fromR, fromC, toR, toC) {
+  let unit = G.board[fromR][fromC];
+  if(!unit) return false;
+  G.board[fromR][fromC] = null;
+  G.board[toR][toC] = unit;
+  unit._r = toR; unit._c = toC;
+
+  // Calculate move cost
+  let terrain = getTerrain(toR, toC);
+  let cost = 1;
+  if(terrain === 'water' && !unit.kw.includes('flying') && !unit._noWaterPenalty && unit.race!=='Merfolk') cost = 2;
+  unit.movesLeft = Math.max(0, unit.movesLeft - cost);
+
+  // Swamp damage
+  if(terrain === 'swamp' && !unit.kw.includes('flying') && !unit._elemImmune) {
+    unit.hp -= 1;
+    showPopup(toR, toC, '-1');
+    addLog(unit.name + ' takes 1 swamp damage!');
+    if(unit.hp <= 0) { destroyUnit(toR, toC); return true; }
+  }
+
+  // Stone Golem vet2 quake
+  if(unit.id === 'stone_golem' && unit.vetLv >= 2) {
+    getAdjacentUnits(toR,toC,enemy(unit.owner)).forEach(e => {
+      dealDamage(e.unit, 1, e.r, e.c);
+    });
+  }
+
+  // Beast Rider vet2 momentum
+  if(unit.id === 'beast_rider' && unit.vetLv >= 2) {
+    unit._turnBuffs.momentum = (unit._turnBuffs.momentum||0) + 1;
+  }
+
+  addLog(unit.name + ' moves to (' + toR + ',' + toC + ')');
+  // Break stealth on certain actions - movement doesn't break stealth
+  return true;
+}
+
+// ====================== COMBAT ======================
+function getValidTargets(r, c) {
+  let unit = G.board[r][c];
+  if(!unit || unit.owner !== G.ap || !unit.ready || unit.hasAttacked || unit.type==='structure') return [];
+  if(unit._frozen) return [];
+  let targets = [];
+  let range = unit.range || 1;
+
+  // Watchtower range bonus
+  getAdjacentUnits(r,c,unit.owner).forEach(({unit:su}) => {
+    if(su.id==='elven_watchtower') range += 1 + (su.vetLv>=2?1:0);
+  });
+
+  // Check for taunt - must attack taunt units first if any in range
+  let tauntTargets = [];
+
+  for(let tr=0;tr<5;tr++) for(let tc=0;tc<7;tc++) {
+    let t = G.board[tr][tc];
+    if(!t || t.owner === unit.owner) continue;
+    if(t._stealthed) continue; // Can't target stealthed
+    let dist = Math.abs(tr-r) + Math.abs(tc-c);
+    if(dist > range) continue;
+
+    // Melee (range 1) can't attack across water
+    if(range === 1 && (getTerrain(r,c)==='water' || getTerrain(tr,tc)==='water') && !unit.kw.includes('flying')) continue;
+
+    // Elusive - only damaged by ranged
+    if(t.kw.includes('elusive') && range <= 1) continue;
+
+    // Simple line-of-sight for ranged: no mountains blocking
+    if(range > 1 && !hasLineOfSight(r,c,tr,tc)) continue;
+
+    if(t.kw.includes('taunt') || t.kw.includes('guard')) tauntTargets.push({r:tr,c:tc});
+    targets.push({r:tr, c:tc});
+  }
+
+  // If taunt units exist, must target them
+  if(tauntTargets.length > 0) return tauntTargets;
+  return targets;
+}
+
+function hasLineOfSight(r1,c1,r2,c2) {
+  // Simple: check tiles between for mountains
+  let dr = Math.sign(r2-r1), dc = Math.sign(c2-c1);
+  let cr = r1+dr, cc = c1+dc;
+  let steps = Math.max(Math.abs(r2-r1), Math.abs(c2-c1));
+  for(let i=1;i<steps;i++) {
+    let checkR = Math.round(r1 + (r2-r1)*i/steps);
+    let checkC = Math.round(c1 + (c2-c1)*i/steps);
+    if(inBounds(checkR,checkC) && getTerrain(checkR,checkC)==='mountain') return false;
+  }
+  return true;
+}
+
+function calcDamage(attacker, aR, aC, defender, dR, dC) {
+  let atk = attacker.atk;
+  // Height bonus
+  let aH = getHeight(aR, aC);
+  let dH = getHeight(dR, dC);
+  if(aH > dH) atk += 2;
+  if(dH > aH) atk -= 1;
+
+  // Terrain offensive bonuses
+  if(attacker.elem === 'fire' && getTerrain(aR,aC) === 'volcano') atk += 2;
+  if(attacker._turnBuffs && attacker._turnBuffs.volcanoBuff) atk += attacker._turnBuffs.volcanoBuff;
+  if(attacker._turnBuffs && attacker._turnBuffs.momentum) atk += attacker._turnBuffs.momentum;
+  if(attacker._turnBuffs && attacker._turnBuffs.inspireAtk) atk += attacker._turnBuffs.inspireAtk;
+
+  // Void Stalker stealth bonus
+  if(attacker._stealthed && attacker.id === 'void_stalker') atk += 2;
+
+  // Dragon synergy
+  if(attacker._dragonBonus && !defender.kw.includes('flying')) atk += attacker._dragonBonus;
+
+  // Terrain defense
+  let def = getTerrainDefBonus(dR, dC);
+  def += defender._armor || 0;
+
+  // Structure aura bonuses
+  getAdjacentUnits(aR,aC,attacker.owner).forEach(({unit:su}) => {
+    if(su.id==='orcish_war_drum') atk += 1 + (su.vetLv>=2?1:0);
+  });
+  getAdjacentUnits(aR,aC,attacker.owner).forEach(({unit:su}) => {
+    if(su.id==='elven_watchtower' && attacker.range > 1) { /* range already applied */ }
+  });
+
+  // Enrage
+  if(attacker.kw.includes('enrage') && attacker.hp < attacker.maxHp) atk += 2;
+
+  // Goblin first strike synergy
+  if(attacker._goblinStrike && !attacker._goblinStrikeUsed) {
+    atk += 2;
+    attacker._goblinStrikeUsed = true;
+  }
+
+  let dmg = Math.max(0, atk - def);
+  return dmg;
+}
+
+function resolveCombat(aR, aC, dR, dC) {
+  let attacker = G.board[aR][aC];
+  let defender = G.board[dR][dC];
+  if(!attacker || !defender) return;
+
+  attacker._stealthed = false;
+  attacker.hasAttacked = true;
+
+  // Combat sound + animation
+  let isRanged = (attacker.range||1)>1;
+  let animDelay = 350;
+  if(isRanged){
+    SFX.arrowShot();
+    let elemColor = attacker.elem&&ELEMENTS[attacker.elem]?ELEMENTS[attacker.elem].color:'#ff0';
+    animDelay = Anim.rangedProjectile(aR,aC,dR,dC,elemColor);
+  } else {
+    SFX.swordHit();
+    Anim.meleeSlash(dR,dC);
+  }
+
+  G.animating = true;
+  render();
+
+  setTimeout(()=>{
+  // Re-verify units still exist after delay
+  attacker = G.board[aR][aC]; defender = G.board[dR][dC];
+  if(!attacker || !defender){G.animating=false;render();return;}
+
+  let atkDmg = calcDamage(attacker, aR, aC, defender, dR, dC);
+  let defDmg = 0;
+  // Defender retaliates if in range (melee=1)
+  let defRange = defender.range || 1;
+  let dist = Math.abs(aR-dR) + Math.abs(aC-dC);
+  if(dist <= defRange && defender.type !== 'structure') {
+    defDmg = calcDamage(defender, dR, dC, attacker, aR, aC);
+  }
+
+  // Crystal Guardian vet2 reflect
+  if(defender.id==='crystal_guardian' && defender.vetLv>=2) defDmg += 1;
+
+  addLog(attacker.name + ' attacks ' + defender.name + ' for ' + atkDmg + (defDmg>0?' (retaliates '+defDmg+')':''));
+
+  // Apply damage to defender
+  if(defender._divine_shield && atkDmg > 0) {
+    defender._divine_shield = false;
+    addLog(defender.name + '\'s Divine Shield absorbs the hit!');
+    showPopup(dR,dC,'BLOCKED');
+  } else if(defender._ward && attacker.range > 1) {
+    defender._ward = false;
+    addLog(defender.name + '\'s Ward absorbs the spell!');
+    showPopup(dR,dC,'WARDED');
+  } else {
+    defender.hp -= atkDmg;
+    if(atkDmg > 0) showPopup(dR, dC, '-'+atkDmg);
+
+    // Poisonous
+    if(attacker.kw.includes('poisonous') && atkDmg > 0) {
+      defender.effects.push({type:'poison',val:1,dur:3});
+      addLog(defender.name + ' is poisoned!');
+    }
+    // Freeze
+    if((attacker.kw.includes('freeze') || attacker.id==='frost_mage') && atkDmg > 0) {
+      defender._frozen = true;
+      addLog(defender.name + ' is frozen!');
+    }
+    // Lifesteal
+    if(attacker.kw.includes('lifesteal') && atkDmg > 0) {
+      let heal = Math.min(atkDmg, G.p[attacker.owner].titan.hp - G.p[attacker.owner].hp);
+      G.p[attacker.owner].hp += Math.max(0, heal);
+    }
+    // Enrage trigger on defender
+    if(defender.kw.includes('enrage') && defender.hp > 0 && defender.hp < defender.maxHp) {
+      // Already handled in calcDamage
+    }
+  }
+
+  // Apply retaliation to attacker
+  if(defDmg > 0) {
+    if(attacker._divine_shield) {
+      attacker._divine_shield = false;
+      showPopup(aR,aC,'BLOCKED');
+    } else {
+      attacker.hp -= defDmg;
+      showPopup(aR, aC, '-'+defDmg);
+      // Poisonous retaliation
+      if(defender.kw.includes('poisonous') && defDmg > 0) {
+        attacker.effects.push({type:'poison',val:1,dur:3});
+      }
+    }
+  }
+
+  // Trample
+  if(attacker.kw.includes('trample') && defender.hp <= 0) {
+    let excess = Math.abs(defender.hp);
+    if(excess > 0) {
+      G.p[enemy(attacker.owner)].hp -= excess;
+      addLog('Trample! ' + excess + ' damage to enemy Titan!');
+    }
+  }
+
+  // Check deaths
+  let defDied = defender.hp <= 0;
+  let atkDied = attacker.hp <= 0;
+
+  if(defDied) {
+    Anim.deathShatter(dR,dC);
+    destroyUnit(dR, dC);
+    G.p[attacker.owner].titan.kills++;
+    if(attacker._orcBonus) attacker.atk += 1;
+    checkUltimate();
+  }
+  if(atkDied) {
+    Anim.deathShatter(aR,aC);
+    destroyUnit(aR, aC);
+    if(defender && G.board[dR][dC]) G.p[defender.owner].titan.kills++;
+  }
+
+  // Windfury - can attack again
+  if(attacker.kw.includes('windfury') && !atkDied && !attacker._windfuryUsed) {
+    attacker._windfuryUsed = true;
+    attacker.hasAttacked = false; // Can attack again
+  }
+
+  checkWin();
+  G.animating = false;
+  G.sel = null; G.highlights = [];
+  render();
+  }, animDelay);
+}
+
+// ====================== DAMAGE & DESTRUCTION ======================
+function dealDamage(unit, dmg, r, c) {
+  if(!unit) return;
+  if(unit._divine_shield && dmg > 0) { unit._divine_shield = false; showPopup(r,c,'BLOCKED'); return; }
+  if(unit._ward && dmg > 0) { unit._ward = false; showPopup(r,c,'WARDED'); return; }
+  let finalDmg = Math.max(0, dmg - (unit._armor||0));
+  unit.hp -= finalDmg;
+  if(finalDmg > 0) showPopup(r,c,'-'+finalDmg);
+  if(unit.hp <= 0) destroyUnit(r,c);
+}
+
+function destroyUnit(r, c) {
+  let unit = G.board[r][c];
+  if(!unit) return;
+  SFX.deathSound();
+  Anim.deathShatter(r,c);
+  addLog(unit.name + ' destroyed!');
+
+  // Deathrattle
+  if(unit.kw.includes('deathrattle')) {
+    switch(unit.id) {
+      case 'goblin_saboteur':
+        let dmg = unit.vetLv>=1 ? 3 : 2;
+        getAdjacentUnits(r,c).forEach(a => dealDamage(a.unit, dmg, a.r, a.c));
+        addLog('Deathrattle: ' + dmg + ' damage to adjacent!');
+        break;
+      case 'phoenix_hatchling':
+        let card = getCardById('phoenix_hatchling');
+        if(card) {
+          let c2 = deepClone(card);
+          if(unit.vetLv >= 2) { /* returns at 2 HP - modify card */ }
+          G.p[unit.owner].hand.push(c2);
+          addLog('Phoenix returns to hand!');
+        }
+        break;
+      case 'plague_bearer':
+        getAdjacentUnits(r,c,enemy(unit.owner)).forEach(a => {
+          a.unit.effects.push({type:'poison',val:1,dur:2});
+        });
+        addLog('Deathrattle: Adjacent enemies poisoned!');
+        break;
+    }
+  }
+
+  // Undead synergy respawn
+  if(unit._undeadRespawn || (unit.race==='Undead' && countRace(unit.owner,'Undead')>=3)) {
+    spawnTokensAdjacent(r,c,unit.owner,'skeleton',1);
+  }
+
+  // Veteran 3 arise (undead_warrior)
+  if(unit.id==='undead_warrior' && unit.vetLv>=3 && !unit._ariseUsed) {
+    unit._ariseUsed = true;
+    let u2 = createUnit(getCardById('undead_warrior'), unit.owner);
+    u2.hp = 1; u2.maxHp = u2.hp;
+    G.board[r][c] = u2;
+    u2._r = r; u2._c = c;
+    addLog('Undead Warrior arises!');
+    return; // Don't remove from board
+  }
+
+  G.p[unit.owner].grave.push(unit);
+  G.board[r][c] = null;
+}
+
+function drawCards(owner, count) {
+  for(let i=0;i<count;i++) {
+    if(G.p[owner].deck.length > 0 && G.p[owner].hand.length < 10) {
+      G.p[owner].hand.push(G.p[owner].deck.pop());
+    }
+  }
+}
+
+function spawnTokensAdjacent(r, c, owner, tokenId, count) {
+  let dirs = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+  let spawned = 0;
+  for(let [dr,dc] of dirs) {
+    if(spawned >= count) break;
+    let nr=r+dr, nc=c+dc;
+    if(!inBounds(nr,nc) || G.board[nr][nc]) continue;
+    if(getTerrain(nr,nc)==='mountain') continue;
+    let token = createUnit(TOKEN_CARDS[tokenId], owner);
+    token._r = nr; token._c = nc;
+    G.board[nr][nc] = token;
+    spawned++;
+  }
+}
+
+function spawnTokensInZone(owner, tokenId, count) {
+  let zones = owner===0?[3,4]:[0,1];
+  let spawned = 0;
+  for(let r of zones) {
+    for(let c=0;c<7;c++) {
+      if(spawned>=count) return;
+      if(!G.board[r][c] && getTerrain(r,c)!=='mountain') {
+        let token = createUnit(TOKEN_CARDS[tokenId], owner);
+        token._r = r; token._c = c;
+        G.board[r][c] = token;
+        spawned++;
+      }
+    }
+  }
+}
+
+function getAdjacentUnits(r, c, owner) {
+  let adj = [];
+  let dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+  for(let [dr,dc] of dirs) {
+    let nr=r+dr, nc=c+dc;
+    if(inBounds(nr,nc) && G.board[nr][nc]) {
+      if(owner===undefined || G.board[nr][nc].owner===owner)
+        adj.push({unit:G.board[nr][nc], r:nr, c:nc});
+    }
+  }
+  return adj;
+}
+
+// ====================== WIN CONDITION ======================
+function checkWin() {
+  for(let i=0;i<2;i++) {
+    if(G.p[i].hp <= 0) {
+      G.p[i].hp = 0;
+      document.getElementById('victory-text').textContent = 'Player ' + (enemy(i)+1) + ' Wins!';
+      document.getElementById('victory-overlay').classList.add('active');
+      addLog('GAME OVER! Player ' + (enemy(i)+1) + ' wins!');
+      SFX.victory();
+      // Spawn victory particles
+      let vp=document.getElementById('victory-particles');if(vp){vp.innerHTML='';for(let j=0;j<30;j++){let s=document.createElement('div');s.className='v-spark';let sz=4+Math.random()*8;s.style.width=sz+'px';s.style.height=sz+'px';s.style.background=['#d4a843','#ffd700','#ff8800','#fff','#ffa'][j%5];s.style.left=(20+Math.random()*60)+'%';s.style.top=(40+Math.random()*30)+'%';s.style.setProperty('--vx',(Math.random()*200-100)+'px');s.style.setProperty('--vy',(-100-Math.random()*200)+'px');s.style.setProperty('--dur',(1.5+Math.random()*1.5)+'s');s.style.animationDelay=(Math.random()*0.5)+'s';vp.appendChild(s)}}
+      if(SFX.ambient){SFX.ambient.stop();SFX.ambient=null}
+      return true;
+    }
+  }
+  return false;
+}
+
+// ====================== UI RENDERING ======================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='newgame-screen') renderNewGameScreen();
+}
+
+function showTurnOverlay() {
+  document.getElementById('turn-overlay-text').textContent = 'Player ' + (G.ap+1) + '\'s Turn';
+  document.getElementById('turn-overlay').classList.add('active');
+}
+
+function dismissTurnOverlay() {
+  document.getElementById('turn-overlay').classList.remove('active');
+  runPhase();
+}
+
+function render() {
+  if(dragState.active || touchDrag.active) return; // never rebuild DOM mid-drag
+  renderBoard();
+  renderHands();
+  renderPlayerBars();
+  renderPhaseBar();
+}
+
+function renderBoard() {
+  let board = document.getElementById('board');
+  board.innerHTML = '';
+  for(let r=0;r<5;r++) {
+    for(let c=0;c<7;c++) {
+      let cell = document.createElement('div');
+      cell.className = 'cell t-' + getTerrain(r,c);
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+
+      // Height CSS class
+      let h = getHeight(r,c);
+      if(h > 0) cell.classList.add('h-'+Math.min(h,3));
+
+      // Terrain SVG icon
+      let terr = getTerrain(r,c);
+      if(TerrainSVG[terr]) {
+        let ti = document.createElement('div');
+        ti.className = 'terrain-icon';
+        ti.innerHTML = TerrainSVG[terr]();
+        cell.appendChild(ti);
+      }
+
+      // Terrain particles
+      if(terr==='volcano'){for(let i=0;i<3;i++){let p=document.createElement('div');p.className='particle fire-p';p.style.left=(15+Math.random()*60)+'%';p.style.animationDelay=(Math.random()*1.5)+'s';cell.appendChild(p)}}
+      if(terr==='forest'){let lf=document.createElement('div');lf.className='particle leaf-p';lf.style.left=(10+Math.random()*70)+'%';lf.style.animationDelay=(Math.random()*4)+'s';cell.appendChild(lf)}
+      if(terr==='water'){for(let i=0;i<2;i++){let w=document.createElement('div');w.className='particle water-p';w.style.left=(10+Math.random()*70)+'%';w.style.top=(20+Math.random()*50)+'%';w.style.animationDelay=(Math.random()*3)+'s';cell.appendChild(w)}}
+      if(terr==='swamp'){let sb=document.createElement('div');sb.className='particle swamp-p';sb.style.left=(20+Math.random()*50)+'%';sb.style.animationDelay=(Math.random()*3)+'s';cell.appendChild(sb)}
+
+      // Highlights
+      let highlight = G.highlights.find(x=>x.r===r && x.c===c);
+      if(highlight) cell.classList.add('hl-' + highlight.type);
+      if(G.sel && G.sel.type==='unit' && G.sel.r===r && G.sel.c===c) cell.classList.add('hl-selected');
+
+      // Unit
+      let unit = G.board[r][c];
+      if(unit) {
+        let token = document.createElement('div');
+        token.className = 'unit-token owner-' + unit.owner;
+        if(unit.type==='structure') token.classList.add('is-structure');
+        if(!unit.ready && !unit._frozen) token.classList.add('exhausted');
+        if(unit._stealthed) token.classList.add('effect-stealth');
+        if(unit._divine_shield) token.classList.add('effect-divine-shield');
+        if(unit._ward) token.classList.add('effect-ward');
+        if(unit._frozen) token.classList.add('effect-frozen');
+        if(unit.effects.some(e=>e.type==='poison')) token.classList.add('effect-poison');
+
+        // Mini SVG art
+        let artFn = CardArt[unit.id] || (unit.isCustom ? ()=>CardArt._generic(unit.type,unit.elem) : null);
+        if(artFn){let ad=document.createElement('div');ad.className='u-art';ad.innerHTML=artFn();token.appendChild(ad)}
+
+        let nameEl = document.createElement('div');
+        nameEl.className = 'u-name';
+        nameEl.textContent = unit.name;
+        token.appendChild(nameEl);
+
+        let statsEl = document.createElement('div');
+        statsEl.className = 'u-stats';
+        if(unit.type!=='structure' || unit.atk > 0) {
+          let atkSpan = document.createElement('span');
+          atkSpan.className = 'u-atk';
+          atkSpan.textContent = (unit.atk + (unit._turnBuffs?.inspireAtk||0) + (unit._turnBuffs?.momentum||0));
+          statsEl.appendChild(atkSpan);
+        }
+        let hpSpan = document.createElement('span');
+        hpSpan.className = 'u-hp';
+        hpSpan.textContent = unit.hp;
+        if(unit.hp < unit.maxHp) hpSpan.style.color = '#ff8888';
+        statsEl.appendChild(hpSpan);
+        token.appendChild(statsEl);
+
+        // XP stars
+        if(unit.xp > 0 && !unit.isToken) {
+          let stars = document.createElement('span');
+          stars.className = 'u-stars';
+          stars.textContent = '★'.repeat(unit.xp);
+          token.appendChild(stars);
+        }
+
+        // Keywords indicator (icon circles)
+        let kwIcons = [];
+        if(unit.kw.includes('taunt')) kwIcons.push({icon:'🛡',title:'Taunt'});
+        if(unit.kw.includes('flying')) kwIcons.push({icon:'🪶',title:'Flying'});
+        if(unit._divine_shield) kwIcons.push({icon:'✦',title:'Divine Shield'});
+        if(unit._stealthed) kwIcons.push({icon:'👁',title:'Stealth'});
+        if(unit._frozen) kwIcons.push({icon:'❄',title:'Frozen'});
+        if(unit._ward) kwIcons.push({icon:'⬡',title:'Ward'});
+        if(unit.kw.includes('ranged')) kwIcons.push({icon:'🎯',title:'Ranged'});
+        if(unit.kw.includes('lifesteal')) kwIcons.push({icon:'♠',title:'Lifesteal'});
+        if(kwIcons.length) {
+          let kwEl = document.createElement('div');
+          kwEl.className = 'u-kw';
+          kwIcons.forEach(ki => {
+            let span = document.createElement('span');
+            span.className = 'kw-icon';
+            span.textContent = ki.icon;
+            span.title = ki.title;
+            kwEl.appendChild(span);
+          });
+          token.appendChild(kwEl);
+        }
+
+        // Element color hint
+        if(unit.elem && ELEMENTS[unit.elem]) {
+          token.style.borderTopColor = ELEMENTS[unit.elem].color;
+        }
+
+        cell.appendChild(token);
+      }
+
+      // Click handler
+      cell.addEventListener('click', () => onCellClick(r,c));
+
+      // Drag drop targets
+      cell.addEventListener('dragover', (e) => handleBoardDragOver(e,r,c));
+      cell.addEventListener('dragleave', (e) => handleBoardDragLeave(e,r,c));
+      cell.addEventListener('drop', (e) => { e.preventDefault(); handleCardDrop(r,c); });
+
+      // Tooltip
+      cell.addEventListener('mouseenter', (e) => showCellTooltip(r,c,e));
+      cell.addEventListener('mouseleave', hideTooltip);
+
+      board.appendChild(cell);
+    }
+  }
+}
+
+function renderHands() {
+  let area = document.getElementById('hand-area');
+  area.innerHTML = '';
+  let p = G.p[G.ap];
+  p.hand.forEach((card, idx) => {
+    let cardEl = renderCardElement(card, idx);
+    // Check if playable
+    let cost = getCardCost(card, G.ap);
+    let playable = G.phase === 2 && G.deployLeft > 0 && p.energy >= cost;
+    if(!playable) {
+      cardEl.classList.add('unplayable');
+    } else {
+      // Determine if draggable (non-targeted spells are click-only)
+      let isDraggable = true;
+      if(card.type === 'spell' && !getSpellNeedsTarget(card)) isDraggable = false;
+      if(isDraggable) {
+        cardEl.draggable = true;
+        cardEl.addEventListener('dragstart', (e) => onCardDragStart(e, idx));
+        cardEl.addEventListener('dragend', (e) => onCardDragEnd(e));
+        cardEl.addEventListener('pointerdown', (e) => onCardPointerDown(e, idx));
+      }
+    }
+    cardEl.addEventListener('click', (e) => { e.stopPropagation(); onCardClick(idx); });
+    area.appendChild(cardEl);
+  });
+}
+
+function getCardCost(card, player) {
+  let cost = card.cost || 0;
+  if(G.p[player].titan && card.elem === G.p[player].titan.elem) cost = Math.max(0, cost-1);
+  if(card.type === 'spell' && G.p[player].titanId === 'elandor') cost = Math.max(0, cost-1);
+  if(card.type === 'spell') {
+    getAllUnits(player).forEach(u => { if(u.unit.id==='arcane_sanctum') cost = Math.max(0, cost-1); });
+  }
+  if(card.race === 'Goblin' && countRace(player, 'Goblin') >= 3) cost = Math.max(0, cost-1);
+  return cost;
+}
+
+function renderCardElement(card, idx) {
+  let el = document.createElement('div');
+  el.className = 'card';
+  if(card.elem) el.classList.add('elem-'+card.elem);
+  if(card.rarity) el.classList.add('rarity-'+card.rarity);
+  if(G.sel && G.sel.type==='card' && G.sel.idx===idx) el.classList.add('selected');
+
+  let cost = (idx !== undefined && G.p && G.p[G.ap]) ? getCardCost(card, G.ap) : (card.cost||0);
+
+  el.innerHTML = `
+    <div class="c-cost">${cost}</div>
+    <div class="c-name">${card.name||'?'}</div>
+    <div class="c-art" style="background:${card.elem&&ELEMENTS[card.elem]?ELEMENTS[card.elem].color+'22':'#222'}">${CardArt[card.id]?CardArt[card.id]():(card.isCustom?CardArt._generic(card.type,card.elem):(card.elem&&ELEMENTS[card.elem]?ELEMENTS[card.elem].icon:'⬛'))}</div>
+    <div class="c-type">${(card.type||'unit').toUpperCase()}${card.race?' • '+card.race:''}${card.range>1?' • Range '+card.range:''}</div>
+    <div class="c-text">${card.text||''}${card.vet1?'<br>★'+card.vet1:''}${card.vet2?'<br>★★'+card.vet2:''}${card.vet3?'<br>★★★'+card.vet3:''}</div>
+    <div class="c-bottom">
+      ${card.type!=='spell'?'<span class="c-atk">'+((card.atk||0))+'</span>':'<span></span>'}
+      ${card.type!=='spell'?'<span class="c-hp">'+(card.hp||0)+'</span>':'<span></span>'}
+    </div>
+  `;
+  // Tooltip
+  el.addEventListener('mouseenter', (e) => showCardTooltip(card, e));
+  el.addEventListener('mouseleave', hideTooltip);
+  return el;
+}
+
+function renderPlayerBars() {
+  for(let i=0;i<2;i++) {
+    let bar = document.getElementById(i===0?'p1-bar':'p2-bar');
+    let p = G.p[i];
+    let t = p.titan;
+    if(!t) { bar.innerHTML=''; continue; }
+    let hpPct = Math.max(0, (p.hp / t.hp) * 100);
+    let isActive = (i === G.ap);
+    let ultReady = t.kills >= t.ultReq;
+
+    bar.innerHTML = `
+      <div class="titan-portrait" style="border-color:${t.color};color:${t.color}">${t.icon}</div>
+      <div>
+        <div style="font-weight:bold;font-size:13px;${isActive?'color:var(--gold)':''}">${isActive?'► ':''}P${i+1}: ${t.name}</div>
+        <div class="hp-bar-outer"><div class="hp-bar-inner" style="width:${hpPct}%">${p.hp}/${t.hp}</div></div>
+      </div>
+      <div class="energy-display">${isActive?'⚡ '+p.energy+'/10':''}</div>
+      <div class="deploy-display">${isActive?'Actions: '+G.deployLeft+'/3':''}</div>
+      ${isActive?`<button class="titan-ability-btn" onclick="activateTitan()" ${G.phase!==2||G.deployLeft<=0||p.energy<t.activeCost?'disabled':''}
+        title="${t.activeText}">${t.icon} Ability (${t.activeCost}⚡)</button>`:''}
+      ${isActive&&ultReady?`<button class="titan-ability-btn" onclick="activateUltimate()" style="border-color:var(--gold);color:var(--gold)"
+        title="${t.ultText}">⚡ ULTIMATE</button>`:''}
+      <div style="font-size:10px;color:var(--dim)">${t.passiveText}</div>
+      <div style="font-size:10px;color:#888">Deck: ${p.deck.length} | Hand: ${p.hand.length} | Kills: ${t.kills}/${t.ultReq}</div>
+    `;
+  }
+}
+
+function renderPhaseBar() {
+  let list = document.getElementById('phase-list');
+  list.innerHTML = '';
+  PHASES.forEach((name, i) => {
+    let item = document.createElement('div');
+    item.className = 'phase-item';
+    if(i === G.phase) item.classList.add('active');
+    if(i < G.phase) item.classList.add('done');
+    item.textContent = (i+1) + '. ' + name;
+    list.appendChild(item);
+  });
+  document.getElementById('turn-num').textContent = G.turn;
+  let btn = document.getElementById('next-phase-btn');
+  btn.textContent = G.phase >= 5 ? 'End Turn' : 'Next Phase →';
+  // Disable during auto-advance phases
+  btn.disabled = (G.phase === 0 || G.phase === 1 || G.phase === 5);
+}
+
+function renderLog() {
+  let log = document.getElementById('game-log');
+  log.innerHTML = G.log.map(msg => '<div class="log-entry">' + msg + '</div>').join('');
+  log.scrollTop = log.scrollHeight;
+}
+
+// ====================== POPUPS ======================
+function showPopup(r, c, text, isHeal) {
+  let board = document.getElementById('board');
+  let cells = board.children;
+  let idx = r * 7 + c;
+  if(!cells[idx]) return;
+  let rect = cells[idx].getBoundingClientRect();
+  let popup = document.createElement('div');
+  popup.className = 'dmg-popup' + (isHeal ? ' heal' : '');
+  popup.textContent = text;
+  popup.style.left = (rect.left + rect.width/2 - 15) + 'px';
+  popup.style.top = (rect.top + rect.height/3) + 'px';
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 800);
+}
+
+function showVetPopup(r, c, level) {
+  let board = document.getElementById('board');
+  let cells = board.children;
+  let idx = r * 7 + c;
+  if(!cells[idx]) return;
+  let rect = cells[idx].getBoundingClientRect();
+  let popup = document.createElement('div');
+  popup.className = 'vet-popup';
+  popup.textContent = '★'.repeat(level) + ' VETERAN!';
+  popup.style.left = (rect.left + rect.width/2 - 30) + 'px';
+  popup.style.top = (rect.top) + 'px';
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 1000);
+}
+
+// ====================== TOOLTIPS ======================
+function showCellTooltip(r, c, e) {
+  let terrain = getTerrain(r,c);
+  let height = getHeight(r,c);
+  let ti = TERRAIN_INFO[terrain];
+  let unit = G.board[r][c];
+  let html = `<div class="tt-title">${ti.name} (Height ${height})</div>`;
+  html += `<div class="tt-text">${ti.desc}</div>`;
+  if(unit) {
+    html += `<hr style="border-color:#333;margin:6px 0">`;
+    html += `<div class="tt-title">${unit.name} [P${unit.owner+1}]</div>`;
+    html += `<div class="tt-stats">ATK: ${unit.atk} | HP: ${unit.hp}/${unit.maxHp} | Move: ${unit.move} | Range: ${unit.range}</div>`;
+    html += `<div class="tt-stats">${unit.race} • ${unit.elem?ELEMENTS[unit.elem]?.name:''} • XP: ${unit.xp}/3</div>`;
+    if(unit.kw.length) html += `<div class="tt-stats">Keywords: ${unit.kw.join(', ')}</div>`;
+    if(unit._armor) html += `<div class="tt-stats">Armor: ${unit._armor}</div>`;
+    if(unit._divine_shield) html += `<div class="tt-stats">Divine Shield active</div>`;
+    if(unit._stealthed) html += `<div class="tt-stats">Stealthed</div>`;
+    if(unit._frozen) html += `<div class="tt-stats">Frozen!</div>`;
+    if(unit.effects.length) html += `<div class="tt-stats">Effects: ${unit.effects.map(e=>e.type+'('+e.val+')').join(', ')}</div>`;
+    if(unit.vet1) html += `<div class="tt-text">★ ${unit.vet1}${unit.vetLv>=1?' ✓':''}</div>`;
+    if(unit.vet2) html += `<div class="tt-text">★★ ${unit.vet2}${unit.vetLv>=2?' ✓':''}</div>`;
+    if(unit.vet3) html += `<div class="tt-text">★★★ ${unit.vet3}${unit.vetLv>=3?' ✓':''}</div>`;
+    if(canActivateVet3(unit) && unit.owner===G.ap) html += `<div class="tt-text" style="color:var(--gold)">Right-click to activate Vet3!</div>`;
+    if(unit.text) html += `<div class="tt-text" style="color:#aaa">${unit.text}</div>`;
+
+    // Show projected damage if in combat phase and unit is selected attacker
+    if(G.phase===4 && G.sel && G.sel.type==='unit') {
+      let attacker = G.board[G.sel.r][G.sel.c];
+      if(attacker && unit.owner !== attacker.owner) {
+        let projDmg = calcDamage(attacker, G.sel.r, G.sel.c, unit, r, c);
+        html += `<div class="tt-text" style="color:#ff6666">Projected damage: ${projDmg}</div>`;
+      }
+    }
+
+    // Synergy info
+    let raceCount = countRace(unit.owner, unit.race);
+    let syn = SYNERGY_DATA[unit.race];
+    if(syn && raceCount >= 2) {
+      html += `<div class="tt-stats" style="color:var(--gold)">${unit.race} synergy (${raceCount}): `;
+      if(raceCount >= 5) html += syn.t5;
+      else if(raceCount >= 3) html += syn.t3;
+      else html += 'Need 3 for: ' + syn.t3;
+      html += '</div>';
+    }
+  }
+  showTooltipAt(html, e);
+}
+
+function showCardTooltip(card, e) {
+  let html = `<div class="tt-title">${card.name}</div>`;
+  html += `<div class="tt-stats">Cost: ${card.cost} | ${card.type}${card.race?' | '+card.race:''}${card.elem?' | '+ELEMENTS[card.elem]?.name:''}</div>`;
+  if(card.type !== 'spell') html += `<div class="tt-stats">ATK: ${card.atk} HP: ${card.hp} Move: ${card.move} Range: ${card.range}</div>`;
+  if(card.kw && card.kw.length) html += `<div class="tt-stats">Keywords: ${card.kw.join(', ')}</div>`;
+  html += `<div class="tt-text">${card.text||''}</div>`;
+  if(card.vet1) html += `<div class="tt-text">★ ${card.vet1}</div>`;
+  if(card.vet2) html += `<div class="tt-text">★★ ${card.vet2}</div>`;
+  if(card.vet3) html += `<div class="tt-text">★★★ ${card.vet3}</div>`;
+  if(card.flavor) html += `<div class="tt-text" style="color:#666;font-style:italic">${card.flavor}</div>`;
+  showTooltipAt(html, e);
+}
+
+function showTooltipAt(html, e) {
+  let tt = document.getElementById('tooltip');
+  tt.innerHTML = html;
+  tt.style.display = 'block';
+  let x = e.clientX + 15, y = e.clientY + 10;
+  if(x + 280 > window.innerWidth) x = e.clientX - 290;
+  if(y + 200 > window.innerHeight) y = e.clientY - 210;
+  tt.style.left = x + 'px';
+  tt.style.top = y + 'px';
+}
+
+function hideTooltip() {
+  document.getElementById('tooltip').style.display = 'none';
+}
+
+// ====================== EVENT HANDLERS ======================
+function onCellClick(r, c) {
+  if(G.animating) return;
+  SFX.uiClick();
+  // Handle titan target selection
+  if(G.sel && G.sel.type === 'titan_target') {
+    handleTitanTarget(r, c);
+    render();
+    return;
+  }
+
+  // Handle spell targeting
+  if(G.sel && G.sel.type === 'spell') {
+    let card = G.p[G.ap].hand[G.sel.idx];
+    deployCard(G.sel.idx, r, c);
+    G.sel = null;
+    G.highlights = [];
+    render();
+    return;
+  }
+
+  // Handle card placement
+  if(G.sel && G.sel.type === 'card') {
+    let card = G.p[G.ap].hand[G.sel.idx];
+    if(card.type === 'spell') {
+      deployCard(G.sel.idx, r, c);
+    } else {
+      let valid = G.highlights.find(h=>h.r===r && h.c===c);
+      if(valid) {
+        deployCard(G.sel.idx, r, c);
+      } else {
+        addLog('Invalid placement. Click a highlighted tile.');
+      }
+    }
+    G.sel = null;
+    G.highlights = [];
+    render();
+    return;
+  }
+
+  let unit = G.board[r][c];
+
+  // Deploy phase - nothing special for empty cells unless card selected
+  if(G.phase === 2) {
+    if(unit && unit.owner === G.ap) {
+      // Check for vet3 activation
+      if(canActivateVet3(unit)) {
+        G.sel = {type:'vet3', r, c};
+        // Highlight possible targets
+        G.highlights = getAllUnits(enemy(G.ap)).map(u=>({r:u.r,c:u.c,type:'attack'}));
+        addLog('Select target for ' + unit.name + '\'s Vet3 ability, or click same unit to self-activate.');
+        render();
+        return;
+      }
+    }
+    G.sel = null;
+    G.highlights = [];
+    render();
+    return;
+  }
+
+  // Handle vet3 targeting
+  if(G.sel && G.sel.type === 'vet3') {
+    let srcUnit = G.board[G.sel.r][G.sel.c];
+    if(r === G.sel.r && c === G.sel.c) {
+      activateVet3(srcUnit, G.sel.r, G.sel.c);
+    } else {
+      activateVet3(srcUnit, G.sel.r, G.sel.c, r, c);
+    }
+    G.sel = null;
+    G.highlights = [];
+    render();
+    return;
+  }
+
+  // Movement phase
+  if(G.phase === 3) {
+    if(G.sel && G.sel.type === 'unit') {
+      let valid = G.highlights.find(h=>h.r===r && h.c===c && h.type==='move');
+      if(valid) {
+        moveUnit(G.sel.r, G.sel.c, r, c);
+        G.sel = null;
+        G.highlights = [];
+        render();
+        return;
+      }
+    }
+    if(unit && unit.owner === G.ap && unit.ready && unit.movesLeft > 0 && unit.type!=='structure') {
+      G.sel = {type:'unit', r, c};
+      G.highlights = getValidMoves(r,c).map(m=>({r:m.r,c:m.c,type:'move'}));
+      render();
+      return;
+    }
+    G.sel = null;
+    G.highlights = [];
+    render();
+    return;
+  }
+
+  // Combat phase
+  if(G.phase === 4) {
+    if(G.sel && G.sel.type === 'unit') {
+      let valid = G.highlights.find(h=>h.r===r && h.c===c && h.type==='attack');
+      if(valid) {
+        resolveCombat(G.sel.r, G.sel.c, r, c);
+        G.sel = null;
+        G.highlights = [];
+        render();
+        return;
+      }
+    }
+    if(unit && unit.owner === G.ap && unit.ready && !unit.hasAttacked && unit.type!=='structure' && !unit._frozen) {
+      G.sel = {type:'unit', r, c};
+      G.highlights = getValidTargets(r,c).map(t=>({r:t.r,c:t.c,type:'attack'}));
+      if(G.highlights.length === 0) addLog(unit.name + ' has no valid targets.');
+      render();
+      return;
+    }
+    G.sel = null;
+    G.highlights = [];
+    render();
+    return;
+  }
+}
+
+function onCardClick(idx) {
+  if(G.animating) return;
+  SFX.uiClick();
+  if(G.phase !== 2 || G.deployLeft <= 0) return;
+  let p = G.p[G.ap];
+  let card = p.hand[idx];
+  if(!card) return;
+  let cost = getCardCost(card, G.ap);
+  if(p.energy < cost) { addLog('Not enough energy! Need ' + cost); return; }
+
+  if(card.type === 'spell') {
+    // Some spells need targeting, some don't
+    let needsTarget = ['fireball','healing_light','shadow_strike','wind_rush','divine_favor','lightning_bolt'].includes(card.id);
+    if(!needsTarget && card.type==='spell') {
+      // Check custom spell text for targeting
+      let txt = (card.text||'').toLowerCase();
+      needsTarget = txt.includes('target') || txt.includes('deal') && txt.includes('damage');
+    }
+    if(needsTarget) {
+      G.sel = {type:'card', idx};
+      // Highlight valid spell targets
+      let isHeal = card.text && card.text.toLowerCase().includes('heal');
+      let targetOwner = isHeal ? G.ap : enemy(G.ap);
+      G.highlights = getAllUnits(targetOwner).map(u=>({r:u.r,c:u.c,type:isHeal?'deploy':'attack'}));
+      // Also allow targeting empty for some
+      if(!isHeal) G.highlights.push({r:-1,c:-1,type:'attack'}); // titan target dummy
+      addLog('Select a target for ' + card.name);
+    } else {
+      deployCard(idx, undefined, undefined);
+      G.sel = null;
+      G.highlights = [];
+    }
+  } else {
+    G.sel = {type:'card', idx};
+    let validTiles = getValidDeployTiles(card);
+    G.highlights = validTiles.map(t=>({r:t.r,c:t.c,type:'deploy'}));
+    addLog('Select a tile to deploy ' + card.name + ' (cost: ' + cost + ')');
+  }
+  render();
+}
+
+// Context menu for vet3
+document.addEventListener('contextmenu', (e) => {
+  let cell = e.target.closest('.cell');
+  if(!cell) return;
+  let r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
+  let unit = G.board[r]?.[c];
+  if(unit && unit.owner === G.ap && canActivateVet3(unit)) {
+    e.preventDefault();
+    G.sel = {type:'vet3', r, c};
+    G.highlights = getAllUnits(enemy(G.ap)).map(u=>({r:u.r,c:u.c,type:'attack'}));
+    addLog('Select target for ' + unit.name + '\'s Vet3, or click same unit.');
+    render();
+  }
+});
+
+// ====================== DRAG & DROP ======================
+let dragState = { active:false, cardIdx:-1, ghostEl:null, validCells:[], isSpell:false, needsTarget:false };
+
+function getSpellNeedsTarget(card) {
+  if(!card || card.type !== 'spell') return false;
+  let needs = ['fireball','healing_light','shadow_strike','wind_rush','divine_favor','lightning_bolt'].includes(card.id);
+  if(!needs) {
+    let txt = (card.text||'').toLowerCase();
+    needs = txt.includes('target') || (txt.includes('deal') && txt.includes('damage'));
+  }
+  return needs;
+}
+
+function getSpellValidCells(card) {
+  let isHeal = card.text && card.text.toLowerCase().includes('heal');
+  let targetOwner = isHeal ? G.ap : enemy(G.ap);
+  return getAllUnits(targetOwner).map(u=>({r:u.r,c:u.c}));
+}
+
+function onCardDragStart(e, idx) {
+  if(G.animating || G.phase !== 2 || G.deployLeft <= 0) { e.preventDefault(); return; }
+  let p = G.p[G.ap];
+  let card = p.hand[idx];
+  if(!card) { e.preventDefault(); return; }
+  let cost = getCardCost(card, G.ap);
+  if(p.energy < cost) { e.preventDefault(); return; }
+
+  // Determine valid cells
+  let validCells = [];
+  let isSpell = card.type === 'spell';
+  let needsTarget = false;
+
+  if(isSpell) {
+    needsTarget = getSpellNeedsTarget(card);
+    if(!needsTarget) { e.preventDefault(); return; } // non-targeted spells stay click-only
+    validCells = getSpellValidCells(card);
+  } else {
+    validCells = getValidDeployTiles(card);
+  }
+
+  if(validCells.length === 0) { e.preventDefault(); return; }
+
+  dragState.active = true;
+  dragState.cardIdx = idx;
+  dragState.validCells = validCells;
+  dragState.isSpell = isSpell;
+  dragState.needsTarget = needsTarget;
+
+  // Create ghost
+  let ghost = e.target.closest('.card').cloneNode(true);
+  ghost.className = 'card drag-ghost';
+  ghost.style.width = '110px';
+  ghost.style.height = '155px';
+  document.body.appendChild(ghost);
+  dragState.ghostEl = ghost;
+
+  // Make native drag image transparent
+  let blank = document.createElement('canvas');
+  blank.width = 1; blank.height = 1;
+  e.dataTransfer.setDragImage(blank, 0, 0);
+  e.dataTransfer.effectAllowed = 'move';
+
+  // Highlight valid cells on the board (direct DOM, no render())
+  let board = document.getElementById('board');
+  let cells = board.children;
+  let validSet = new Set(validCells.map(v=>v.r*7+v.c));
+  for(let i=0;i<cells.length;i++) {
+    if(validSet.has(i)) cells[i].classList.add('drag-valid');
+    else cells[i].classList.add('drag-invalid');
+  }
+}
+
+function onCardDragEnd(e) {
+  // Clean up ghost
+  if(dragState.ghostEl) { dragState.ghostEl.remove(); dragState.ghostEl = null; }
+  // Remove all drag classes
+  let board = document.getElementById('board');
+  if(board) {
+    let cells = board.children;
+    for(let i=0;i<cells.length;i++) {
+      cells[i].classList.remove('drag-valid','drag-hover','drag-invalid');
+    }
+  }
+  dragState.active = false;
+  dragState.cardIdx = -1;
+  dragState.validCells = [];
+}
+
+function handleBoardDragOver(e, r, c) {
+  if(!dragState.active) return;
+  let isValid = dragState.validCells.some(v=>v.r===r && v.c===c);
+  if(isValid) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.target.closest('.cell')?.classList.add('drag-hover');
+  }
+}
+
+function handleBoardDragLeave(e, r, c) {
+  e.target.closest('.cell')?.classList.remove('drag-hover');
+}
+
+function handleCardDrop(r, c) {
+  if(!dragState.active) return;
+  let isValid = dragState.validCells.some(v=>v.r===r && v.c===c);
+  if(!isValid) return;
+
+  let idx = dragState.cardIdx;
+  // Clean up drag state before deploy (deploy calls render)
+  onCardDragEnd(null);
+
+  deployCard(idx, r, c);
+  G.sel = null;
+  G.highlights = [];
+  render();
+}
+
+// Ghost position tracker
+document.addEventListener('dragover', (e) => {
+  if(!dragState.active || !dragState.ghostEl) return;
+  dragState.ghostEl.style.left = (e.clientX + 12) + 'px';
+  dragState.ghostEl.style.top = (e.clientY - 20) + 'px';
+});
+
+// ====================== TOUCH DRAG FALLBACK ======================
+let touchDrag = { active:false, timer:null, cardIdx:-1, ghostEl:null, validCells:[], isSpell:false };
+
+function onCardPointerDown(e, idx) {
+  if(e.pointerType === 'mouse') return; // mouse uses native drag
+  if(G.animating || G.phase !== 2 || G.deployLeft <= 0) return;
+  let p = G.p[G.ap];
+  let card = p.hand[idx];
+  if(!card) return;
+  let cost = getCardCost(card, G.ap);
+  if(p.energy < cost) return;
+
+  touchDrag.cardIdx = idx;
+  touchDrag.timer = setTimeout(() => {
+    let isSpell = card.type === 'spell';
+    let needsTarget = isSpell ? getSpellNeedsTarget(card) : false;
+    if(isSpell && !needsTarget) return;
+
+    let validCells = isSpell ? getSpellValidCells(card) : getValidDeployTiles(card);
+    if(validCells.length === 0) return;
+
+    touchDrag.active = true;
+    touchDrag.validCells = validCells;
+    touchDrag.isSpell = isSpell;
+
+    // Create ghost
+    let ghost = e.target.closest('.card').cloneNode(true);
+    ghost.className = 'card drag-ghost';
+    ghost.style.width = '110px';
+    ghost.style.height = '155px';
+    ghost.style.left = (e.clientX + 12) + 'px';
+    ghost.style.top = (e.clientY - 20) + 'px';
+    document.body.appendChild(ghost);
+    touchDrag.ghostEl = ghost;
+
+    // Highlight valid cells
+    let board = document.getElementById('board');
+    let cells = board.children;
+    let validSet = new Set(validCells.map(v=>v.r*7+v.c));
+    for(let i=0;i<cells.length;i++) {
+      if(validSet.has(i)) cells[i].classList.add('drag-valid');
+      else cells[i].classList.add('drag-invalid');
+    }
+  }, 150);
+}
+
+function onCardPointerMove(e) {
+  if(!touchDrag.active) return;
+  e.preventDefault();
+  if(touchDrag.ghostEl) {
+    touchDrag.ghostEl.style.left = (e.clientX + 12) + 'px';
+    touchDrag.ghostEl.style.top = (e.clientY - 20) + 'px';
+  }
+  // Highlight cell under finger
+  let board = document.getElementById('board');
+  if(board) {
+    let cells = board.children;
+    for(let i=0;i<cells.length;i++) cells[i].classList.remove('drag-hover');
+    let el = document.elementFromPoint(e.clientX, e.clientY);
+    let cell = el?.closest?.('.cell');
+    if(cell && cell.classList.contains('drag-valid')) cell.classList.add('drag-hover');
+  }
+}
+
+function onCardPointerUp(e) {
+  clearTimeout(touchDrag.timer);
+  if(!touchDrag.active) { touchDrag.cardIdx = -1; return; }
+
+  let el = document.elementFromPoint(e.clientX, e.clientY);
+  let cell = el?.closest?.('.cell');
+  if(cell) {
+    let r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
+    let isValid = touchDrag.validCells.some(v=>v.r===r && v.c===c);
+    if(isValid) {
+      let idx = touchDrag.cardIdx;
+      cleanupTouchDrag();
+      deployCard(idx, r, c);
+      G.sel = null;
+      G.highlights = [];
+      render();
+      return;
+    }
+  }
+  cleanupTouchDrag();
+}
+
+function cleanupTouchDrag() {
+  if(touchDrag.ghostEl) { touchDrag.ghostEl.remove(); touchDrag.ghostEl = null; }
+  let board = document.getElementById('board');
+  if(board) {
+    let cells = board.children;
+    for(let i=0;i<cells.length;i++) cells[i].classList.remove('drag-valid','drag-hover','drag-invalid');
+  }
+  touchDrag.active = false;
+  touchDrag.cardIdx = -1;
+  touchDrag.validCells = [];
+}
+
+document.addEventListener('pointermove', onCardPointerMove);
+document.addEventListener('pointerup', onCardPointerUp);
+
+// ====================== NEW GAME SCREEN ======================
+let ngState = {p1Titan:'kargath', p2Titan:'thalor', mapIdx:0};
+
+function renderNewGameScreen() {
+  for(let pi=0;pi<2;pi++) {
+    let container = document.getElementById(pi===0?'p1-titans':'p2-titans');
+    container.innerHTML = '';
+    TITANS.forEach(t => {
+      let div = document.createElement('div');
+      div.className = 'titan-option';
+      if((pi===0?ngState.p1Titan:ngState.p2Titan)===t.id) div.classList.add('selected');
+      div.innerHTML = `<span class="t-name">${t.icon} ${t.name}</span><span class="t-elem" style="background:${t.color}44;color:${t.color}">${t.elem}</span>
+        <div class="t-desc">${t.passiveText}<br>${t.activeText}<br><em>${t.ultText}</em></div>`;
+      div.onclick = () => { if(pi===0) ngState.p1Titan=t.id; else ngState.p2Titan=t.id; renderNewGameScreen(); };
+      container.appendChild(div);
+    });
+  }
+  let mapContainer = document.getElementById('map-options');
+  mapContainer.innerHTML = '';
+  MAPS.forEach((m,i) => {
+    let div = document.createElement('div');
+    div.className = 'map-option' + (ngState.mapIdx===i?' selected':'');
+    div.innerHTML = `<strong>${m.name}</strong><br><span style="font-size:11px;color:var(--dim)">${m.desc}</span>`;
+    div.onclick = () => { ngState.mapIdx = i; renderNewGameScreen(); };
+    mapContainer.appendChild(div);
+  });
+}
+
+function launchGame() {
+  SFX.ensure();
+  // Build default decks if none saved
+  let pool = getCardPool().filter(c=>!c.isToken);
+  let buildDeck = () => {
+    let deck = [];
+    let available = pool.filter(c=>c.type!=='structure'||Math.random()>0.5);
+    shuffle(available);
+    // Pick 30 cards, allowing duplicates up to 2
+    let counts = {};
+    for(let card of available) {
+      if(deck.length >= 30) break;
+      counts[card.id] = (counts[card.id]||0);
+      if(counts[card.id] < 2) {
+        deck.push(card.id);
+        counts[card.id]++;
+      }
+    }
+    // Fill remaining with random
+    while(deck.length < 30) {
+      let c = available[Math.floor(Math.random()*available.length)];
+      deck.push(c.id);
+    }
+    return deck;
+  };
+
+  // Try to load saved decks, fall back to random
+  let p1Deck = savedDecks['Player 1'] || buildDeck();
+  let p2Deck = savedDecks['Player 2'] || buildDeck();
+
+  startGame(ngState.p1Titan, ngState.p2Titan, ngState.mapIdx, p1Deck, p2Deck);
+}
+
+// ====================== DECK BUILDER ======================
+function initDeckBuilder() {
+  currentDeck = [];
+  renderDeckBuilder();
+  // Populate load select
+  let sel = document.getElementById('db-load-select');
+  sel.innerHTML = '<option value="">Load deck...</option>';
+  Object.keys(savedDecks).forEach(name => {
+    sel.innerHTML += `<option value="${name}">${name} (${savedDecks[name].length})</option>`;
+  });
+  // Render filter
+  let filterDiv = document.getElementById('db-filter');
+  filterDiv.innerHTML = `
+    <input placeholder="Search..." oninput="dbFilter.search=this.value;renderDeckBuilder()" style="width:140px">
+    <select onchange="dbFilter.elem=this.value;renderDeckBuilder()">
+      <option value="all">All Elements</option>
+      ${Object.keys(ELEMENTS).map(e=>`<option value="${e}">${ELEMENTS[e].name}</option>`).join('')}
+    </select>
+    <select onchange="dbFilter.type=this.value;renderDeckBuilder()">
+      <option value="all">All Types</option>
+      <option value="unit">Units</option><option value="spell">Spells</option><option value="structure">Structures</option>
+    </select>
+    <select onchange="dbFilter.race=this.value;renderDeckBuilder()">
+      <option value="all">All Races</option>
+      ${RACES.map(r=>`<option value="${r}">${r}</option>`).join('')}
+    </select>
+  `;
+}
+
+function renderDeckBuilder() {
+  let pool = getCardPool().filter(c=>!c.isToken);
+  // Apply filters
+  if(dbFilter.elem!=='all') pool = pool.filter(c=>c.elem===dbFilter.elem);
+  if(dbFilter.type!=='all') pool = pool.filter(c=>c.type===dbFilter.type);
+  if(dbFilter.race!=='all') pool = pool.filter(c=>c.race===dbFilter.race);
+  if(dbFilter.search) {
+    let s = dbFilter.search.toLowerCase();
+    pool = pool.filter(c=>(c.name||'').toLowerCase().includes(s) || (c.text||'').toLowerCase().includes(s));
+  }
+  pool.sort((a,b)=>(a.cost||0)-(b.cost||0));
+
+  let poolDiv = document.getElementById('db-pool');
+  poolDiv.innerHTML = '';
+  pool.forEach(card => {
+    let el = renderCardElement(card);
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => {
+      if(currentDeck.length < 30) {
+        let count = currentDeck.filter(id=>id===card.id).length;
+        if(count < 2) {
+          currentDeck.push(card.id);
+          renderDeckBuilder();
+        } else {
+          addLog('Max 2 copies of each card!');
+        }
+      }
+    });
+    poolDiv.appendChild(el);
+  });
+
+  let deckList = document.getElementById('db-deck-list');
+  deckList.innerHTML = '';
+  let grouped = {};
+  currentDeck.forEach(id => { grouped[id] = (grouped[id]||0)+1; });
+  Object.entries(grouped).sort((a,b)=>{
+    let ca = getCardById(a[0]), cb = getCardById(b[0]);
+    return (ca?.cost||0) - (cb?.cost||0);
+  }).forEach(([id, count]) => {
+    let card = getCardById(id);
+    if(!card) return;
+    let item = document.createElement('div');
+    item.className = 'db-deck-item';
+    item.innerHTML = `<span><span class="cost-badge">${card.cost}</span>${card.name} x${count}</span>
+      <button class="btn-sm btn-danger" onclick="removeFromDeck('${id}')">✕</button>`;
+    deckList.appendChild(item);
+  });
+  document.getElementById('db-count').textContent = currentDeck.length;
+}
+
+function removeFromDeck(id) {
+  let idx = currentDeck.indexOf(id);
+  if(idx >= 0) currentDeck.splice(idx, 1);
+  renderDeckBuilder();
+}
+
+function saveDeck() {
+  let name = document.getElementById('db-deck-name').value.trim();
+  if(!name) { alert('Enter a deck name!'); return; }
+  if(currentDeck.length < 10) { alert('Deck needs at least 10 cards!'); return; }
+  savedDecks[name] = [...currentDeck];
+  try { localStorage.setItem('tc_decks', JSON.stringify(savedDecks)); } catch(e) {}
+  alert('Deck "' + name + '" saved! (' + currentDeck.length + ' cards)');
+  initDeckBuilder();
+}
+
+function loadDeck(name) {
+  if(!name || !savedDecks[name]) return;
+  currentDeck = [...savedDecks[name]];
+  renderDeckBuilder();
+}
+
+function clearDeck() {
+  currentDeck = [];
+  renderDeckBuilder();
+}
+
+// ====================== CARD CREATOR ======================
+function initCardCreator() {
+  let form = document.getElementById('cc-form');
+  form.innerHTML = `
+    <label>Name <input id="cc-name" oninput="updatePreview()" placeholder="Card name..."></label>
+    <div class="row">
+      <label>Cost <input id="cc-cost" type="number" min="0" max="10" value="3" oninput="updatePreview()"></label>
+      <label>Type <select id="cc-type" onchange="updatePreview()"><option value="unit">Unit</option><option value="spell">Spell</option><option value="structure">Structure</option></select></label>
+    </div>
+    <div class="row" id="cc-stat-row">
+      <label>Attack <input id="cc-atk" type="number" min="0" max="20" value="2" oninput="updatePreview()"></label>
+      <label>HP <input id="cc-hp" type="number" min="1" max="30" value="3" oninput="updatePreview()"></label>
+      <label>Move <input id="cc-move" type="number" min="0" max="5" value="2" oninput="updatePreview()"></label>
+      <label>Range <input id="cc-range" type="number" min="1" max="5" value="1" oninput="updatePreview()"></label>
+    </div>
+    <div class="row">
+      <label>Element <select id="cc-elem" onchange="updatePreview()">
+        ${Object.keys(ELEMENTS).map(e=>`<option value="${e}">${ELEMENTS[e].name}</option>`).join('')}
+      </select></label>
+      <label>Race <select id="cc-race" onchange="updatePreview()">
+        <option value="">None</option>
+        ${RACES.map(r=>`<option value="${r}">${r}</option>`).join('')}
+      </select></label>
+      <label>Rarity <select id="cc-rarity" onchange="updatePreview()">
+        <option value="common">Common</option><option value="rare">Rare</option><option value="epic">Epic</option><option value="legendary">Legendary</option>
+      </select></label>
+    </div>
+    <label>Keywords (comma-separated) <input id="cc-kw" oninput="updatePreview()" placeholder="e.g. taunt, flying, charge"></label>
+    <label>Ability Text <textarea id="cc-text" rows="2" oninput="updatePreview()" placeholder="Card ability description..."></textarea></label>
+    <label>Veteran 1 Text <span>Effect at 1 XP</span><input id="cc-vet1" oninput="updatePreview()" placeholder="e.g. Trained: +1/+1"></label>
+    <label>Veteran 2 Text <span>Effect at 2 XP</span><input id="cc-vet2" oninput="updatePreview()" placeholder="e.g. Hardened: Armor 2"></label>
+    <label>Veteran 3 Text <span>Activatable at 3 XP (costs 2 XP)</span><input id="cc-vet3" oninput="updatePreview()" placeholder="e.g. Cataclysm: Deal 5 to all (2 XP)"></label>
+    <label>Flavor Text <input id="cc-flavor" oninput="updatePreview()" placeholder="Italic flavor text..."></label>
+    <button class="btn-primary" onclick="saveCustomCard()" style="margin-top:10px">Save Card</button>
+  `;
+  updatePreview();
+  renderSavedCards();
+}
+
+function getCreatorCard() {
+  return {
+    id: 'custom_' + (document.getElementById('cc-name').value||'card').toLowerCase().replace(/\s+/g,'_') + '_' + Date.now(),
+    name: document.getElementById('cc-name').value || 'Unnamed',
+    cost: parseInt(document.getElementById('cc-cost').value) || 0,
+    type: document.getElementById('cc-type').value,
+    atk: parseInt(document.getElementById('cc-atk').value) || 0,
+    hp: parseInt(document.getElementById('cc-hp').value) || 1,
+    move: parseInt(document.getElementById('cc-move').value) || 0,
+    range: parseInt(document.getElementById('cc-range').value) || 1,
+    elem: document.getElementById('cc-elem').value,
+    race: document.getElementById('cc-race').value,
+    kw: (document.getElementById('cc-kw').value||'').split(',').map(k=>k.trim().toLowerCase()).filter(Boolean),
+    text: document.getElementById('cc-text').value,
+    vet1: document.getElementById('cc-vet1').value,
+    vet2: document.getElementById('cc-vet2').value,
+    vet3: document.getElementById('cc-vet3').value,
+    flavor: document.getElementById('cc-flavor').value,
+    rarity: document.getElementById('cc-rarity').value,
+    isCustom: true
+  };
+}
+
+function updatePreview() {
+  let card = getCreatorCard();
+  let previewDiv = document.getElementById('cc-preview-card');
+  previewDiv.innerHTML = '';
+  let el = renderCardElement(card);
+  el.style.transform = 'scale(1.5)';
+  el.style.transformOrigin = 'top center';
+  previewDiv.appendChild(el);
+}
+
+function saveCustomCard() {
+  let card = getCreatorCard();
+  // Give it a unique stable ID
+  card.id = 'custom_' + Date.now();
+  customCards.push(card);
+  try { localStorage.setItem('tc_cards', JSON.stringify(customCards)); } catch(e) {}
+  alert('Card "' + card.name + '" saved!');
+  renderSavedCards();
+}
+
+function renderSavedCards() {
+  let list = document.getElementById('cc-saved-list');
+  list.innerHTML = '';
+  customCards.forEach((card, i) => {
+    let item = document.createElement('div');
+    item.className = 'cc-saved-item';
+    item.innerHTML = `<span style="color:${ELEMENTS[card.elem]?.color||'#aaa'}">${ELEMENTS[card.elem]?.icon||'⬛'}</span>
+      <span>${card.name} (${card.cost})</span>
+      <button class="btn-sm btn-danger" onclick="deleteCustomCard(${i})">✕</button>`;
+    list.appendChild(item);
+  });
+  if(customCards.length === 0) list.innerHTML = '<span style="color:var(--dim)">No custom cards yet. Create one above!</span>';
+}
+
+function deleteCustomCard(idx) {
+  customCards.splice(idx, 1);
+  try { localStorage.setItem('tc_cards', JSON.stringify(customCards)); } catch(e) {}
+  renderSavedCards();
+}
+
+// ====================== RULES SCREEN ======================
+function initRules() {
+  document.getElementById('rules-content').innerHTML = `
+    <h3>Game Overview</h3>
+    <p>Titanfall Chronicles is a tactical fantasy card game played on a 7×5 grid. Two players each control a Titan and deploy units, cast spells, and build structures to destroy the enemy Titan.</p>
+
+    <h3>Turn Structure</h3>
+    <ul>
+      <li><strong>1. Refresh:</strong> Refill to 10 Energy, ready all units, resolve ongoing effects.</li>
+      <li><strong>2. Draw:</strong> Draw 1 card.</li>
+      <li><strong>3. Deploy:</strong> Up to 3 actions: play cards (costs Energy), activate Titan ability, or pass.</li>
+      <li><strong>4. Movement:</strong> Move each ready unit up to its Move stat (orthogonal, terrain costs apply).</li>
+      <li><strong>5. Combat:</strong> Attack with ready units. Select attacker → select target in range.</li>
+      <li><strong>6. End:</strong> Surviving units gain +1 XP. Veteran level-ups trigger. End-of-turn effects resolve.</li>
+    </ul>
+
+    <h3>Terrain Effects</h3>
+    <ul>
+      <li><strong>Plain:</strong> Normal terrain.</li>
+      <li><strong>Forest:</strong> +2 defense. Elves move +1 here.</li>
+      <li><strong>Mountain:</strong> Impassable (Flying only). Height +2.</li>
+      <li><strong>Water:</strong> Movement cost 2. No melee across water.</li>
+      <li><strong>Swamp:</strong> Units entering take 1 poison damage.</li>
+      <li><strong>Hill:</strong> Height +1, +1 defense.</li>
+      <li><strong>Volcano:</strong> Fire units +2 Attack here.</li>
+      <li><strong>Ruins:</strong> Arcane spells cost 1 less from here.</li>
+    </ul>
+
+    <h3>Height Rules</h3>
+    <p>Attacker on higher ground: +2 Attack. Defender on higher ground: attacker -1 Attack.</p>
+
+    <h3>Veteran System</h3>
+    <p>Units gain +1 XP each End Phase (max 3). Each XP level unlocks a unique ability defined per card. Level 3 abilities can be activated (right-click or click in Deploy phase) at the cost of 2 XP.</p>
+
+    <h3>Keywords</h3>
+    <ul>
+      <li><span class="kw">Rush/Haste:</span> Can move the turn it's played.</li>
+      <li><span class="kw">Charge:</span> Can attack the turn it's played.</li>
+      <li><span class="kw">Taunt/Guard:</span> Enemies must attack this unit first.</li>
+      <li><span class="kw">Flying:</span> Ignores terrain, passes over mountains.</li>
+      <li><span class="kw">Stealth:</span> Cannot be targeted until it attacks.</li>
+      <li><span class="kw">Divine Shield:</span> Absorbs the first hit.</li>
+      <li><span class="kw">Windfury:</span> Can attack twice per turn.</li>
+      <li><span class="kw">Lifesteal:</span> Damage dealt heals your Titan.</li>
+      <li><span class="kw">Poisonous:</span> Applies 1 poison/turn for 3 turns on hit.</li>
+      <li><span class="kw">Trample:</span> Excess lethal damage hits enemy Titan.</li>
+      <li><span class="kw">Elusive:</span> Only damaged by Ranged attacks.</li>
+      <li><span class="kw">Swift:</span> +1 Move.</li>
+      <li><span class="kw">Ward:</span> Immune to next spell/ranged damage.</li>
+      <li><span class="kw">Freeze:</span> Target skips next turn.</li>
+      <li><span class="kw">Enrage:</span> +2 Attack while damaged.</li>
+      <li><span class="kw">Battlecry:</span> Effect when played.</li>
+      <li><span class="kw">Deathrattle:</span> Effect when destroyed.</li>
+      <li><span class="kw">Inspire:</span> Effect when you play another card.</li>
+      <li><span class="kw">Armor X:</span> Reduce incoming damage by X.</li>
+      <li><span class="kw">Ranged X:</span> Can attack from X tiles away.</li>
+      <li><span class="kw">Regen X:</span> Heal X at start of turn.</li>
+    </ul>
+
+    <h3>Racial Synergies</h3>
+    <p>Having 3+ or 5+ units of the same race on your board triggers synergy bonuses:</p>
+    <ul>
+      ${Object.entries(SYNERGY_DATA).map(([race,syn])=>`<li><strong>${race}:</strong> 3+: ${syn.t3} | 5+: ${syn.t5}</li>`).join('')}
+    </ul>
+
+    <h3>Tips</h3>
+    <ul>
+      <li>Your Titan's element makes matching cards 1 Energy cheaper.</li>
+      <li>Use height advantage for +2 Attack bonus.</li>
+      <li>Protect veteran units—their XP abilities are powerful!</li>
+      <li>Build racial synergies for stacking bonuses.</li>
+      <li>Titan ultimates unlock after enough kills—build toward them!</li>
+    </ul>
+  `;
+}
+
+// ====================== INITIALIZATION ======================
+function init() {
+  initRules();
+  // Structure aura range boost
+  // Handled in combat calc
+  showScreen('menu-screen');
+}
+
+window.onload = init;
+</script>
+</body>
+</html>

@@ -227,11 +227,31 @@
   justify-content: center;
   font-size: 11px;
   font-weight: bold;
-  min-width: 20px;
-  text-shadow: 0 1px 2px #000;
+  min-width: 24px;
+  color: #fff;
+  text-shadow: 0 0 3px #000, 0 0 3px #000, 0 1px 2px #000;
+  letter-spacing: 0.5px;
+  padding: 0 6px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.3);
 }
-.energy-display { font-size: 1.1em; font-weight: bold; color: var(--mana-blue, #4a9eff); }
-.deploy-display { font-size: .9em; color: var(--gold); }
+.energy-display { 
+  display: flex; 
+  align-items: center; 
+  gap: 4px; 
+  font-size: 1.1em; 
+  font-weight: bold; 
+  color: var(--mana-blue, #4a9eff); 
+}
+.deploy-display { 
+  font-size: .9em; 
+  color: var(--gold);
+  min-width: 100px;
+  text-align: center;
+}
+.deploy-display.deploy-empty {
+  visibility: hidden;
+  min-width: 100px;
+}
 .titan-ability-btn { padding: 4px 10px; font-size: 12px; background: #2a2a5a; color: var(--arcane); border: 1px solid var(--arcane); border-radius: 4px; }
 .titan-ability-btn:hover { background: #3a3a7a; }
 .titan-ability-btn:disabled { opacity: .4; cursor: not-allowed; }
@@ -272,6 +292,13 @@
 .log-section { flex: 1; overflow-y: auto; padding: 10px; font-size: 11px; }
 .log-section .log-entry { padding: 3px 0; border-bottom: 1px solid #1a1a2a; color: var(--dim); }
 .log-section .log-entry:last-child { color: var(--text); }
+.log-section .log-empty { 
+  color: var(--dim); 
+  font-style: italic; 
+  text-align: center; 
+  padding: 20px 10px;
+  opacity: 0.6;
+}
 
 /* Hand */
 .hand-section {

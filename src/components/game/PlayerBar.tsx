@@ -32,12 +32,15 @@ export function PlayerBar({ player, playerIdx, isActive, onActivateTitan, phase,
           </div>
         </div>
       </div>
-      <div className="energy-display">
-        {player.energy} Energy
+      <div className="energy-display" title="Available Energy">
+        <span className="energy-icon">⚡</span>
+        <span className="energy-current">{player.energy}</span>
+        <span className="energy-separator">/</span>
+        <span className="energy-max">10</span>
       </div>
-      {isActive && (deployLeft ?? 0) > 0 && (
-        <div className="deploy-display">{deployLeft} deploys left</div>
-      )}
+      <div className={`deploy-display ${(!isActive || (deployLeft ?? 0) <= 0) ? 'deploy-empty' : ''}`}>
+        {isActive && (deployLeft ?? 0) > 0 ? `${deployLeft} deploys left` : '\u00A0'}
+      </div>
       {titan && onActivateTitan && (
         <button
           className="titan-ability-btn"

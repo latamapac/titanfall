@@ -35,8 +35,8 @@
 .card .c-name { text-align: center; font-weight: bold; font-size: 10px; margin-top: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card .c-art { flex: 1; display: flex; align-items: center; justify-content: center; margin: 3px 0; border-radius: 3px; font-size: 20px; min-height: 30px; overflow: hidden; }
 .card .c-art svg { width: 100%; height: 100%; max-height: 50px; }
-.card .c-type { font-size: 8px; text-align: center; color: var(--dim); }
-.card .c-text { font-size: 8px; color: #bbb; text-align: center; flex: 1; overflow: hidden; line-height: 1.3; margin: 2px 0; }
+.card .c-type { font-size: 9px; text-align: center; color: #999; font-weight: 500; }
+.card .c-text { font-size: 10px; color: #e0e0e0; text-align: center; flex: 1; overflow: hidden; line-height: 1.4; margin: 3px 0; padding: 0 2px; }
 .card .c-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
 .card .c-atk { color: #f88; font-weight: bold; background: rgba(200,50,50,.2); padding: 1px 5px; border-radius: 3px; }
 .card .c-hp { color: #8f8; font-weight: bold; background: rgba(50,200,50,.2); padding: 1px 5px; border-radius: 3px; }
@@ -64,4 +64,17 @@
   0%, 100% { box-shadow: inset 0 0 15px rgba(255,136,0,.25), 0 0 8px rgba(255,200,0,.12); }
   50% { box-shadow: inset 0 0 28px rgba(255,200,0,.35), 0 0 16px rgba(255,220,50,.22); }
 }
-.card.unplayable { opacity: .5; }
+.card.unplayable { 
+  opacity: 0.5; 
+  filter: grayscale(60%);
+  cursor: not-allowed;
+}
+.card.unplayable .c-cost {
+  background: #666;
+  color: #faa;
+  text-decoration: line-through;
+}
+.card.unplayable:hover { 
+  transform: none; 
+  box-shadow: none;
+}

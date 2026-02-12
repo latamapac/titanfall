@@ -58,9 +58,13 @@ export function Sidebar({ turn, phase, logs, onNextPhase }: SidebarProps) {
         )}
       </div>
       <div className="log-section">
-        {logs.map((entry, i) => (
-          <div key={i} className="log-entry">{entry}</div>
-        ))}
+        {logs.length === 0 ? (
+          <div className="log-empty">Combat log will appear here...</div>
+        ) : (
+          logs.map((entry, i) => (
+            <div key={i} className="log-entry">{entry}</div>
+          ))
+        )}
         <div ref={logEndRef} />
       </div>
     </div>

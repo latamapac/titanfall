@@ -97,14 +97,7 @@ export function GameScreen({
 
       {/* Turn indicator for local games - shows whose turn it is */}
       {!isMultiplayer && !showTurnOverlay && !victory && (
-        <div style={{
-          position: 'fixed', top: '10px', left: '50%', transform: 'translateX(-50%)',
-          background: ap === 0 ? 'rgba(74,138,245,.8)' : 'rgba(245,74,74,.8)', 
-          padding: '10px 30px', borderRadius: '20px',
-          border: '2px solid var(--gold)', zIndex: 50, fontSize: '16px', fontWeight: 'bold',
-          color: '#fff',
-          textShadow: '0 1px 2px rgba(0,0,0,.5)',
-        }}>
+        <div className={`turn-indicator ${ap === 0 ? 'player-1' : 'player-2'}`}>
           {ap === 0 ? '🔵 Player 1 Turn' : '🔴 Player 2 Turn'}
         </div>
       )}

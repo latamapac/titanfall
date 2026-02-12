@@ -1,3 +1,5 @@
+@import './factions.css';
+
 :root {
   --bg: #0a0a1a;
   --bg2: #111128;
@@ -86,6 +88,114 @@ h1 {
 h2 { color: var(--gold); margin-bottom: 12px; }
 h3 { color: var(--gold); margin-bottom: 8px; font-size: 1.1em; }
 .subtitle { color: var(--dim); font-style: italic; margin-bottom: 30px; }
+
+/* ============================================
+   MYTHIC TURN INDICATOR
+   ============================================ */
+
+.turn-indicator-mythic {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  padding: 4px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+.turn-indicator-mythic.player-1 {
+  border: 1px solid rgba(74, 138, 245, 0.5);
+  box-shadow: 0 0 30px rgba(74, 138, 245, 0.3);
+}
+
+.turn-indicator-mythic.player-2 {
+  border: 1px solid rgba(245, 74, 74, 0.5);
+  box-shadow: 0 0 30px rgba(245, 74, 74, 0.3);
+}
+
+.indicator-glow {
+  position: absolute;
+  inset: -10px;
+  border-radius: 20px;
+  filter: blur(20px);
+  opacity: 0.3;
+  z-index: -1;
+}
+
+.turn-indicator-mythic.player-1 .indicator-glow {
+  background: radial-gradient(circle, rgba(74, 138, 245, 0.5), transparent 70%);
+}
+
+.turn-indicator-mythic.player-2 .indicator-glow {
+  background: radial-gradient(circle, rgba(245, 74, 74, 0.5), transparent 70%);
+}
+
+.indicator-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  background: rgba(22, 22, 58, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.indicator-icon {
+  font-size: 32px;
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+.indicator-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.indicator-label {
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.indicator-sub {
+  font-size: 11px;
+  color: var(--dim);
+  font-style: italic;
+}
+
+.indicator-pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+
+.turn-indicator-mythic.player-1 .indicator-pulse.active {
+  background: #4a8af5;
+  box-shadow: 0 0 10px #4a8af5;
+  animation: pulse-blue 2s ease-in-out infinite;
+}
+
+.turn-indicator-mythic.player-2 .indicator-pulse {
+  background: #f54a4a;
+  box-shadow: 0 0 10px #f54a4a;
+  animation: pulse-red 2s ease-in-out infinite;
+}
+
+@keyframes pulse-blue {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 10px #4a8af5; }
+  50% { opacity: 0.5; transform: scale(0.8); box-shadow: 0 0 20px #4a8af5; }
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 10px #f54a4a; }
+  50% { opacity: 0.5; transform: scale(0.8); box-shadow: 0 0 20px #f54a4a; }
+}
 
 /* ============================================
    ACCESSIBILITY & UX IMPROVEMENTS

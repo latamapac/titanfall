@@ -97,10 +97,18 @@ export function GameScreen({
         />
       )}
 
-      {/* Turn indicator for local/AI games - shows whose turn it is */}
+      {/* Enhanced Turn Indicator */}
       {!isMultiplayer && !showTurnOverlay && !victory && (
-        <div className={`turn-indicator ${ap === 0 ? 'player-1' : 'player-2'}`}>
-          {ap === 0 ? '🔵 Player 1 Turn' : `🔴 ${isAI ? `AI (${aiDifficulty})` : 'Player 2'} Turn`}
+        <div className={`turn-indicator-mythic ${ap === 0 ? 'player-1' : 'player-2'}`}>
+          <div className="indicator-glow" />
+          <div className="indicator-content">
+            <span className="indicator-icon">{ap === 0 ? '👤' : isAI ? '🤖' : '👥'}</span>
+            <div className="indicator-text">
+              <span className="indicator-label">{ap === 0 ? 'YOUR TURN' : isAI ? 'AI TURN' : 'OPPONENT TURN'}</span>
+              <span className="indicator-sub">{ap === 0 ? 'Command the battlefield' : isAI ? `${aiDifficulty} difficulty` : 'Awaiting moves'}</span>
+            </div>
+            <div className={`indicator-pulse ${ap === 0 ? 'active' : ''}`} />
+          </div>
         </div>
       )}
 

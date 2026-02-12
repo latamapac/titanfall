@@ -24,6 +24,7 @@
 - [x] 24 Keywords with mechanics
 - [x] Veterancy system (units level up with XP)
 - [x] Deck generation based on Titan element
+- [x] **AI Opponent** - 3 difficulty levels (Easy/Medium/Hard)
 
 ### Screens
 - [x] Main Menu (Local, Multiplayer, Deck Builder, Card Creator, Rules)
@@ -77,7 +78,7 @@
 - [x] Mobile responsiveness partially improved (focus indicators, reduced motion)
 
 ### Features to Add (from original HTML)
-- [ ] Single-player vs AI mode
+- [x] Single-player vs AI mode ✅ (Added 2026-02-12)
 - [ ] Flavor text on cards
 - [ ] More detailed card art (currently procedural SVG)
 - [ ] Tutorial mode
@@ -172,6 +173,15 @@ docker build -t titanfall . && docker run -p 3001:3001 titanfall
 ---
 
 ## 🔄 Recent Changes (2026-02-12)
+
+### AI Opponent for Single-Player
+1. **Added AI opponent** - Play against computer with 3 difficulty levels
+   - **Easy**: Makes mistakes, only safe attacks, slower reaction
+   - **Medium**: Balanced gameplay, occasional suboptimal plays
+   - **Hard**: Optimal decisions, aggressive tactics, values trades
+   - AI plays all phases: Deploy, Movement, Combat, Titan abilities
+   - Visual "AI is thinking..." indicator with spinner animation
+   - AI auto-dismisses turn overlay for smooth flow
 
 ### 10 UI/UX Improvements + Test Suite
 1. **Card text readability:** Increased font size 8px→10px, better contrast (#e0e0e0)

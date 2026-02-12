@@ -3,10 +3,25 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { existsSync } from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const server = createServer(app);
+
+// Determine dist path - try multiple locations for different deployment environments
+const possibleDistPaths = [
+  join(__dirname, '../dist'),      // Local dev / some deployments
+  join(process.cwd(), 'dist'),      // Railway / Render root
+  join(__dirname, '../../dist'),    // Alternative structure
+];
+
+let distPath = possibleDistPaths.find(p => existsSync(p));
+if (!distPath) {
+  console.warn('Warning: dist folder not found! Trying default path...');
+  distPath = possibleDistPaths[0];
+}
+console.log('Serving static files from:', distPath);
 // CORS configuration - allow all in dev, restrict in production
 const corsOrigin = process.env.NODE_ENV === 'production' 
   ? [process.env.RAILWAY_STATIC_URL || '*', 'https://*.railway.app', 'https://*.up.railway.app']
@@ -25,21 +40,32 @@ const io = new Server(server, {
 
 // Health check endpoint for Railway
 app.get('/health', (_req, res) => {
+  const indexExists = existsSync(join(distPath, 'index.html'));
   res.status(200).json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     rooms: rooms.size,
-    stats: isDev ? stats : undefined,
+    distPath,
+    indexExists,
     environment: process.env.NODE_ENV || 'development',
   });
 });
 
+// Root check
+app.get('/', (_req, res, next) => {
+  const indexPath = join(distPath, 'index.html');
+  if (existsSync(indexPath)) {
+    next(); // Let static middleware handle it
+  } else {
+    res.status(503).send('Build in progress... Please wait.');
+  }
+});
+
 // Serve static Vite build with cache control
-app.use(express.static(join(__dirname, '../dist'), {
-  maxAge: '1m', // Short cache for development, use '1y' for production assets
+app.use(express.static(distPath, {
+  maxAge: '1m',
   setHeaders: (res, path) => {
-    // No cache for index.html
     if (path.endsWith('index.html')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
@@ -47,12 +73,18 @@ app.use(express.static(join(__dirname, '../dist'), {
     }
   }
 }));
+
 // SPA fallback - serve index.html for all non-file routes
 app.use((_req, res) => {
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-  res.sendFile(join(__dirname, '../dist/index.html'));
+  const indexPath = join(distPath, 'index.html');
+  if (existsSync(indexPath)) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send('Build not found. Please wait for deployment to complete.');
+  }
 });
 
 // Room management with reconnection support

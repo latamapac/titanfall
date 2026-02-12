@@ -1,13 +1,7 @@
 import { useRef, useEffect } from 'react';
 import type { GameState } from '../../types/game';
-import { BoardEnhanced } from '../game/BoardEnhanced';
-import { PlayerBarEnhanced } from '../game/PlayerBarEnhanced';
-import { HandAreaEnhanced } from '../game/HandAreaEnhanced';
-import { SidebarEnhanced } from '../game/SidebarEnhanced';
-import { TurnOverlay } from '../overlays/TurnOverlay';
-import { VictoryOverlayEnhanced } from '../overlays/VictoryOverlayEnhanced';
-import { DefeatOverlayEnhanced } from '../overlays/DefeatOverlayEnhanced';
-import { anim } from '../../animations/Anim';
+import { Card3D } from '../game/Card3D';
+import { PlayerBarCinematic } from '../game/PlayerBarCinematic';
 
 interface GameScreenProps {
   gameState: GameState;
@@ -32,141 +26,252 @@ export function GameScreen({
   onDismissTurnOverlay, onBackToMenu,
   myPlayerIdx = 0, isMultiplayer = false, isAI = false, aiDifficulty = 'medium',
 }: GameScreenProps) {
-  const animLayerRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    anim.setRefs(animLayerRef.current, boardRef.current);
-  }, []);
-
   const G = gameState;
   const ap = G.ap;
   const isMyTurn = !isMultiplayer || ap === myPlayerIdx;
-
-  // In multiplayer: show own hand. In local: show active player's hand.
   const handPlayerIdx = isMultiplayer ? myPlayerIdx : ap;
   const handPlayer = G.p[handPlayerIdx];
-  
-  // Debug logging for local games
-  if (!isMultiplayer && import.meta.env.DEV) {
-    console.log('Local game - Active Player:', ap, 'Hand showing:', handPlayerIdx, 'Cards:', handPlayer.hand.length);
-  }
 
   return (
-    <div className="game-screen">
-      <PlayerBarEnhanced player={G.p[1]} playerIdx={1} isActive={ap === 1} onActivateTitan={ap === 1 && isMyTurn ? onActivateTitan : undefined} phase={G.phase} deployLeft={G.deployLeft} />
-
-      <div className="game-middle">
-        <div className="board-wrap">
-          <BoardEnhanced
-            ref={boardRef}
-            gameState={G}
-            onCellClick={onCellClick}
-          />
-          <div className="anim-layer" ref={animLayerRef} />
-        </div>
-        <SidebarEnhanced
-          turn={G.turn}
-          phase={G.phase}
-          faction={G.p[ap].titan?.elem || 'kargath'}
-          logs={logs}
-          onNextPhase={onNextPhase}
-        />
-      </div>
-
-      <PlayerBarEnhanced player={G.p[0]} playerIdx={0} isActive={ap === 0} onActivateTitan={ap === 0 && isMyTurn ? onActivateTitan : undefined} phase={G.phase} deployLeft={G.deployLeft} />
-
-      <HandAreaEnhanced
-        hand={handPlayer.hand}
-        activePlayer={handPlayerIdx}
-        playerFaction={handPlayer.titan?.elem}
-        energy={handPlayer.energy}
-        phase={isMyTurn ? G.phase : -1}
-        selectedIdx={G.sel?.type === 'card' ? (G.sel.idx ?? null) : null}
-        onCardClick={onCardClick}
+    <div 
+      className="game-screen"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #0f0f1f 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '20px',
+        gap: '16px',
+      }}
+    >
+      {/* Enemy Player Bar */}
+      <PlayerBarCinematic 
+        player={G.p[1]} 
+        playerIdx={1} 
+        isActive={ap === 1}
+        onActivateTitan={ap === 1 && isMyTurn ? onActivateTitan : undefined}
+        phase={G.phase}
+        deployLeft={G.deployLeft}
       />
 
-      {showTurnOverlay && (
-        <TurnOverlay
-          playerIdx={ap}
-          onDismiss={onDismissTurnOverlay}
-        />
-      )}
-
-      {victory && (
-        victory.winner === myPlayerIdx ? (
-          <VictoryOverlayEnhanced
-            winner={G.p[victory.winner].titan?.name || `Player ${victory.winner + 1}`}
-            winnerFaction={G.p[victory.winner].titan?.elem || 'kargath'}
-            stats={{ turns: G.turn }}
-            onPlayAgain={() => window.location.reload()}
-            onMainMenu={onBackToMenu}
-          />
-        ) : (
-          <DefeatOverlayEnhanced
-            loser={G.p[myPlayerIdx].titan?.name || `Player ${myPlayerIdx + 1}`}
-            loserFaction={G.p[myPlayerIdx].titan?.elem || 'kargath'}
-            winner={G.p[victory.winner].titan?.name || `Player ${victory.winner + 1}`}
-            onRetry={() => window.location.reload()}
-            onMainMenu={onBackToMenu}
-          />
-        )
-      )}
-
-      {/* Enhanced Turn Indicator */}
-      {!isMultiplayer && !showTurnOverlay && !victory && (
-        <div className={`turn-indicator-mythic ${ap === 0 ? 'player-1' : 'player-2'}`}>
-          <div className="indicator-glow" />
-          <div className="indicator-content">
-            <span className="indicator-icon">{ap === 0 ? '👤' : isAI ? '🤖' : '👥'}</span>
-            <div className="indicator-text">
-              <span className="indicator-label">{ap === 0 ? 'YOUR TURN' : isAI ? 'AI TURN' : 'OPPONENT TURN'}</span>
-              <span className="indicator-sub">{ap === 0 ? 'Command the battlefield' : isAI ? `${aiDifficulty} difficulty` : 'Awaiting moves'}</span>
-            </div>
-            <div className={`indicator-pulse ${ap === 0 ? 'active' : ''}`} />
+      {/* Main Game Area */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        gap: '20px',
+        minHeight: 0,
+      }}>
+        {/* Board Area */}
+        <div 
+          ref={boardRef}
+          style={{
+            flex: 1,
+            background: 'rgba(0,0,0,0.3)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+          }}
+        >
+          {/* Placeholder Board */}
+          <div style={{
+            width: '100%',
+            height: '100%',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gridTemplateRows: 'repeat(5, 1fr)',
+            gap: '8px',
+            padding: '20px',
+          }}>
+            {Array.from({ length: 35 }).map((_, i) => (
+              <div
+                key={i}
+                onClick={() => onCellClick(Math.floor(i / 7), i % 7)}
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                }}
+              />
+            ))}
           </div>
         </div>
-      )}
 
-      {/* AI thinking indicator */}
-      {isAI && ap === 1 && !showTurnOverlay && !victory && (
+        {/* Sidebar */}
         <div style={{
-          position: 'fixed',
-          bottom: '160px',
-          right: '20px',
-          background: 'rgba(0,0,0,0.85)',
-          padding: '10px 20px',
-          borderRadius: '20px',
-          border: '2px solid var(--gold)',
-          zIndex: 40,
+          width: '280px',
+          background: 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '16px',
+          border: '1px solid rgba(255,255,255,0.1)',
+          padding: '20px',
           display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
+          flexDirection: 'column',
+          gap: '16px',
         }}>
-          <span style={{ fontSize: '20px' }}>🤖</span>
-          <span>AI is thinking...</span>
-          <span style={{
-            display: 'inline-block',
-            width: '16px',
-            height: '16px',
-            border: '2px solid var(--gold)',
-            borderTopColor: 'transparent',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-          }} />
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        </div>
-      )}
+          {/* Turn Info */}
+          <div style={{
+            padding: '16px',
+            background: 'rgba(255,215,0,0.1)',
+            borderRadius: '12px',
+            border: '1px solid rgba(255,215,0,0.3)',
+          }}>
+            <div style={{
+              fontSize: '12px',
+              color: '#FFD700',
+              textTransform: 'uppercase',
+              letterSpacing: '2px',
+              marginBottom: '4px',
+            }}>
+              Turn {G.turn}
+            </div>
+            <div style={{
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: '#fff',
+            }}>
+              {['Refresh', 'Draw', 'Deploy', 'Movement', 'Combat', 'End'][G.phase]} Phase
+            </div>
+          </div>
 
-      {isMultiplayer && !isMyTurn && !showTurnOverlay && !victory && (
-        <div style={{
-          position: 'fixed', top: '10px', left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(0,0,0,.8)', padding: '8px 20px', borderRadius: '20px',
-          border: '1px solid #555', zIndex: 50, fontSize: '13px', color: 'var(--dim)',
-        }}>
-          Opponent's turn...
+          {/* Phase Button */}
+          <button
+            onClick={onNextPhase}
+            style={{
+              padding: '16px',
+              background: 'linear-gradient(135deg, #EAB308, #F59E0B)',
+              border: 'none',
+              borderRadius: '12px',
+              color: '#000',
+              fontWeight: 'bold',
+              fontSize: '16px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(234, 179, 8, 0.4)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {G.phase === 5 ? '🔄 End Turn' : 'Next Phase →'}
+          </button>
+
+          {/* Combat Log */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+          }}>
+            <div style={{
+              fontSize: '12px',
+              color: '#888',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+            }}>
+              Combat Log
+            </div>
+            {logs.slice(-10).map((log, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: '8px 12px',
+                  background: 'rgba(255,255,255,0.05)',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  color: '#CCC',
+                  borderLeft: '2px solid rgba(255,215,0,0.5)',
+                }}
+              >
+                {log}
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* Player Bar */}
+      <PlayerBarCinematic 
+        player={G.p[0]} 
+        playerIdx={0} 
+        isActive={ap === 0}
+        onActivateTitan={ap === 0 && isMyTurn ? onActivateTitan : undefined}
+        phase={G.phase}
+        deployLeft={G.deployLeft}
+      />
+
+      {/* Hand Area with 3D Cards */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '20px',
+        padding: '20px',
+        background: 'rgba(0,0,0,0.4)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '16px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        overflowX: 'auto',
+      }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '0 20px',
+          borderRight: '1px solid rgba(255,255,255,0.1)',
+        }}>
+          <div style={{
+            fontSize: '12px',
+            color: '#FFD700',
+            fontWeight: 'bold',
+          }}>
+            P{handPlayerIdx + 1}
+          </div>
+          <div style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: '#fff',
+          }}>
+            {handPlayer.hand.length}
+          </div>
+          <div style={{
+            fontSize: '10px',
+            color: '#888',
+          }}>
+            cards
+          </div>
+        </div>
+
+        {handPlayer.hand.map((card, i) => (
+          <div
+            key={i}
+            style={{
+              transform: G.sel?.type === 'card' && G.sel.idx === i 
+                ? 'translateY(-40px)' 
+                : 'translateY(0)',
+              transition: 'transform 0.3s ease',
+              zIndex: G.sel?.type === 'card' && G.sel.idx === i ? 100 : handPlayer.hand.length - i,
+            }}
+          >
+            <Card3D
+              card={card}
+              faction={handPlayer.titan?.elem}
+              isSelected={G.sel?.type === 'card' && G.sel.idx === i}
+              canPlay={isMyTurn && G.phase === 2 && handPlayer.energy >= card.cost}
+              onClick={() => onCardClick(i)}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

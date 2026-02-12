@@ -3,6 +3,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+# Clear any potential TypeScript cache
+RUN rm -rf node_modules/.tmp/*.tsbuildinfo
 RUN npm run build
 
 FROM node:22-alpine

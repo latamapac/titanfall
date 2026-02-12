@@ -26,8 +26,8 @@ export const BoardEnhanced = forwardRef<HTMLDivElement, BoardProps>(({ gameState
       ref={ref}
       style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${map.cols}, 1fr)`,
-        gridTemplateRows: `repeat(${map.rows}, 1fr)`,
+        gridTemplateColumns: `repeat(${map.tiles[0]?.length || 7}, 1fr)`,
+        gridTemplateRows: `repeat(${map.tiles.length}, 1fr)`,
         gap: '4px',
         width: '100%',
         height: '100%',

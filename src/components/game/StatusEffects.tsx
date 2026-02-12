@@ -1,7 +1,13 @@
-import type { StatusEffect } from '../../types/game';
+// Status effect interface for UI display
+interface StatusEffectUI {
+  type: string;
+  duration?: number;
+  stacks?: number;
+  description?: string;
+}
 
 interface StatusEffectsProps {
-  effects: StatusEffect[];
+  effects: StatusEffectUI[];
   size?: 'sm' | 'md' | 'lg';
 }
 
@@ -165,7 +171,7 @@ export function StatusEffects({ effects, size = 'md' }: StatusEffectsProps) {
 
 // Single status effect display (for tooltips or detailed views)
 interface StatusEffectDetailProps {
-  effect: StatusEffect;
+  effect: StatusEffectUI;
 }
 
 export function StatusEffectDetail({ effect }: StatusEffectDetailProps) {

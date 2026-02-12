@@ -34,7 +34,7 @@ export function CardEnhanced({
 }: CardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [, setImageLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [isDrawn, setIsDrawn] = useState(true);
   

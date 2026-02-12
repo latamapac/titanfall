@@ -28,9 +28,8 @@ export function PlayerBarEnhanced({ player, playerIdx, isActive, onActivateTitan
   // Determine faction from titan element
   const faction = titan ? elementToFaction[titan.elem] || 'kargath' : 'kargath';
   
-  // HUD image paths
+  // HUD image path
   const healthbarPath = `/assets/ui/hud_healthbar_${faction}.png`;
-  const energyPath = `/assets/ui/hud_energy_${faction}.png`;
   
   // Titan ability activation checks
   const hasEnergy = player.energy >= (titan?.activeCost ?? 99);

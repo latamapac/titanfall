@@ -114,7 +114,7 @@ export function DefeatOverlayEnhanced({
               textShadow: '0 2px 10px rgba(0,0,0,0.8)',
             }}
           >
-            {winner ? `${winner} has prevailed...` : 'The battle is lost...'}
+            {winner ? `${winner} has prevailed...` : `${loser} has fallen...`}
           </div>
           <div
             style={{

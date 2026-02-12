@@ -5,6 +5,11 @@ export { StatusEffects, StatusEffectDetail } from './game/StatusEffects';
 export { ActionButton, EndTurnButton, PhaseActionButtons } from './ui/ActionButtons';
 export { VictoryOverlayEnhanced } from './overlays/VictoryOverlayEnhanced';
 export { DefeatOverlayEnhanced } from './overlays/DefeatOverlayEnhanced';
+export { HandAreaEnhanced } from './game/HandAreaEnhanced';
+export { BoardEnhanced } from './game/BoardEnhanced';
+export { CellEnhanced } from './game/CellEnhanced';
+export { UnitTokenEnhanced } from './game/UnitTokenEnhanced';
+export { SidebarEnhanced } from './game/SidebarEnhanced';
 
 // Original components (still available)
 export { Card } from './v2/Card';

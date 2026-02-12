@@ -1,11 +1,12 @@
 import { useRef, useEffect } from 'react';
 import type { GameState } from '../../types/game';
-import { Board } from '../game/Board';
-import { PlayerBar } from '../game/PlayerBar';
-import { HandArea } from '../game/HandArea';
-import { Sidebar } from '../game/Sidebar';
+import { BoardEnhanced } from '../game/BoardEnhanced';
+import { PlayerBarEnhanced } from '../game/PlayerBarEnhanced';
+import { HandAreaEnhanced } from '../game/HandAreaEnhanced';
+import { SidebarEnhanced } from '../game/SidebarEnhanced';
 import { TurnOverlay } from '../overlays/TurnOverlay';
-import { VictoryOverlay } from '../overlays/VictoryOverlay';
+import { VictoryOverlayEnhanced } from '../overlays/VictoryOverlayEnhanced';
+import { DefeatOverlayEnhanced } from '../overlays/DefeatOverlayEnhanced';
 import { anim } from '../../animations/Anim';
 
 interface GameScreenProps {
@@ -53,30 +54,32 @@ export function GameScreen({
 
   return (
     <div className="game-screen">
-      <PlayerBar player={G.p[1]} playerIdx={1} isActive={ap === 1} onActivateTitan={ap === 1 && isMyTurn ? onActivateTitan : undefined} phase={G.phase} deployLeft={G.deployLeft} />
+      <PlayerBarEnhanced player={G.p[1]} playerIdx={1} isActive={ap === 1} onActivateTitan={ap === 1 && isMyTurn ? onActivateTitan : undefined} phase={G.phase} deployLeft={G.deployLeft} />
 
       <div className="game-middle">
         <div className="board-wrap">
-          <Board
+          <BoardEnhanced
             ref={boardRef}
             gameState={G}
             onCellClick={onCellClick}
           />
           <div className="anim-layer" ref={animLayerRef} />
         </div>
-        <Sidebar
+        <SidebarEnhanced
           turn={G.turn}
           phase={G.phase}
+          faction={G.p[ap].titan?.elem || 'kargath'}
           logs={logs}
           onNextPhase={onNextPhase}
         />
       </div>
 
-      <PlayerBar player={G.p[0]} playerIdx={0} isActive={ap === 0} onActivateTitan={ap === 0 && isMyTurn ? onActivateTitan : undefined} phase={G.phase} deployLeft={G.deployLeft} />
+      <PlayerBarEnhanced player={G.p[0]} playerIdx={0} isActive={ap === 0} onActivateTitan={ap === 0 && isMyTurn ? onActivateTitan : undefined} phase={G.phase} deployLeft={G.deployLeft} />
 
-      <HandArea
+      <HandAreaEnhanced
         hand={handPlayer.hand}
         activePlayer={handPlayerIdx}
+        playerFaction={handPlayer.titan?.elem}
         energy={handPlayer.energy}
         phase={isMyTurn ? G.phase : -1}
         selectedIdx={G.sel?.type === 'card' ? (G.sel.idx ?? null) : null}
@@ -91,10 +94,23 @@ export function GameScreen({
       )}
 
       {victory && (
-        <VictoryOverlay
-          winner={victory.winner}
-          onBackToMenu={onBackToMenu}
-        />
+        victory.winner === myPlayerIdx ? (
+          <VictoryOverlayEnhanced
+            winner={G.p[victory.winner].titan?.name || `Player ${victory.winner + 1}`}
+            winnerFaction={G.p[victory.winner].titan?.elem || 'kargath'}
+            stats={{ turns: G.turn }}
+            onPlayAgain={() => window.location.reload()}
+            onMainMenu={onBackToMenu}
+          />
+        ) : (
+          <DefeatOverlayEnhanced
+            loser={G.p[myPlayerIdx].titan?.name || `Player ${myPlayerIdx + 1}`}
+            loserFaction={G.p[myPlayerIdx].titan?.elem || 'kargath'}
+            winner={G.p[victory.winner].titan?.name || `Player ${victory.winner + 1}`}
+            onRetry={() => window.location.reload()}
+            onMainMenu={onBackToMenu}
+          />
+        )
       )}
 
       {/* Enhanced Turn Indicator */}

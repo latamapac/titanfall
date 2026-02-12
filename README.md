@@ -72,3 +72,4 @@ export default defineConfig([
 ])
 ```
 // Deploy: Thu Feb 12 12:17:43 -03 2026
+// Build cache bust: Thu Feb 12 16:36:09 -03 2026

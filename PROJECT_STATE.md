@@ -1,6 +1,6 @@
 # Titanfall Chronicles - Project State
 
-> Last updated: 2026-02-10
+> Last updated: 2026-02-12
 
 ---
 
@@ -73,6 +73,7 @@
 - [ ] Need to verify all card abilities work correctly
 - [ ] Some edge cases in combat might need testing
 - [x] **FIXED:** Local 2-player game flow was confusing (added turn indicators, fixed hand display)
+- [x] **FIXED:** Turn switching bug - next player couldn't access cards (2026-02-12)
 - [ ] Mobile responsiveness could be improved
 
 ### Features to Add (from original HTML)
@@ -170,7 +171,16 @@ docker build -t titanfall . && docker run -p 3001:3001 titanfall
 
 ---
 
-## 🔄 Recent Changes (2026-02-10)
+## 🔄 Recent Changes (2026-02-12)
+
+### Critical Bug Fix - Turn Switching
+1. **Fixed Turn Flow Bug:** When ending turn, the next player's turn now starts correctly
+   - **Root Cause:** `dismissTurnOverlay()` only hid the overlay but never called `runPhase()`
+   - **Impact:** Player 2 (and subsequent turns) never progressed through phases (Refresh → Draw → Deploy)
+   - **Fix:** `dismissTurnOverlay()` now calls `engine.runPhase()` to properly start the new turn
+   - Added `onRender()` call in `nextPhase()` to ensure state sync when switching players
+
+## 🔄 Previous Changes (2026-02-10)
 
 ### Multiplayer Fixes
 1. **Fixed Multiplayer Reconnection:** Added 30-second grace period for disconnects
@@ -209,9 +219,10 @@ docker build -t titanfall . && docker run -p 3001:3001 titanfall
 ---
 
 **Next Priority:** 
-1. Test all card abilities work correctly
-2. Add AI opponent for single-player
-3. Mobile responsiveness improvements
+1. Test the turn switching fix thoroughly
+2. Test all card abilities work correctly
+3. Add AI opponent for single-player
+4. Mobile responsiveness improvements
 
 **Multiplayer Test Results:** All 11 core tests + 7 reconnection tests passing ✅
 - See `MULTIPLAYER_TEST_PLAN.md` for detailed test documentation

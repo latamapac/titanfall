@@ -78,6 +78,7 @@ export class GameEngine {
       G.turn++;
       this.log('--- Turn ' + G.turn + ' - Player ' + (G.ap + 1) + ' ---');
       this.cb.onShowTurnOverlay();
+      this.cb.onRender(); // Ensure state is updated before returning
       return;
     }
     const PHASE_NAMES = ['Refresh', 'Draw', 'Deploy', 'Movement', 'Combat', 'End'];

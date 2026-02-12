@@ -93,6 +93,12 @@ export function useGameEngine() {
 
   const dismissTurnOverlay = useCallback(() => {
     setShowTurnOverlay(false);
+    // After dismissing the turn overlay, run the current phase to start the turn
+    const engine = engineRef.current;
+    if (engine) {
+      engine.runPhase();
+      setGameState(deepClone(engine.G));
+    }
   }, []);
 
   const resetGame = useCallback(() => {

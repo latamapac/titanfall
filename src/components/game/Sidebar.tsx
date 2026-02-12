@@ -12,7 +12,10 @@ export function Sidebar({ turn, phase, logs, onNextPhase }: SidebarProps) {
   const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Only scroll the log section, not the entire page
+    if (logEndRef.current) {
+      logEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }, [logs.length]);
 
   const canAdvance = phase === 2 || phase === 3 || phase === 4;

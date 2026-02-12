@@ -217,9 +217,10 @@ export default function App() {
 
   // AI: Make decisions when it's AI's turn
   const isProcessingAI = useRef(false);
+  const aiActionPending = useRef(false);
   
   useEffect(() => {
-    if (gameMode !== 'ai' || !engine.gameState || isProcessingAI.current) return;
+    if (gameMode !== 'ai' || !engine.gameState) return;
     
     const G = engine.gameState;
     
@@ -227,60 +228,87 @@ export default function App() {
     // 1. It's player 2's turn (AI is always player 2)
     // 2. No overlay is showing
     // 3. Game hasn't ended
-    if (G.ap !== 1 || engine.showTurnOverlay || engine.victory) return;
+    // 4. Not already processing an AI action
+    if (G.ap !== 1 || engine.showTurnOverlay || engine.victory || isProcessingAI.current) return;
     
     // Process AI turn
     const processAI = async () => {
       isProcessingAI.current = true;
+      aiActionPending.current = true;
       
       try {
         if (!aiRef.current) {
           aiRef.current = new GameAI(aiDifficulty);
         }
         
-        const action = await aiRef.current.think(G);
+        // Keep taking actions until AI decides to end phase
+        let actionCount = 0;
+        const maxActions = 50; // Safety limit to prevent infinite loops
         
-        if (action) {
+        while (actionCount < maxActions) {
+          // Get current game state (it may have changed after previous action)
+          const currentG = engine.gameState;
+          if (!currentG || currentG.ap !== 1 || engine.showTurnOverlay || engine.victory) {
+            break; // Turn ended or overlay shown
+          }
+          
+          const action = await aiRef.current.think(currentG);
+          
+          if (!action || action.type === 'nextPhase') {
+            // End this phase
+            if (action?.type === 'nextPhase') {
+              engine.nextPhase();
+            }
+            break;
+          }
+          
+          // Execute the action
           switch (action.type) {
             case 'deploy':
               if (action.payload) {
                 engine.cardClick(action.payload.cardIndex as number);
-                // Small delay to let selection register
-                await new Promise(r => setTimeout(r, 200));
+                await new Promise(r => setTimeout(r, 300)); // Wait for UI update
                 engine.cellClick(action.payload.r as number, action.payload.c as number);
+                await new Promise(r => setTimeout(r, 500)); // Wait for deploy animation
               }
               break;
             case 'move':
               if (action.payload) {
                 engine.cellClick(action.payload.fromR as number, action.payload.fromC as number);
-                await new Promise(r => setTimeout(r, 200));
+                await new Promise(r => setTimeout(r, 300));
                 engine.cellClick(action.payload.toR as number, action.payload.toC as number);
+                await new Promise(r => setTimeout(r, 400));
               }
               break;
             case 'attack':
               if (action.payload) {
                 engine.cellClick(action.payload.fromR as number, action.payload.fromC as number);
-                await new Promise(r => setTimeout(r, 200));
+                await new Promise(r => setTimeout(r, 300));
                 engine.cellClick(action.payload.toR as number, action.payload.toC as number);
+                await new Promise(r => setTimeout(r, 600)); // Wait for combat animation
               }
               break;
             case 'titan':
               engine.activateTitan();
-              break;
-            case 'nextPhase':
-              engine.nextPhase();
+              await new Promise(r => setTimeout(r, 500));
               break;
           }
+          
+          actionCount++;
+          
+          // Small delay between actions for visual clarity
+          await new Promise(r => setTimeout(r, 200));
         }
       } catch (err) {
         console.error('AI error:', err);
       } finally {
         isProcessingAI.current = false;
+        aiActionPending.current = false;
       }
     };
     
     processAI();
-  }, [gameMode, engine.gameState, engine.showTurnOverlay, engine.victory, engine.cardClick, engine.cellClick, engine.activateTitan, engine.nextPhase, aiDifficulty]);
+  }, [gameMode, engine.gameState, engine.showTurnOverlay, engine.victory, aiDifficulty]);
 
   // Actions
   const handleStartLocal = useCallback(() => {

@@ -20,13 +20,13 @@ import './styles/v2/tokens.css';
 import './styles/v2/animations.css';
 import './styles/v2/touch.css';
 
-type Screen = 'menu' | 'newgame' | 'lobby' | 'game' | 'rules' | 'deckbuilder' | 'cardcreator' | 'ai-setup';
-type GameMode = 'local' | 'host' | 'remote' | 'ai';
+type Screen = 'menu' | 'newgame-local' | 'newgame-ai' | 'lobby' | 'game' | 'rules' | 'deckbuilder' | 'cardcreator' | 'ai-setup';
+type GameMode = 'local' | 'host' | 'remote' | 'ai' | null;
 type LobbyStatus = 'idle' | 'creating' | 'waiting' | 'joining' | 'connected' | 'reconnecting';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('menu');
-  const [gameMode, setGameMode] = useState<GameMode>('local');
+  const [gameMode, setGameMode] = useState<GameMode>(null);
   const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>('medium');
   const engine = useGameEngine();
   const aiRef = useRef<GameAI | null>(null);
@@ -49,37 +49,27 @@ export default function App() {
   const [remoteShowTurnOverlay, setRemoteShowTurnOverlay] = useState(false);
   const [remoteVictory, setRemoteVictory] = useState<{ winner: number } | null>(null);
 
-  // Check for saved session on mount (for page refresh recovery)
+  // Check for saved session on mount
   useEffect(() => {
     const saved = getSavedRoomSession();
     if (saved.code && saved.role) {
       console.log(`Found saved session: room=${saved.code}, role=${saved.role}`);
-      // Only auto-reconnect if we're in multiplayer mode (not local)
-      // and user explicitly clicks multiplayer
-      // For now, just clear old sessions to prevent stuck state
       const socket = getSocket();
-      
-      // Try silent reconnection, but don't block the UI
       socket.emit('rejoin-room', { code: saved.code, role: saved.role });
       
-      // Set up one-time error handler - if reconnection fails, clear session
       const handleRejoinError = () => {
         console.log('Silent reconnection failed, clearing session');
         clearRoomSession();
       };
       
       socket.once('rejoin-error', handleRejoinError);
-      
-      // Clean up handler after 5 seconds
-      setTimeout(() => {
-        socket.off('rejoin-error', handleRejoinError);
-      }, 5000);
+      setTimeout(() => socket.off('rejoin-error', handleRejoinError), 5000);
     }
   }, []);
 
   // Socket event handlers
   useEffect(() => {
-    if (gameMode === 'local') return;
+    if (!gameMode || gameMode === 'local' || gameMode === 'ai') return;
     const socket = getSocket();
 
     const onRoomCreated = ({ code }: { code: string }) => {
@@ -93,9 +83,7 @@ export default function App() {
       setRoomCode(code);
       setLobbyStatus('connected');
       setMpRole(isReconnection ? mpRole : 'remote');
-      if (!isReconnection) {
-        saveRoomSession(code, 'remote');
-      }
+      if (!isReconnection) saveRoomSession(code, 'remote');
       setOpponentDisconnected(false);
     };
     
@@ -157,7 +145,7 @@ export default function App() {
     };
   }, [gameMode, mpRole]);
 
-  // Host: broadcast state to remote whenever it changes
+  // Host: broadcast state to remote
   useEffect(() => {
     if (gameMode !== 'host' || !engine.gameState) return;
     getSocket().emit('state-update', {
@@ -168,7 +156,7 @@ export default function App() {
     });
   }, [gameMode, engine.gameState, engine.logs, engine.showTurnOverlay, engine.victory]);
 
-  // Host: listen for remote player actions
+  // Host: listen for remote actions
   useEffect(() => {
     if (gameMode !== 'host') return;
     const socket = getSocket();
@@ -185,7 +173,7 @@ export default function App() {
     return () => { socket.off('remote-action', onRemoteAction); };
   }, [gameMode, engine]);
 
-  // Remote: listen for state updates from host
+  // Remote: listen for state updates
   useEffect(() => {
     if (gameMode !== 'remote') return;
     const socket = getSocket();
@@ -204,152 +192,131 @@ export default function App() {
     return () => { socket.off('state-update', onStateUpdate); };
   }, [gameMode]);
 
-  // Remote: listen for game start from host
+  // Remote: listen for game start
   useEffect(() => {
     if (gameMode !== 'remote') return;
     const socket = getSocket();
-    const onGameStart = () => {
-      setScreen('game');
-    };
+    const onGameStart = () => setScreen('game');
     socket.on('game-start', onGameStart);
     return () => { socket.off('game-start', onGameStart); };
   }, [gameMode]);
 
-  // AI: Make decisions when it's AI's turn
+  // AI Turn Processing
   const isProcessingAI = useRef(false);
-  const aiActionPending = useRef(false);
   
   useEffect(() => {
     if (gameMode !== 'ai' || !engine.gameState) return;
     
     const G = engine.gameState;
     
-    // Only process AI when:
-    // 1. It's player 2's turn (AI is always player 2)
-    // 2. No overlay is showing
-    // 3. Game hasn't ended
-    // 4. Not already processing an AI action
+    // Only process AI when it's player 2's turn, no overlay, game not ended
     if (G.ap !== 1 || engine.showTurnOverlay || engine.victory || isProcessingAI.current) return;
     
-    // Process AI turn
     const processAI = async () => {
       isProcessingAI.current = true;
-      aiActionPending.current = true;
       
       try {
-        if (!aiRef.current) {
-          aiRef.current = new GameAI(aiDifficulty);
-        }
+        if (!aiRef.current) aiRef.current = new GameAI(aiDifficulty);
         
-        // Keep taking actions until AI decides to end phase
         let actionCount = 0;
-        const maxActions = 50; // Safety limit to prevent infinite loops
+        const maxActions = 50;
         
         while (actionCount < maxActions) {
-          // Get current game state (it may have changed after previous action)
+          // Check current state
           const currentG = engine.gameState;
-          if (!currentG || currentG.ap !== 1 || engine.showTurnOverlay || engine.victory) {
-            break; // Turn ended or overlay shown
-          }
+          if (!currentG || currentG.ap !== 1 || engine.showTurnOverlay || engine.victory) break;
           
           const action = await aiRef.current.think(currentG);
           
           if (!action || action.type === 'nextPhase') {
-            // End this phase
-            if (action?.type === 'nextPhase') {
-              engine.nextPhase();
-            }
+            if (action?.type === 'nextPhase') engine.nextPhase();
             break;
           }
           
-          // Execute the action
+          // Execute action
           switch (action.type) {
             case 'deploy':
               if (action.payload) {
                 engine.cardClick(action.payload.cardIndex as number);
-                await new Promise(r => setTimeout(r, 300)); // Wait for UI update
+                await new Promise(r => setTimeout(r, 400));
                 engine.cellClick(action.payload.r as number, action.payload.c as number);
-                await new Promise(r => setTimeout(r, 500)); // Wait for deploy animation
+                await new Promise(r => setTimeout(r, 600));
               }
               break;
             case 'move':
               if (action.payload) {
                 engine.cellClick(action.payload.fromR as number, action.payload.fromC as number);
-                await new Promise(r => setTimeout(r, 300));
-                engine.cellClick(action.payload.toR as number, action.payload.toC as number);
                 await new Promise(r => setTimeout(r, 400));
+                engine.cellClick(action.payload.toR as number, action.payload.toC as number);
+                await new Promise(r => setTimeout(r, 500));
               }
               break;
             case 'attack':
               if (action.payload) {
                 engine.cellClick(action.payload.fromR as number, action.payload.fromC as number);
-                await new Promise(r => setTimeout(r, 300));
+                await new Promise(r => setTimeout(r, 400));
                 engine.cellClick(action.payload.toR as number, action.payload.toC as number);
-                await new Promise(r => setTimeout(r, 600)); // Wait for combat animation
+                await new Promise(r => setTimeout(r, 700));
               }
               break;
             case 'titan':
               engine.activateTitan();
-              await new Promise(r => setTimeout(r, 500));
+              await new Promise(r => setTimeout(r, 600));
               break;
           }
           
           actionCount++;
-          
-          // Small delay between actions for visual clarity
-          await new Promise(r => setTimeout(r, 200));
+          await new Promise(r => setTimeout(r, 300));
         }
       } catch (err) {
         console.error('AI error:', err);
       } finally {
         isProcessingAI.current = false;
-        aiActionPending.current = false;
       }
     };
     
     processAI();
-  }, [gameMode, engine.gameState, engine.showTurnOverlay, engine.victory, aiDifficulty]);
+  }, [gameMode, engine.gameState?.turn, engine.gameState?.phase, engine.gameState?.p[1].energy, engine.showTurnOverlay, engine.victory, aiDifficulty]);
 
-  // Actions
-  const handleStartLocal = useCallback(() => {
-    // Clear any existing multiplayer session when starting local
+  // Menu Actions
+  const handleLocalMultiplayer = useCallback(() => {
     clearRoomSession();
     disconnectSocket();
     aiRef.current = null;
     setGameMode('local');
-    setLobbyStatus('idle');
-    setRoomCode(null);
-    setMpRole(null);
-    setMpError(null);
-    setOpponentDisconnected(false);
-    setScreen('newgame');
+    resetLobbyState();
+    setScreen('newgame-local');
   }, []);
 
-  const handleStartAI = useCallback((difficulty: AIDifficulty) => {
+  const handleOnlineGame = useCallback(() => {
+    aiRef.current = null;
+    setGameMode('host');
+    resetLobbyState();
+    clearRoomSession();
+    setScreen('lobby');
+  }, []);
+
+  const handleSingleBattle = useCallback(() => {
+    setScreen('ai-setup');
+  }, []);
+
+  const handleSelectAIDifficulty = useCallback((difficulty: AIDifficulty) => {
     clearRoomSession();
     disconnectSocket();
     aiRef.current = new GameAI(difficulty);
     setAiDifficulty(difficulty);
     setGameMode('ai');
-    setLobbyStatus('idle');
-    setRoomCode(null);
-    setMpRole(null);
-    setMpError(null);
-    setOpponentDisconnected(false);
-    setScreen('newgame');
+    resetLobbyState();
+    setScreen('newgame-ai');
   }, []);
 
-  const handleStartMultiplayer = useCallback(() => {
-    aiRef.current = null;
-    setGameMode('host');
+  const resetLobbyState = () => {
     setLobbyStatus('idle');
     setRoomCode(null);
     setMpRole(null);
     setMpError(null);
     setOpponentDisconnected(false);
-    clearRoomSession();
-    setScreen('lobby');
-  }, []);
+  };
 
   const handleCreateRoom = useCallback(() => {
     setMpError(null);
@@ -367,15 +334,11 @@ export default function App() {
   const handleCancelReconnect = useCallback(() => {
     clearRoomSession();
     disconnectSocket();
-    setLobbyStatus('idle');
-    setRoomCode(null);
-    setMpRole(null);
-    setMpError(null);
-    setOpponentDisconnected(false);
+    resetLobbyState();
   }, []);
 
   const handleLobbyProceed = useCallback(() => {
-    setScreen('newgame');
+    setScreen('newgame-local');
   }, []);
 
   const handleStartGame = useCallback((p1TitanId: string, p2TitanId: string, mapIdx: number) => {
@@ -398,16 +361,12 @@ export default function App() {
     setRemoteLogs([]);
     setRemoteShowTurnOverlay(false);
     setRemoteVictory(null);
-    setGameMode('local');
-    setLobbyStatus('idle');
-    setRoomCode(null);
-    setMpRole(null);
-    setMpError(null);
-    setOpponentDisconnected(false);
+    setGameMode(null);
+    resetLobbyState();
     setScreen('menu');
   }, [engine]);
 
-  // Remote player sends actions to host via server
+  // Remote actions
   const remoteOnCellClick = useCallback((r: number, c: number) => {
     getSocket().emit('remote-action', { type: 'cellClick', payload: { r, c } });
   }, []);
@@ -424,7 +383,7 @@ export default function App() {
     getSocket().emit('remote-action', { type: 'dismissTurnOverlay' });
   }, []);
 
-  // Pick which state to render
+  // Determine state to render
   const isRemote = gameMode === 'remote';
   const isAI = gameMode === 'ai';
   const gameState = isRemote ? remoteGameState : engine.gameState;
@@ -433,13 +392,10 @@ export default function App() {
   const victory = isRemote ? remoteVictory : engine.victory;
   const myPlayerIdx = isRemote ? 1 : 0;
 
-  // AI Mode: auto-dismiss turn overlay for AI
+  // Auto-dismiss turn overlay for AI
   useEffect(() => {
     if (isAI && showTurnOverlay && engine.gameState?.ap === 1) {
-      // AI turn starting - auto dismiss after short delay
-      const timer = setTimeout(() => {
-        engine.dismissTurnOverlay();
-      }, 500);
+      const timer = setTimeout(() => engine.dismissTurnOverlay(), 500);
       return () => clearTimeout(timer);
     }
   }, [isAI, showTurnOverlay, engine.gameState?.ap, engine.dismissTurnOverlay]);
@@ -448,20 +404,22 @@ export default function App() {
     <>
       {screen === 'menu' && (
         <MenuScreen
-          onNewGame={handleStartLocal}
-          onMultiplayer={handleStartMultiplayer}
-          onVsAI={() => setScreen('ai-setup')}
+          onLocalMultiplayer={handleLocalMultiplayer}
+          onOnlineGame={handleOnlineGame}
+          onSingleBattle={handleSingleBattle}
           onRules={() => setScreen('rules')}
           onDeckBuilder={() => setScreen('deckbuilder')}
           onCardCreator={() => setScreen('cardcreator')}
         />
       )}
+      
       {screen === 'ai-setup' && (
         <AISelectScreen
-          onSelect={handleStartAI}
+          onSelect={handleSelectAIDifficulty}
           onBack={() => setScreen('menu')}
         />
       )}
+      
       {screen === 'lobby' && (
         <LobbyScreen
           status={lobbyStatus}
@@ -476,13 +434,24 @@ export default function App() {
           onCancelReconnect={handleCancelReconnect}
         />
       )}
-      {screen === 'newgame' && (
+      
+      {screen === 'newgame-local' && (
         <NewGameScreen
           onStart={handleStartGame}
           onBack={handleBackToMenu}
-          isAI={isAI}
+          mode="local"
         />
       )}
+      
+      {screen === 'newgame-ai' && (
+        <NewGameScreen
+          onStart={handleStartGame}
+          onBack={handleBackToMenu}
+          mode="ai"
+          aiDifficulty={aiDifficulty}
+        />
+      )}
+      
       {screen === 'game' && gameState && (
         <GameScreen
           gameState={gameState}
@@ -496,20 +465,15 @@ export default function App() {
           onDismissTurnOverlay={isRemote ? remoteOnDismissTurnOverlay : engine.dismissTurnOverlay}
           onBackToMenu={handleBackToMenu}
           myPlayerIdx={myPlayerIdx}
-          isMultiplayer={gameMode !== 'local' && gameMode !== 'ai'}
+          isMultiplayer={isRemote}
           isAI={isAI}
           aiDifficulty={aiDifficulty}
         />
       )}
-      {screen === 'rules' && (
-        <RulesScreen onBack={() => setScreen('menu')} />
-      )}
-      {screen === 'deckbuilder' && (
-        <DeckBuilderScreen onBack={() => setScreen('menu')} />
-      )}
-      {screen === 'cardcreator' && (
-        <CardCreatorScreen onBack={() => setScreen('menu')} />
-      )}
+      
+      {screen === 'rules' && <RulesScreen onBack={() => setScreen('menu')} />}
+      {screen === 'deckbuilder' && <DeckBuilderScreen onBack={() => setScreen('menu')} />}
+      {screen === 'cardcreator' && <CardCreatorScreen onBack={() => setScreen('menu')} />}
     </>
   );
 }
@@ -532,9 +496,9 @@ function AISelectScreen({ onSelect, onBack }: AISelectScreenProps) {
         borderRadius: '12px',
         border: '1px solid #3a3a6a',
       }}>
-        <h2 style={{ marginBottom: '10px' }}>⚔️ vs AI</h2>
+        <h2 style={{ marginBottom: '10px' }}>⚔️ Single Battle</h2>
         <p className="subtitle" style={{ marginBottom: '30px' }}>
-          Select your opponent's difficulty
+          Choose your opponent's difficulty
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>

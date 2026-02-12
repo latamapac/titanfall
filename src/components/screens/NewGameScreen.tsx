@@ -3,13 +3,17 @@ import { TITANS } from '../../data/titans';
 import { MAPS } from '../../data/maps';
 import { ELEMENTS } from '../../data/constants';
 
+import type { AIDifficulty } from '../../ai/GameAI';
+
 interface NewGameScreenProps {
   onStart: (p1TitanId: string, p2TitanId: string, mapIdx: number) => void;
   onBack: () => void;
-  isAI?: boolean;
+  mode: 'local' | 'ai';
+  aiDifficulty?: AIDifficulty;
 }
 
-export function NewGameScreen({ onStart, onBack, isAI }: NewGameScreenProps) {
+export function NewGameScreen({ onStart, onBack, mode, aiDifficulty }: NewGameScreenProps) {
+  const isAI = mode === 'ai';
   const [p1Titan, setP1Titan] = useState('');
   const [p2Titan, setP2Titan] = useState('');
   const [mapIdx, setMapIdx] = useState(0);
@@ -25,7 +29,13 @@ export function NewGameScreen({ onStart, onBack, isAI }: NewGameScreenProps) {
       <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '1200px' }}>
         {[0, 1].map(pIdx => (
           <div key={pIdx} style={{ flex: 1, minWidth: '300px', maxWidth: '450px' }}>
-            <h3>{pIdx === 0 ? 'Player 1' : isAI ? '🤖 AI Opponent' : 'Player 2'} - Choose Titan</h3>
+            <h3>
+              {pIdx === 0 
+                ? 'Player 1' 
+                : isAI 
+                  ? `🤖 AI Opponent (${aiDifficulty || 'medium'})` 
+                  : 'Player 2'} - Choose Titan
+            </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
               {TITANS.map(t => {
                 const elemInfo = ELEMENTS[t.elem as keyof typeof ELEMENTS];

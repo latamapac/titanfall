@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import type { GameState } from '../../types/game';
 import { Card3D } from '../game/Card3D';
 import { PlayerBarCinematic } from '../game/PlayerBarCinematic';
@@ -6,14 +6,14 @@ import { PlayerBarCinematic } from '../game/PlayerBarCinematic';
 interface GameScreenProps {
   gameState: GameState;
   logs: string[];
-  showTurnOverlay: boolean;
-  victory: { winner: number } | null;
+  showTurnOverlay?: boolean;
+  victory?: { winner: number } | null;
   onNextPhase: () => void;
   onCellClick: (r: number, c: number) => void;
   onCardClick: (idx: number) => void;
   onActivateTitan: () => void;
-  onDismissTurnOverlay: () => void;
-  onBackToMenu: () => void;
+  onDismissTurnOverlay?: () => void;
+  onBackToMenu?: () => void;
   myPlayerIdx?: number;
   isMultiplayer?: boolean;
   isAI?: boolean;
@@ -21,10 +21,15 @@ interface GameScreenProps {
 }
 
 export function GameScreen({
-  gameState, logs, showTurnOverlay, victory,
+  gameState, logs, 
+  showTurnOverlay: _showTurnOverlay, 
+  victory: _victory,
   onNextPhase, onCellClick, onCardClick, onActivateTitan,
-  onDismissTurnOverlay, onBackToMenu,
-  myPlayerIdx = 0, isMultiplayer = false, isAI = false, aiDifficulty = 'medium',
+  onDismissTurnOverlay: _onDismissTurnOverlay, 
+  onBackToMenu: _onBackToMenu,
+  myPlayerIdx = 0, isMultiplayer = false, 
+  isAI: _isAI, 
+  aiDifficulty: _aiDifficulty,
 }: GameScreenProps) {
   const boardRef = useRef<HTMLDivElement>(null);
   const G = gameState;

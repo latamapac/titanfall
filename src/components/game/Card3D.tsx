@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import type { CardDef } from '../../types/game';
-import { factions, rarity, animations } from '../../styles/theme';
 
+import { factions, rarity } from "../../styles/theme";
 interface Card3DProps {
   card: CardDef;
   faction?: string;
@@ -171,7 +171,7 @@ export function Card3D({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: animations.typography?.fontFamily?.mono || 'monospace',
+            fontFamily: '"JetBrains Mono", monospace',
             fontWeight: 'bold',
             fontSize: isZoomed ? '20px' : '16px',
             color: '#000',

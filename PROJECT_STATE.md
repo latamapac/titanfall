@@ -74,7 +74,7 @@
 - [ ] Some edge cases in combat might need testing
 - [x] **FIXED:** Local 2-player game flow was confusing (added turn indicators, fixed hand display)
 - [x] **FIXED:** Turn switching bug - next player couldn't access cards (2026-02-12)
-- [ ] Mobile responsiveness could be improved
+- [x] Mobile responsiveness partially improved (focus indicators, reduced motion)
 
 ### Features to Add (from original HTML)
 - [ ] Single-player vs AI mode
@@ -173,12 +173,28 @@ docker build -t titanfall . && docker run -p 3001:3001 titanfall
 
 ## 🔄 Recent Changes (2026-02-12)
 
+### 10 UI/UX Improvements + Test Suite
+1. **Card text readability:** Increased font size 8px→10px, better contrast (#e0e0e0)
+2. **Focus indicators:** Added :focus-visible styles for keyboard navigation (WCAG)
+3. **Turn overlay auto-dismiss:** 5-second countdown with progress bar
+4. **Unplayable cards:** Grayscale filter, not-allowed cursor, strikethrough cost
+5. **HP bar text:** Improved contrast with text-shadow, min-width fix
+6. **Energy display:** Crystal icon + current/max format (⚡ 8/10)
+7. **Victory celebration:** Confetti particles, flash effect, bounce animation
+8. **Turn indicator CSS:** Moved from inline styles to CSS classes
+9. **Log empty state:** "Combat log will appear here..." placeholder
+10. **Deploy display layout:** Fixed layout shift with min-width
+
+**Additional:**
+- Added prefers-reduced-motion support for accessibility
+- Created comprehensive test suite with 41 tests
+- Added UI/UX audit document (`docs/UI_UX_AUDIT.md`)
+
 ### Critical Bug Fix - Turn Switching
-1. **Fixed Turn Flow Bug:** When ending turn, the next player's turn now starts correctly
-   - **Root Cause:** `dismissTurnOverlay()` only hid the overlay but never called `runPhase()`
-   - **Impact:** Player 2 (and subsequent turns) never progressed through phases (Refresh → Draw → Deploy)
-   - **Fix:** `dismissTurnOverlay()` now calls `engine.runPhase()` to properly start the new turn
-   - Added `onRender()` call in `nextPhase()` to ensure state sync when switching players
+11. **Fixed Turn Flow Bug:** When ending turn, the next player's turn now starts correctly
+    - **Root Cause:** `dismissTurnOverlay()` only hid the overlay but never called `runPhase()`
+    - **Impact:** Player 2 (and subsequent turns) never progressed through phases
+    - **Fix:** `dismissTurnOverlay()` now calls `engine.runPhase()` to properly start the new turn
 
 ## 🔄 Previous Changes (2026-02-10)
 

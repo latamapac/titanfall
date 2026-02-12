@@ -38,6 +38,7 @@ const io = new Server(server, {
   pingInterval: 25000,
 });
 
+// Health check endpoint for Railway (defined after rooms variable)
 // Health check endpoint for Railway
 app.get('/health', (_req, res) => {
   const indexExists = existsSync(join(distPath, 'index.html'));
@@ -45,7 +46,7 @@ app.get('/health', (_req, res) => {
     status: 'ok', 
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    rooms: rooms.size,
+    rooms: 0, // Rooms not tracked here to avoid initialization order issues
     distPath,
     indexExists,
     environment: process.env.NODE_ENV || 'development',
@@ -340,12 +341,8 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  log(`Titanfall Chronicles server running on port ${PORT}`);
-  log(`Reconnection grace period: ${RECONNECT_GRACE_PERIOD}ms`);
-  if (isDev) log('Running in DEVELOPMENT mode');
-  else log('Running in PRODUCTION mode');
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Titanfall Chronicles server running on port ${PORT}`);
+  console.log(`Reconnection grace period: ${RECONNECT_GRACE_PERIOD}ms`);
+  console.log(`Environment: ${isDev ? 'DEVELOPMENT' : 'PRODUCTION'}`);
 });
-// Deploy check Wed Feb 11 10:05:13 -03 2026
-PORT=3001
-// Deploy timestamp: Thu Feb 12 12:28:09 -03 2026

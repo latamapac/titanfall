@@ -35,10 +35,23 @@ app.get('/health', (_req, res) => {
   });
 });
 
-// Serve static Vite build
-app.use(express.static(join(__dirname, '../dist')));
+// Serve static Vite build with cache control
+app.use(express.static(join(__dirname, '../dist'), {
+  maxAge: '1m', // Short cache for development, use '1y' for production assets
+  setHeaders: (res, path) => {
+    // No cache for index.html
+    if (path.endsWith('index.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
 // SPA fallback - serve index.html for all non-file routes
 app.use((_req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.sendFile(join(__dirname, '../dist/index.html'));
 });
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { MenuScreen } from './components/screens/MenuScreen';
 import { NewGameScreen } from './components/screens/NewGameScreen';
 import { LobbyScreen } from './components/screens/LobbyScreen';
@@ -10,6 +10,7 @@ import { useGameEngine } from './hooks/useGameEngine';
 import { generateDefaultDeck, loadCustomCardsFromStorage } from './engine/utils';
 import { TITANS } from './data/titans';
 import { getSocket, disconnectSocket, saveRoomSession, clearRoomSession, getSavedRoomSession } from './multiplayer/socket';
+import { GameAI, type AIDifficulty } from './ai/GameAI';
 import type { GameState } from './types/game';
 import './styles/globals.css';
 import './styles/board.css';
@@ -19,14 +20,16 @@ import './styles/v2/tokens.css';
 import './styles/v2/animations.css';
 import './styles/v2/touch.css';
 
-type Screen = 'menu' | 'newgame' | 'lobby' | 'game' | 'rules' | 'deckbuilder' | 'cardcreator';
-type GameMode = 'local' | 'host' | 'remote';
+type Screen = 'menu' | 'newgame' | 'lobby' | 'game' | 'rules' | 'deckbuilder' | 'cardcreator' | 'ai-setup';
+type GameMode = 'local' | 'host' | 'remote' | 'ai';
 type LobbyStatus = 'idle' | 'creating' | 'waiting' | 'joining' | 'connected' | 'reconnecting';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('menu');
   const [gameMode, setGameMode] = useState<GameMode>('local');
+  const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>('medium');
   const engine = useGameEngine();
+  const aiRef = useRef<GameAI | null>(null);
 
   // Load custom cards on mount
   useEffect(() => {
@@ -212,11 +215,79 @@ export default function App() {
     return () => { socket.off('game-start', onGameStart); };
   }, [gameMode]);
 
+  // AI: Make decisions when it's AI's turn
+  const isProcessingAI = useRef(false);
+  
+  useEffect(() => {
+    if (gameMode !== 'ai' || !engine.gameState || isProcessingAI.current) return;
+    
+    const G = engine.gameState;
+    
+    // Only process AI when:
+    // 1. It's player 2's turn (AI is always player 2)
+    // 2. No overlay is showing
+    // 3. Game hasn't ended
+    if (G.ap !== 1 || engine.showTurnOverlay || engine.victory) return;
+    
+    // Process AI turn
+    const processAI = async () => {
+      isProcessingAI.current = true;
+      
+      try {
+        if (!aiRef.current) {
+          aiRef.current = new GameAI(aiDifficulty);
+        }
+        
+        const action = await aiRef.current.think(G);
+        
+        if (action) {
+          switch (action.type) {
+            case 'deploy':
+              if (action.payload) {
+                engine.cardClick(action.payload.cardIndex as number);
+                // Small delay to let selection register
+                await new Promise(r => setTimeout(r, 200));
+                engine.cellClick(action.payload.r as number, action.payload.c as number);
+              }
+              break;
+            case 'move':
+              if (action.payload) {
+                engine.cellClick(action.payload.fromR as number, action.payload.fromC as number);
+                await new Promise(r => setTimeout(r, 200));
+                engine.cellClick(action.payload.toR as number, action.payload.toC as number);
+              }
+              break;
+            case 'attack':
+              if (action.payload) {
+                engine.cellClick(action.payload.fromR as number, action.payload.fromC as number);
+                await new Promise(r => setTimeout(r, 200));
+                engine.cellClick(action.payload.toR as number, action.payload.toC as number);
+              }
+              break;
+            case 'titan':
+              engine.activateTitan();
+              break;
+            case 'nextPhase':
+              engine.nextPhase();
+              break;
+          }
+        }
+      } catch (err) {
+        console.error('AI error:', err);
+      } finally {
+        isProcessingAI.current = false;
+      }
+    };
+    
+    processAI();
+  }, [gameMode, engine.gameState, engine.showTurnOverlay, engine.victory, engine.cardClick, engine.cellClick, engine.activateTitan, engine.nextPhase, aiDifficulty]);
+
   // Actions
   const handleStartLocal = useCallback(() => {
     // Clear any existing multiplayer session when starting local
     clearRoomSession();
     disconnectSocket();
+    aiRef.current = null;
     setGameMode('local');
     setLobbyStatus('idle');
     setRoomCode(null);
@@ -226,7 +297,22 @@ export default function App() {
     setScreen('newgame');
   }, []);
 
+  const handleStartAI = useCallback((difficulty: AIDifficulty) => {
+    clearRoomSession();
+    disconnectSocket();
+    aiRef.current = new GameAI(difficulty);
+    setAiDifficulty(difficulty);
+    setGameMode('ai');
+    setLobbyStatus('idle');
+    setRoomCode(null);
+    setMpRole(null);
+    setMpError(null);
+    setOpponentDisconnected(false);
+    setScreen('newgame');
+  }, []);
+
   const handleStartMultiplayer = useCallback(() => {
+    aiRef.current = null;
     setGameMode('host');
     setLobbyStatus('idle');
     setRoomCode(null);
@@ -278,6 +364,7 @@ export default function App() {
 
   const handleBackToMenu = useCallback(() => {
     engine.resetGame();
+    aiRef.current = null;
     disconnectSocket();
     setRemoteGameState(null);
     setRemoteLogs([]);
@@ -311,11 +398,23 @@ export default function App() {
 
   // Pick which state to render
   const isRemote = gameMode === 'remote';
+  const isAI = gameMode === 'ai';
   const gameState = isRemote ? remoteGameState : engine.gameState;
   const logs = isRemote ? remoteLogs : engine.logs;
   const showTurnOverlay = isRemote ? remoteShowTurnOverlay : engine.showTurnOverlay;
   const victory = isRemote ? remoteVictory : engine.victory;
   const myPlayerIdx = isRemote ? 1 : 0;
+
+  // AI Mode: auto-dismiss turn overlay for AI
+  useEffect(() => {
+    if (isAI && showTurnOverlay && engine.gameState?.ap === 1) {
+      // AI turn starting - auto dismiss after short delay
+      const timer = setTimeout(() => {
+        engine.dismissTurnOverlay();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isAI, showTurnOverlay, engine.gameState?.ap, engine.dismissTurnOverlay]);
 
   return (
     <>
@@ -323,9 +422,16 @@ export default function App() {
         <MenuScreen
           onNewGame={handleStartLocal}
           onMultiplayer={handleStartMultiplayer}
+          onVsAI={() => setScreen('ai-setup')}
           onRules={() => setScreen('rules')}
           onDeckBuilder={() => setScreen('deckbuilder')}
           onCardCreator={() => setScreen('cardcreator')}
+        />
+      )}
+      {screen === 'ai-setup' && (
+        <AISelectScreen
+          onSelect={handleStartAI}
+          onBack={() => setScreen('menu')}
         />
       )}
       {screen === 'lobby' && (
@@ -346,6 +452,7 @@ export default function App() {
         <NewGameScreen
           onStart={handleStartGame}
           onBack={handleBackToMenu}
+          isAI={isAI}
         />
       )}
       {screen === 'game' && gameState && (
@@ -361,7 +468,9 @@ export default function App() {
           onDismissTurnOverlay={isRemote ? remoteOnDismissTurnOverlay : engine.dismissTurnOverlay}
           onBackToMenu={handleBackToMenu}
           myPlayerIdx={myPlayerIdx}
-          isMultiplayer={gameMode !== 'local'}
+          isMultiplayer={gameMode !== 'local' && gameMode !== 'ai'}
+          isAI={isAI}
+          aiDifficulty={aiDifficulty}
         />
       )}
       {screen === 'rules' && (
@@ -374,5 +483,86 @@ export default function App() {
         <CardCreatorScreen onBack={() => setScreen('menu')} />
       )}
     </>
+  );
+}
+
+// AI Difficulty Selection Screen
+interface AISelectScreenProps {
+  onSelect: (difficulty: AIDifficulty) => void;
+  onBack: () => void;
+}
+
+function AISelectScreen({ onSelect, onBack }: AISelectScreenProps) {
+  return (
+    <div className="screen">
+      <div style={{ 
+        maxWidth: '500px', 
+        width: '100%', 
+        textAlign: 'center',
+        padding: '40px',
+        background: 'linear-gradient(180deg, var(--bg2), var(--bg))',
+        borderRadius: '12px',
+        border: '1px solid #3a3a6a',
+      }}>
+        <h2 style={{ marginBottom: '10px' }}>⚔️ vs AI</h2>
+        <p className="subtitle" style={{ marginBottom: '30px' }}>
+          Select your opponent's difficulty
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
+          <button 
+            className="btn-primary" 
+            onClick={() => onSelect('easy')}
+            style={{ 
+              padding: '20px', 
+              fontSize: '18px',
+              background: 'linear-gradient(135deg, #2a5a3f, #1a3a2f)',
+            }}
+          >
+            <div style={{ fontSize: '24px', marginBottom: '5px' }}>🌱</div>
+            <div>Easy</div>
+            <div style={{ fontSize: '12px', color: '#aaa', marginTop: '5px' }}>
+              For beginners - AI makes mistakes and plays safe
+            </div>
+          </button>
+
+          <button 
+            className="btn-primary" 
+            onClick={() => onSelect('medium')}
+            style={{ 
+              padding: '20px', 
+              fontSize: '18px',
+              background: 'linear-gradient(135deg, #2a5a8f, #1a3a6f)',
+            }}
+          >
+            <div style={{ fontSize: '24px', marginBottom: '5px' }}>⚔️</div>
+            <div>Medium</div>
+            <div style={{ fontSize: '12px', color: '#aaa', marginTop: '5px' }}>
+              Balanced challenge - AI plays smart but fair
+            </div>
+          </button>
+
+          <button 
+            className="btn-primary" 
+            onClick={() => onSelect('hard')}
+            style={{ 
+              padding: '20px', 
+              fontSize: '18px',
+              background: 'linear-gradient(135deg, #5a1a1a, #3a0a0a)',
+            }}
+          >
+            <div style={{ fontSize: '24px', marginBottom: '5px' }}>🔥</div>
+            <div>Hard</div>
+            <div style={{ fontSize: '12px', color: '#aaa', marginTop: '5px' }}>
+              Expert AI - Optimized plays, aggressive tactics
+            </div>
+          </button>
+        </div>
+
+        <button className="btn-secondary" onClick={onBack}>
+          ← Back
+        </button>
+      </div>
+    </div>
   );
 }

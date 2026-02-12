@@ -3,12 +3,13 @@ import { sfx } from '../../audio/SFX';
 interface MenuScreenProps {
   onNewGame: () => void;
   onMultiplayer: () => void;
+  onVsAI: () => void;
   onRules: () => void;
   onDeckBuilder: () => void;
   onCardCreator: () => void;
 }
 
-export function MenuScreen({ onNewGame, onMultiplayer, onRules, onDeckBuilder, onCardCreator }: MenuScreenProps) {
+export function MenuScreen({ onNewGame, onMultiplayer, onVsAI, onRules, onDeckBuilder, onCardCreator }: MenuScreenProps) {
   const handleSoundToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
     const on = sfx.toggle();
     (e.target as HTMLButtonElement).textContent = on ? 'Sound: ON' : 'Sound: OFF';
@@ -28,6 +29,9 @@ export function MenuScreen({ onNewGame, onMultiplayer, onRules, onDeckBuilder, o
       <p className="subtitle">A Tactical Fantasy Card Game</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '280px' }}>
         <button className="btn-primary" onClick={onNewGame} style={{ width: '100%' }}>Local Game</button>
+        <button className="btn-primary" onClick={onVsAI} style={{ width: '100%', background: 'linear-gradient(135deg, #5a2a6f, #3a1a4f)' }}>
+          ⚔️ vs AI
+        </button>
         <button className="btn-primary" onClick={onMultiplayer} style={{ width: '100%' }}>Multiplayer</button>
         <button className="btn-primary" onClick={onDeckBuilder} style={{ width: '100%' }}>Deck Builder</button>
         <button className="btn-primary" onClick={onCardCreator} style={{ width: '100%' }}>Card Creator</button>

@@ -6,9 +6,10 @@ import { ELEMENTS } from '../../data/constants';
 interface NewGameScreenProps {
   onStart: (p1TitanId: string, p2TitanId: string, mapIdx: number) => void;
   onBack: () => void;
+  isAI?: boolean;
 }
 
-export function NewGameScreen({ onStart, onBack }: NewGameScreenProps) {
+export function NewGameScreen({ onStart, onBack, isAI }: NewGameScreenProps) {
   const [p1Titan, setP1Titan] = useState('');
   const [p2Titan, setP2Titan] = useState('');
   const [mapIdx, setMapIdx] = useState(0);
@@ -24,7 +25,7 @@ export function NewGameScreen({ onStart, onBack }: NewGameScreenProps) {
       <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '1200px' }}>
         {[0, 1].map(pIdx => (
           <div key={pIdx} style={{ flex: 1, minWidth: '300px', maxWidth: '450px' }}>
-            <h3>Player {pIdx + 1} - Choose Titan</h3>
+            <h3>{pIdx === 0 ? 'Player 1' : isAI ? '🤖 AI Opponent' : 'Player 2'} - Choose Titan</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
               {TITANS.map(t => {
                 const elemInfo = ELEMENTS[t.elem as keyof typeof ELEMENTS];

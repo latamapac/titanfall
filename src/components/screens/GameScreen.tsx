@@ -21,13 +21,15 @@ interface GameScreenProps {
   onBackToMenu: () => void;
   myPlayerIdx?: number;
   isMultiplayer?: boolean;
+  isAI?: boolean;
+  aiDifficulty?: 'easy' | 'medium' | 'hard';
 }
 
 export function GameScreen({
   gameState, logs, showTurnOverlay, victory,
   onNextPhase, onCellClick, onCardClick, onActivateTitan,
   onDismissTurnOverlay, onBackToMenu,
-  myPlayerIdx = 0, isMultiplayer = false,
+  myPlayerIdx = 0, isMultiplayer = false, isAI = false, aiDifficulty = 'medium',
 }: GameScreenProps) {
   const animLayerRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -95,10 +97,40 @@ export function GameScreen({
         />
       )}
 
-      {/* Turn indicator for local games - shows whose turn it is */}
+      {/* Turn indicator for local/AI games - shows whose turn it is */}
       {!isMultiplayer && !showTurnOverlay && !victory && (
         <div className={`turn-indicator ${ap === 0 ? 'player-1' : 'player-2'}`}>
-          {ap === 0 ? '🔵 Player 1 Turn' : '🔴 Player 2 Turn'}
+          {ap === 0 ? '🔵 Player 1 Turn' : `🔴 ${isAI ? `AI (${aiDifficulty})` : 'Player 2'} Turn`}
+        </div>
+      )}
+
+      {/* AI thinking indicator */}
+      {isAI && ap === 1 && !showTurnOverlay && !victory && (
+        <div style={{
+          position: 'fixed',
+          bottom: '160px',
+          right: '20px',
+          background: 'rgba(0,0,0,0.85)',
+          padding: '10px 20px',
+          borderRadius: '20px',
+          border: '2px solid var(--gold)',
+          zIndex: 40,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+        }}>
+          <span style={{ fontSize: '20px' }}>🤖</span>
+          <span>AI is thinking...</span>
+          <span style={{
+            display: 'inline-block',
+            width: '16px',
+            height: '16px',
+            border: '2px solid var(--gold)',
+            borderTopColor: 'transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+          }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       )}
 
